@@ -65,7 +65,7 @@ mkdir -p $VDIR1 $VDIR2
 
 touch $IFILE
 
-ARCH=`arch`
+ARCH=`uname -m`
 
 # produce benchmark header for easier comparisons
 
