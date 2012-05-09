@@ -74,7 +74,7 @@ hostname=`uname -n`
 if [ -f /usr/sbin/psrinfo ]; then
 	p_count=`psrinfo|wc -l`
 	p_mhz=`psrinfo -v | awk '/operates/{print $6 "MHz"; exit }'`
-	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'` 
+	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'`
 fi
 
 if [ -f /proc/cpuinfo ]; then
@@ -101,7 +101,7 @@ printf "!Compiler Ver.:%30s\n" "`bin/tattle -v`"
 printf "!sizeof(long): %30s\n" `bin/tattle -s`
 printf "!extra_CFLAGS: %30s\n" "`bin/tattle -f`"
 printf "!TimerRes:     %30s\n" "`bin/tattle -r`"
- 
+
 mkdir -p $TMPROOT/bin
 cp bin-$ARCH/exec_bin $TMPROOT/bin/$A
 
@@ -134,32 +134,32 @@ done <<.
 # for default since SuSe implements this "syscall" in userland
 #
 getpid		$OPTS -N "getpid" -I 5
-		 
-getenv		$OPTS -N "getenv"	-s 100 -I 100	 
-getenv		$OPTS -N "getenvT2"	-s 100 -I 100	-T 2 
 
-gettimeofday	$OPTS -N "gettimeofday"          
+getenv		$OPTS -N "getenv"	-s 100 -I 100
+getenv		$OPTS -N "getenvT2"	-s 100 -I 100	-T 2
 
-log		$OPTS -N "log"	-I 20		 
-exp		$OPTS -N "exp"	-I 20		 
+gettimeofday	$OPTS -N "gettimeofday"
+
+log		$OPTS -N "log"	-I 20
+exp		$OPTS -N "exp"	-I 20
 lrand48		$OPTS -N "lrand48"
 
-memset		$OPTS -N "memset_10"	-s 10	-I 10 
+memset		$OPTS -N "memset_10"	-s 10	-I 10
 memset		$OPTS -N "memset_256"	-s 256	-I 20
-memset		$OPTS -N "memset_256_u"	-s 256	 -a 1 -I 20 
+memset		$OPTS -N "memset_256_u"	-s 256	 -a 1 -I 20
 memset		$OPTS -N "memset_1k"	-s 1k	 -I 100
 memset		$OPTS -N "memset_4k"    -s 4k    -I 250
 memset		$OPTS -N "memset_4k_uc" -s 4k    -u -I 400
 
-memset		$OPTS -N "memset_10k"	-s 10k	-I 600	 
+memset		$OPTS -N "memset_10k"	-s 10k	-I 600
 memset		$OPTS -N "memset_1m"	-s 1m	-I 200000
-memset		$OPTS -N "memset_10m"	-s 10m -I 2000000 
-memset		$OPTS -N "memsetP2_10m"	-s 10m -P 2 -I 2000000 
+memset		$OPTS -N "memset_10m"	-s 10m -I 2000000
+memset		$OPTS -N "memsetP2_10m"	-s 10m -P 2 -I 2000000
 
 memrand		$OPTS -N "memrand"	-s 128m -B 10000
 cachetocache	$OPTS -N "cachetocache" -s 100k -T 2 -I 200
 
-isatty		$OPTS -N "isatty_yes"   
+isatty		$OPTS -N "isatty_yes"
 isatty		$OPTS -N "isatty_no"  -f $IFILE
 
 malloc		$OPTS -N "malloc_10"    -s 10    -g 10 -I 50
@@ -179,13 +179,13 @@ close		$OPTS -N "close_tmp"		-B 32		-f $TFILE
 close		$OPTS -N "close_usr"		-B 32		-f $VFILE
 close		$OPTS -N "close_zero"		-B 32		-f /dev/zero
 
-memcpy		$OPTS -N "memcpy_10"	-s 10	-I 10 
+memcpy		$OPTS -N "memcpy_10"	-s 10	-I 10
 memcpy		$OPTS -N "memcpy_1k"	-s 1k	-I 50
 memcpy		$OPTS -N "memcpy_10k"	-s 10k	-I 800
 memcpy		$OPTS -N "memcpy_1m"	-s 1m   -I 500000
 memcpy		$OPTS -N "memcpy_10m"	-s 10m  -I 5000000
 
-strcpy		$OPTS -N "strcpy_10"	-s 10   -I 5 
+strcpy		$OPTS -N "strcpy_10"	-s 10   -I 5
 strcpy		$OPTS -N "strcpy_1k"	-s 1k   -I 100
 
 strlen		$OPTS -N "strlen_10"	-s 10   -I 5
@@ -199,13 +199,13 @@ strcmp		$OPTS -N "strcmp_1k"	-s 1k   -I 200
 strcasecmp	$OPTS -N "scasecmp_10"	-s 10 -I 50
 strcasecmp	$OPTS -N "scasecmp_1k"	-s 1k -I 20000
 
-strtol		$OPTS -N "strtol"      -I 20      
+strtol		$OPTS -N "strtol"      -I 20
 
 getcontext	$OPTS -N "getcontext"  -I 100
 setcontext	$OPTS -N "setcontext"  -I 100
 
 mutex		$OPTS -N "mutex_st"	-I 10
-mutex		$OPTS -N "mutex_mt"	-t -I 10	
+mutex		$OPTS -N "mutex_mt"	-t -I 10
 mutex		$OPTS -N "mutex_T2"     -T 2  -I 100
 
 longjmp		$OPTS -N "longjmp"	-I 10
@@ -215,11 +215,11 @@ getrusage	$OPTS -N "getrusage"	-I 200
 
 times		$OPTS -N "times"	-I 200
 time		$OPTS -N "time"		-I 50
-localtime_r	$OPTS -N "localtime_r"	-I 200  
-strftime	$OPTS -N "strftime" -I 10000  
+localtime_r	$OPTS -N "localtime_r"	-I 200
+strftime	$OPTS -N "strftime" -I 10000
 
-mktime		$OPTS -N "mktime"       -I 500   
-mktime		$OPTS -N "mktimeT2" -T 2 -I 1000 
+mktime		$OPTS -N "mktime"       -I 500
+mktime		$OPTS -N "mktimeT2" -T 2 -I 1000
 
 cascade_mutex	$OPTS -N "c_mutex_1"	-I 50
 cascade_mutex	$OPTS -N "c_mutex_10"	-T 10 -I 5000
@@ -229,19 +229,19 @@ cascade_cond	$OPTS -N "c_cond_1"	-I 100
 cascade_cond	$OPTS -N "c_cond_10"	-T 10	-I 3000
 cascade_cond	$OPTS -N "c_cond_200"	-T 200	-I 2000000
 
-cascade_lockf	$OPTS -N "c_lockf_1"	-I 1000	
+cascade_lockf	$OPTS -N "c_lockf_1"	-I 1000
 cascade_lockf	$OPTS -N "c_lockf_10"	-P 10 -I 50000
 cascade_lockf	$OPTS -N "c_lockf_200"	-P 200 -I 5000000
 
-cascade_flock	$OPTS -N "c_flock"	-I 1000	
+cascade_flock	$OPTS -N "c_flock"	-I 1000
 cascade_flock	$OPTS -N "c_flock_10"	-P 10   -I 50000
 cascade_flock	$OPTS -N "c_flock_200"	-P 200	-I 5000000
 
-cascade_fcntl	$OPTS -N "c_fcntl_1"	-I 2000 	
+cascade_fcntl	$OPTS -N "c_fcntl_1"	-I 2000
 cascade_fcntl	$OPTS -N "c_fcntl_10"	-P 10 -I 20000
 cascade_fcntl	$OPTS -N "c_fcntl_200"	-P 200	-I 5000000
 
-file_lock	$OPTS -N "file_lock"   -I 1000         
+file_lock	$OPTS -N "file_lock"   -I 1000
 
 getsockname	$OPTS -N "getsockname"	-I 100
 getpeername	$OPTS -N "getpeername"	-I 100
@@ -260,7 +260,7 @@ stat		$OPTS -N "stat_usr" -I 1000		-f $VFILE
 
 fcntl		$OPTS -N "fcntl_tmp"	-I 100	-f $TFILE
 fcntl		$OPTS -N "fcntl_usr"	-I 100	-f $VFILE
-fcntl_ndelay	$OPTS -N "fcntl_ndelay"	-I 100	
+fcntl_ndelay	$OPTS -N "fcntl_ndelay"	-I 100
 
 lseek		$OPTS -N "lseek_t8k"	-s 8k	-I 50	-f $TFILE
 lseek		$OPTS -N "lseek_u8k"	-s 8k	-I 50	-f $VFILE
@@ -269,7 +269,7 @@ open		$OPTS -N "open_tmp"		-B 256		-f $TFILE
 open		$OPTS -N "open_usr"		-B 256		-f $VFILE
 open		$OPTS -N "open_zero"		-B 256		-f /dev/zero
 
-dup		$OPTS -N "dup"			-B 512   
+dup		$OPTS -N "dup"			-B 512
 
 socket		$OPTS -N "socket_u"		-B 256
 socket		$OPTS -N "socket_i"		-B 256		-f PF_INET
@@ -282,7 +282,7 @@ bind		$OPTS -N "bind"			-B 100
 
 listen		$OPTS -N "listen"		-B 100
 
-connection	$OPTS -N "connection"		-B 256 
+connection	$OPTS -N "connection"		-B 256
 
 poll		$OPTS -N "poll_10"	-n 10	-I 500
 poll		$OPTS -N "poll_100"	-n 100	-I 1000
@@ -335,10 +335,10 @@ read		$OPTS -N "read_u1k"	-s 1k			-f $VFILE
 read		$OPTS -N "read_u10k"	-s 10k			-f $VFILE
 read		$OPTS -N "read_u100k"	-s 100k			-f $VFILE
 
-read		$OPTS -N "read_z1k"	-s 1k			-f /dev/zero 
-read		$OPTS -N "read_z10k"	-s 10k			-f /dev/zero 
-read		$OPTS -N "read_z100k"	-s 100k			-f /dev/zero 
-read		$OPTS -N "read_zw100k"	-s 100k	         -w	-f /dev/zero 
+read		$OPTS -N "read_z1k"	-s 1k			-f /dev/zero
+read		$OPTS -N "read_z10k"	-s 10k			-f /dev/zero
+read		$OPTS -N "read_z100k"	-s 100k			-f /dev/zero
+read		$OPTS -N "read_zw100k"	-s 100k	         -w	-f /dev/zero
 
 write		$OPTS -N "write_t1k"	-s 1k			-f $TFILE
 write		$OPTS -N "write_t10k"	-s 10k			-f $TFILE
@@ -348,9 +348,9 @@ write		$OPTS -N "write_u1k"	-s 1k			-f $VFILE
 write		$OPTS -N "write_u10k"	-s 10k			-f $VFILE
 write		$OPTS -N "write_u100k"	-s 100k			-f $VFILE
 
-write		$OPTS -N "write_n1k"	-s 1k	-I 100 -B 0	-f /dev/null 
-write		$OPTS -N "write_n10k"	-s 10k	-I 100 -B 0	-f /dev/null 
-write		$OPTS -N "write_n100k"	-s 100k	-I 100 -B 0	-f /dev/null 
+write		$OPTS -N "write_n1k"	-s 1k	-I 100 -B 0	-f /dev/null
+write		$OPTS -N "write_n10k"	-s 10k	-I 100 -B 0	-f /dev/null
+write		$OPTS -N "write_n100k"	-s 100k	-I 100 -B 0	-f /dev/null
 
 writev		$OPTS -N "writev_t1k"	-s 1k			-f $TFILE
 writev		$OPTS -N "writev_t10k"	-s 10k		        -f $TFILE
@@ -360,9 +360,9 @@ writev		$OPTS -N "writev_u1k"	-s 1k			-f $VFILE
 writev		$OPTS -N "writev_u10k"	-s 10k			-f $VFILE
 writev		$OPTS -N "writev_u100k"	-s 100k			-f $VFILE
 
-writev		$OPTS -N "writev_n1k"	-s 1k	-I 100 -B 0	-f /dev/null 
-writev		$OPTS -N "writev_n10k"	-s 10k	-I 100 -B 0	-f /dev/null 
-writev		$OPTS -N "writev_n100k"	-s 100k	-I 100 -B 0	-f /dev/null 
+writev		$OPTS -N "writev_n1k"	-s 1k	-I 100 -B 0	-f /dev/null
+writev		$OPTS -N "writev_n10k"	-s 10k	-I 100 -B 0	-f /dev/null
+writev		$OPTS -N "writev_n100k"	-s 100k	-I 100 -B 0	-f /dev/null
 
 pread		$OPTS -N "pread_t1k"	-s 1k	-I 300		-f $TFILE
 pread		$OPTS -N "pread_t10k"	-s 10k	-I 1000		-f $TFILE
@@ -372,10 +372,10 @@ pread		$OPTS -N "pread_u1k"	-s 1k	-I 300		-f $VFILE
 pread		$OPTS -N "pread_u10k"	-s 10k	-I 1000		-f $VFILE
 pread		$OPTS -N "pread_u100k"	-s 100k	-I 10000	-f $VFILE
 
-pread		$OPTS -N "pread_z1k"	-s 1k	-I 300		-f /dev/zero 
-pread		$OPTS -N "pread_z10k"	-s 10k	-I 1000		-f /dev/zero 
-pread		$OPTS -N "pread_z100k"	-s 100k	-I 2000	-f /dev/zero 
-pread		$OPTS -N "pread_zw100k"	-s 100k	-w -I 10000	-f /dev/zero 
+pread		$OPTS -N "pread_z1k"	-s 1k	-I 300		-f /dev/zero
+pread		$OPTS -N "pread_z10k"	-s 10k	-I 1000		-f /dev/zero
+pread		$OPTS -N "pread_z100k"	-s 100k	-I 2000	-f /dev/zero
+pread		$OPTS -N "pread_zw100k"	-s 100k	-w -I 10000	-f /dev/zero
 
 pwrite		$OPTS -N "pwrite_t1k"	-s 1k	-I 500		-f $TFILE
 pwrite		$OPTS -N "pwrite_t10k"	-s 10k	-I 1000		-f $TFILE
@@ -385,9 +385,9 @@ pwrite		$OPTS -N "pwrite_u1k"	-s 1k	-I 500		-f $VFILE
 pwrite		$OPTS -N "pwrite_u10k"	-s 10k	-I 1000		-f $VFILE
 pwrite		$OPTS -N "pwrite_u100k"	-s 100k	-I 20000	-f $VFILE
 
-pwrite		$OPTS -N "pwrite_n1k"	-s 1k	-I 100		-f /dev/null 
-pwrite		$OPTS -N "pwrite_n10k"	-s 10k	-I 100		-f /dev/null 
-pwrite		$OPTS -N "pwrite_n100k"	-s 100k	-I 100		-f /dev/null 
+pwrite		$OPTS -N "pwrite_n1k"	-s 1k	-I 100		-f /dev/null
+pwrite		$OPTS -N "pwrite_n10k"	-s 10k	-I 100		-f /dev/null
+pwrite		$OPTS -N "pwrite_n100k"	-s 100k	-I 100		-f /dev/null
 
 mmap		$OPTS -N "mmap_z8k"	-l 8k   -I 1000		-f /dev/zero
 mmap		$OPTS -N "mmap_z128k"	-l 128k	-I 2000		-f /dev/zero
@@ -478,5 +478,5 @@ pipe		$OPTS -N "pipe_tmp4k"	-s 4k	-I 8000	-x tcp  -m mp
 
 connection	$OPTS -N "conn_accept"		-B 256      -a
 
-close_tcp	$OPTS -N "close_tcp"		-B 32  
+close_tcp	$OPTS -N "close_tcp"		-B 32
 .
