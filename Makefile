@@ -68,28 +68,34 @@ TARBALL_CONTENTS = 	\
 	wrapper.sh	\
 	README
 
-default $(ALL) run cstyle lint tattle: $(BINS)
-	@cp bench.sh bench
-	@cp multiview.sh multiview
-	@cp wrapper.sh wrapper
-	@chmod +x bench multiview wrapper
+default $(ALL) run cstyle lint tattle: $(BINS) bench multiview wrapper
 	@mkdir -p bin-`uname -m`; cd bin-`uname -m`; MACH=`uname -m` $(MAKE) -f ../Makefile.`uname -s` UNAME_RELEASE=`uname -r | sed 's/\./_/g'` $@
 
+bench: bench.sh
+	cp bench.sh bench
+	chmod +x bench
+
+multiview: multiview.sh
+	cp multiview.sh multiview
+	chmod +x multiview
+
+wrapper: wrapper.sh
+	cp wrapper.sh wrapper
+	chmod +x wrapper
+
 clean:
-	rm -rf bin bin-* wrapper multiview bench
+	rm -rf bin bin-* wrapper multiview bench *~
 
 bin:	
 	@mkdir -p bin
 
-$(BINS): bin
-	@cp wrapper.sh wrapper
-	@chmod +x wrapper
+$(BINS): bin wrapper
 	@ln -sf ../wrapper $@
 
 
 libMicro.tar:	FORCE
 	@chmod +x ./mk_tarball wrapper
 	@./mk_tarball $(TARBALL_CONTENTS) 
- 
+
 FORCE:
 
