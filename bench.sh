@@ -65,7 +65,7 @@ mkdir -p $VDIR1 $VDIR2
 
 touch $IFILE
 
-ARCH=`arch -k`
+ARCH=`arch`
 
 # produce benchmark header for easier comparisons
 
