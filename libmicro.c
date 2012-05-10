@@ -569,8 +569,9 @@ print_warnings(barrier_t *b)
 		    ((double)lm_optB * median * 1000.0)) +
 		    1.0);
 		(void) printf("#     Quantization error likely; "
-                "increase batch size (-B option) %lldX to avoid.\n",
-                increase);
+                "increase batch size (-B option, "
+                "currently %d) %lldX to avoid.\n",
+                lm_optB, increase);
 	}
 
 	/*
