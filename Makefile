@@ -84,7 +84,7 @@ wrapper: wrapper.sh
 	chmod +x wrapper
 
 clean:
-	rm -rf bin bin-* wrapper multiview bench *~
+	rm -rf bin bin-* wrapper multiview bench *~ cscope.*
 
 bin:	
 	@mkdir -p bin
