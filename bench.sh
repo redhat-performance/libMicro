@@ -55,7 +55,7 @@ VFILE=$VARROOT/data
 VDIR1=$VARROOT/0/1/2/3/4/5/6/7/8/9
 VDIR2=$VARROOT/1/2/3/4/5/6/7/8/9/0
 
-OPTS="-E -C 200 -L -S -W"
+OPTS="-E -C 1000 -L -S -W"
 
 dd if=/dev/zero of=$TFILE bs=1024k count=10 2>/dev/null
 dd if=/dev/zero of=$VFILE bs=1024k count=10 2>/dev/null
@@ -311,12 +311,12 @@ pthread_create  $OPTS -N "pthread_128"		-B 128
 pthread_create  $OPTS -N "pthread_512"		-B 512
 
 fork		$OPTS -N "fork_10"		-B 10
-fork		$OPTS -N "fork_100"		-B 100  -C 100
-fork		$OPTS -N "fork_1000"		-B 1000 -C 50
+fork		$OPTS -N "fork_100"		-B 100  -C 500
+fork		$OPTS -N "fork_1000"		-B 1000 -C 250
 
 exit		$OPTS -N "exit_10"		-B 10
 exit		$OPTS -N "exit_100"		-B 100
-exit		$OPTS -N "exit_1000"		-B 1000 -C 50
+exit		$OPTS -N "exit_1000"		-B 1000 -C 250
 
 exit		$OPTS -N "exit_10_nolibc"	-e -B 10
 
