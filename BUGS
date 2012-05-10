@@ -1,0 +1,29 @@
+
+BUGS:
+
+Tests spin on 32 bit x86 compile with gcc-- longjmp test spins forever.
+
+CPU_NAME is wrong on earlier (than 10) and later (than 10) versions of Solaris
+    (parsing psrinfo output is fragile)
+
+TimerRes detection on some Solaris 8 SPARC systems is wrong and falsely
+    detects resolution as 1nsec
+
+TODO:
+
+.o files should probably be separated from generated binaries (obj-sun4u?)
+
+Move more of the system info data gathering into tattle
+
+Would be nice to show the platform name (uname -i) if available
+
+Multiview's "red" can get a little too bright.
+
+Consider recoding multiview to use a different performance indicator than
+    color (smileys and bombs?)  -- today a 20% perf difference is hard to
+    spot (it's very very light pink).
+
+FreeBSD ports collection has patches to make libmicro work on FreeBSD.
+    Fold those in (or reimplement)
+    http://portsmon.freebsd.org/portoverview.py?category=benchmarks&portname=libmicro
+

@@ -152,7 +152,7 @@ actual_main(int argc, char *argv[])
 	char			*tmp;
 	char			optstr[256];
 	barrier_t		*b;
-	long long		startnsecs = getnsecs();
+	long long		startnsecs;
 
 #ifdef USE_RDTSC
 	if (getenv("LIBMICRO_HZ") == NULL) {
@@ -161,6 +161,8 @@ actual_main(int argc, char *argv[])
 	}
 	lm_hz = strtoll(getenv("LIBMICRO_HZ"), NULL, 10);
 #endif
+
+	startnsecs = getnsecs();
 
 	lm_argc = argc;
 	lm_argv = argv;
@@ -1461,12 +1463,28 @@ get_nsecs_overhead()
 
 }
 
+/*
+ * Determine the resolution of the system's high resolution counter.
+ * Most hardware has a nanosecond resolution counter, but some systems still
+ * use course resolution (e.g. derived instead by a periodic interrupt).
+ *
+ * Algorithm:
+ * Determine a busy loop that is long enough for successive nanosecond counter
+ * reads to report different times.  Then take 1000 samples with busy loop
+ * interval successively increases by i.  The counter resolution is assumed
+ * to be the smallest non-zero time delta between these 1000 samples.
+ *
+ * One last wrinkle is all 1000 samples may have the same delta on a system
+ * with a very fast and consistent hardware counter based getnsecs().
+ * In that case assume the resolution is 1ns.
+ */
 long long
 get_nsecs_resolution()
 {
 	long long y[1000];
 
-	int i, j, nops, res;
+	volatile int i, j;
+	int nops, res;
 	long long start, stop;
 
 	/*
@@ -1506,11 +1524,10 @@ get_nsecs_resolution()
 
 	/*
 	 * find smallest positive difference between samples;
-	 * this is the timer resolution
+	 * this is the counter resolution
 	 */
 
-	res = 1<<30;
-
+	res = y[0];
 	for (i = 1; i < 1000; i++) {
 		int diff = y[i] - y[i-1];
 
@@ -1518,6 +1535,8 @@ get_nsecs_resolution()
 			res = diff;
 
 	}
+	if (res == 0)
+		res = 1;
 
 	return (res);
 }

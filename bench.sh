@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.0
+bench_version=0.4.1
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
