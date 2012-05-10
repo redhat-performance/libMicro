@@ -52,6 +52,7 @@
 #include <sys/resource.h>
 #include <math.h>
 #include <limits.h>
+#include <assert.h>
 
 #ifdef	__sun
 #include <sys/elf.h>
@@ -554,18 +555,22 @@ void
 print_warnings(barrier_t *b)
 {
 	int head = 0;
-	int increase;
+	long long increase;
 
 	if (b->ba_quant) {
 		if (!head++) {
 			(void) printf("#\n# WARNINGS\n");
 		}
-		increase = (int)(floor((nsecs_resolution * 100.0) /
-		    ((double)lm_optB * b->ba_corrected.st_median * 1000.0)) +
+        assert(nsecs_resolution > 0);
+        assert(lm_optB > 0);
+        float median = b->ba_corrected.st_median;
+        if (median <= 0.0) median = 1.0;
+		increase = (long long)(floor((nsecs_resolution * 100.0) /
+		    ((double)lm_optB * median * 1000.0)) +
 		    1.0);
-		(void) printf("#     Quantization error likely;"
-		    "increase batch size (-B option) %dX to avoid.\n",
-		    increase);
+		(void) printf("#     Quantization error likely; "
+                "increase batch size (-B option) %lldX to avoid.\n",
+                increase);
 	}
 
 	/*

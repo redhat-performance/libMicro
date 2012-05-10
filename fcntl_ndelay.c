@@ -80,18 +80,22 @@ benchmark(void *tsd, result_t *res)
 	int			flags;
 
 	for (i = 0; i < lm_optB; i += 4) {
-		if (fcntl(fd, F_GETFL, &flags) < 0)
+		flags = fcntl(fd, F_GETFL); 
+		if (flags < 0)
 			res->re_errors++;
+
 		flags |= O_NDELAY;
 
-		if (fcntl(fd, F_SETFL, &flags) < 0)
+		if (fcntl(fd, F_SETFL, flags) < 0)
 			res->re_errors++;
 
-		if (fcntl(fd, F_GETFL, &flags) < 0)
+		flags = fcntl(fd, F_GETFL);
+		if (flags < 0)
 			res->re_errors++;
+
 		flags &= ~O_NDELAY;
 
-		if (fcntl(fd, F_SETFL, &flags) < 0)
+		if (fcntl(fd, F_SETFL, flags) < 0)
 			res->re_errors++;
 	}
 	res->re_count = i;
