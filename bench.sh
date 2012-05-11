@@ -102,7 +102,7 @@ printf "!extra_CFLAGS: %30s\n" "`bin/tattle -f`"
 printf "!TimerRes:     %30s\n" "`bin/tattle -r`"
 
 mkdir -p $TMPROOT/bin
-cp bin-$ARCH/exec_bin $TMPROOT/bin/$A
+cp bin-$ARCH/exec_bin $TMPROOT/bin/
 
 while read A B
 do
