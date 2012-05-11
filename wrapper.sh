@@ -34,4 +34,4 @@ BASENAME=`basename $0`
 DIRNAME=`dirname $0`
 ARCH=`uname -m`
 
-exec numactl -c 0 -m 0 $DIRNAME/../bin-$ARCH/$BASENAME "$@"
+exec $DIRNAME/../bin-$ARCH/$BASENAME "$@"
