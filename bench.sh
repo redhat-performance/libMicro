@@ -121,8 +121,14 @@ do
 	# if we only want to test one case, but a nasty hack)
 
 	case $A in
-	""|"#"*)
-		echo "$A $B"
+	"#"*)
+		# Add an extra "pound" at the beginning so that
+		# these comments will not be added to the html
+		# page constructed by multiview
+		echo "#$A $B"
+		continue
+		;;
+	"")
 		continue
 		;;
 	*$1*)

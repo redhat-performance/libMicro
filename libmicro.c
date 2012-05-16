@@ -408,16 +408,6 @@ actual_main(int argc, char *argv[])
 
 	compute_stats(b);
 
-	/* print arguments benchmark was invoked with ? */
-	if (lm_optL) {
-		int l;
-		(void) printf("# %s ", argv[0]);
-		for (l = 1; l < argc; l++) {
-			(void) printf("%s ", argv[l]);
-		}
-		(void) printf("\n");
-	}
-
 	/* print result header (unless suppressed) */
 	if (!lm_optH) {
 		(void) printf("%12s %3s %3s %12s %12s %8s %8s %s\n",
@@ -433,6 +423,16 @@ actual_main(int argc, char *argv[])
 	    (lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
 	    b->ba_batches, b->ba_errors, lm_optB,
 	    benchmark_result());
+
+	/* print arguments benchmark was invoked with ? */
+	if (lm_optL) {
+		int l;
+		(void) printf("# %s ", argv[0]);
+		for (l = 1; l < argc; l++) {
+			(void) printf("%s ", argv[l]);
+		}
+		(void) printf("\n");
+	}
 
 	if (lm_optS) {
 		print_stats(b);
