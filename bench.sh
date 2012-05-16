@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1
+bench_version=0.4.1-rh.1
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -56,6 +56,15 @@ VDIR1=$VARROOT/0/1/2/3/4/5/6/7/8/9
 VDIR2=$VARROOT/1/2/3/4/5/6/7/8/9/0
 
 OPTS="-E -C 100000 -L -S -W"
+
+ROOT_UID=0   # Only users with $UID 0 have root privileges.
+
+if [ "$UID" -eq "$ROOT_UID" ]
+then
+	# Make an attempt to keep the system from going into
+	# energy savings mode (Intel systems only?).
+	bin/pm_qos > /dev/null 2>&1 < /dev/null &
+fi
 
 dd if=/dev/zero of=$TFILE bs=1024k count=10 2>/dev/null
 dd if=/dev/zero of=$VFILE bs=1024k count=10 2>/dev/null

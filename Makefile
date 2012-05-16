@@ -31,7 +31,7 @@
 
 include Makefile.benchmarks
 
-BINS=		$(ALL:%=bin/%) bin/tattle
+BINS=		$(ALL:%=bin/%) bin/tattle bin/pm_qos
 
 TARBALL_CONTENTS = 	\
 	Makefile.benchmarks \
@@ -64,11 +64,12 @@ TARBALL_CONTENTS = 	\
 	multiview.sh	\
 	OPENSOLARIS.LICENSE	\
 	tattle.c	\
+	pm_qos.c	\
 	wrapper		\
 	wrapper.sh	\
 	README
 
-default $(ALL) run cstyle lint tattle: $(BINS) bench multiview wrapper
+default $(ALL) run cstyle lint tattle pm_qos: $(BINS) bench multiview wrapper
 	@mkdir -p bin-`uname -m`; cd bin-`uname -m`; MACH=`uname -m` $(MAKE) -f ../Makefile.`uname -s` UNAME_RELEASE=`uname -r | sed 's/\./_/g'` $@
 
 bench: bench.sh

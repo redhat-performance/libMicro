@@ -42,7 +42,7 @@ COMPILER_VERSION_CMD_cc=cc -V 2>&1 | egrep Sun
 COMPILER_VERSION_CMD_gcc=gcc -dumpversion
 COMPILER_VERSION_CMD=$(COMPILER_VERSION_CMD_$(CC))
 
-default: $(ALL) tattle
+default: $(ALL) tattle pm_qos
 
 cstyle:	
 	for file in $(ALL:%=../%.c) $(EXTRA_CFILES:%=../%) ; \
@@ -108,6 +108,9 @@ tattle:		../tattle.c	libmicro.a
 	echo "char * CC = \""$(CC)"\";" >> tattle.h
 	echo "char * extra_compiler_flags = \""$(extra_CFLAGS)"\";" >> tattle.h
 	$(CC) -o tattle $(CFLAGS) -I. ../tattle.c libmicro.a -lpthread -lrt -lm
+
+pm_qos:		../pm_qos.c
+	$(CC) -o pm_qos $(CFLAGS) ../pm_qos.c
 
 $(ELIDED_BENCHMARKS):	../elided.c
 	$(CC) -o $(@) ../elided.c
