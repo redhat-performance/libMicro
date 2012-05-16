@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.1
+bench_version=0.4.1-rh.2
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -146,7 +146,9 @@ getpid		$OPTS -N "getpid"   -B 800
 getenv		$OPTS -N "getenv"	-s 100 -I 6
 getenv		$OPTS -N "getenvT2"	-s 100 -I 50	-T 2
 
-gettimeofday	$OPTS -N "gettimeofday" -B 40
+gettimeofday	$OPTS -N "gettimeofday" -B 4000000 -C 100
+
+clock_gettime	$OPTS -N "clock_gettime" -B 4000000 -C 100
 
 log		$OPTS -N "log"	-I 3
 exp		$OPTS -N "exp"	-I 3

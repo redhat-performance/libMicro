@@ -24,25 +24,25 @@
  */
 
 /*
- * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
+ * Copyright 2012 Red Hat, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
 /*
- * gettimeofday test
+ * clock_gettime() test
  */
 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include "libmicro.h"
 
 int
 benchmark_init()
 {
-	(void) sprintf(lm_usage, "note: measures gettimeofday()");
+	(void) sprintf(lm_usage, "note: measures clock_gettime(CLOCK_REALTIME)");
 	lm_tsdsize = 0;
 	return (0);
 }
@@ -52,25 +52,25 @@ int
 benchmark(void *tsd, result_t *res)
 {
 	int			i;
-	struct timeval t;
+	struct timespec	t;
 
-	int			st = gettimeofday(&t, NULL);
+	int			st = clock_gettime(CLOCK_REALTIME, &t);
 	if (st != 0) {
-        res->re_errors++;
-        perror("gettimeofday");
+		res->re_errors++;
+		perror("clock_gettime(CLOCK_REALTIME)");
 	}
 
 	for (i = 0; i < lm_optB; i += 10) {
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
-		(void) gettimeofday(&t, NULL);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
+		(void) clock_gettime(CLOCK_REALTIME, &t);
 	}
 	res->re_count = i;
 

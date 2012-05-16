@@ -39,6 +39,7 @@ ALL=				\
 		cascade_fcntl	\
 		cascade_flock	\
 		chdir		\
+		clock_gettime	\
 		close		\
 		close_tcp	\
 		connection	\
