@@ -120,7 +120,7 @@ END {
 
         printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
 		if (a > 0)
-			printf("><pre>%f</pre></td>\n", name, a);
+			printf("><pre>%f</pre></td>\n", a);
 		else {
 			if (a < 0)
 				printf(" bgcolor=\"#ff0000\">%s</td>\n", "ERRORS");
