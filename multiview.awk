@@ -204,8 +204,8 @@ END {
     printf("      	  else {\n");
     printf("            var pos = GetAbsPosition(shID_el);\n");
     printf("      	    shID_res_el.style.display = 'block';\n");
-    printf("      	    shID_res_el.style.top = pos.x + 'px';\n");
-    printf("      	    shID_res_el.style.left = pos.y + 'px';\n");
+    printf("      	    shID_res_el.style.top = pos.y + 'px';\n");
+    printf("      	    shID_res_el.style.left = pos.x + 'px';\n");
     printf("      	  }\n");
     printf("      	}\n");
     printf("      }\n");
