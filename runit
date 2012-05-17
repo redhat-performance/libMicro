@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Automatically run the libMicro benchmark in three different ways:
+#   1. Without pinning it to NUMA Node 0
+#   2. With pinning it to NUMA Node 0
+#   3. With pinning it to NUMA Node 0 && using SCHED_FIFO Priority 1
+#
+# It automatically appends a "run" number to the results and timings files
+# so that you can run it multiple times without worry of overwriting previous
+# results.
+#
+# Note that you should use multiview to construct the HTML reports separately.
+
+if [ -z "$1" ]; then
+    echo "Please provide the version of RHEL (e.g. 'rhel6.3')"
+    exit 1
+fi
+HN=`hostname -s`
+VER=`bin/tattle -V`
+
+results="/shak/bench/libMicro/results"
+if [ ! -d "$results" ]; then
+    echo "Could not find results dir: $results"
+    exit 1
+fi
+template_base="$results/$1-$HN"
+template_nonuma="$template_base-nonuma-lm.$VER"
+template_numa="$template_base-numa.N0m0-lm.$VER"
+template_numa_chrt="$template_base-numa.N0m0-chrt.f1-lm.$VER"
+
+function checkit {
+    if [ -e "$1" ]; then
+        return 1;
+    else
+        return 0;
+    fi
+}
+
+function checkem {
+    checkit $template_nonuma.run-$1.results.txt || return 1;
+    checkit $template_nonuma.run-$1.timings.txt || return 1;
+    checkit $template_numa.run-$1.results.txt || return 1;
+    checkit $template_numa.run-$1.timings.txt || return 1;
+    checkit $template_numa_chrt.run-$1.results.txt || return 1;
+    checkit $template_numa_chrt.run-$1.timings.txt || return 1;
+    return 0;
+}
+
+for (( i = 0; ; i++ )); do
+    printf -v idx "%04d" $i
+    checkem $idx && break;
+done
+run="run-$idx"
+                            ./bench > $template_nonuma.$run.results.txt    2> $template_nonuma.$run.timings.txt
+numactl -N 0 -m 0           ./bench > $template_numa.$run.results.txt      2> $template_numa.$run.timings.txt
+numactl -N 0 -m 0 chrt -f 1 ./bench > $template_numa_chrt.$run.results.txt 2> $template_numa_chrt.$run.timings.txt
