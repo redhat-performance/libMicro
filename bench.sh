@@ -110,6 +110,8 @@ printf "!sizeof(long): %30s\n" `bin/tattle -s`
 printf "!extra_CFLAGS: %30s\n" "`bin/tattle -f`"
 printf "!TimerRes:     %30s\n" "`bin/tattle -r`"
 
+sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s: %20s\n", $1, $3)}'
+
 mkdir -p $TMPROOT/bin
 cp bin-$ARCH/exec_bin $TMPROOT/bin/
 

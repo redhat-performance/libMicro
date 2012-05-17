@@ -30,11 +30,16 @@ BEGIN {
 	next;
 }
 
-/^\!/ { 
-	split($0, A_header, ":"); 
+/^\!/ {
+	split($0, A_header, ":");
 	name = substr(A_header[1],2);
+	gsub(/^[ \t]+/, "", name)
+	gsub(/[ \t]+$/, "", name)
 	headers[name]=name;
-	header_data[name,FILENAME] = substr($0, length(name) + 3);
+	val = A_header[2]
+	gsub(/^[ \t]+/, "", val)
+	gsub(/[ \t]+$/, "", val)
+	header_data[name,FILENAME] = val;
 	if (header_names[name] == 0) {
 		header_names[name] = ++header_count;
 		headers[header_count] = name;
