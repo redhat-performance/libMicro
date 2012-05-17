@@ -30,7 +30,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.2"
+#define	LIBMICRO_VERSION	"0.4.1-rh.3"
 
 #define	STRSIZE			1024
 
