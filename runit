@@ -51,6 +51,10 @@ for (( i = 0; ; i++ )); do
     checkem $idx && break;
 done
 run="run-$idx"
-                            ./bench > $template_nonuma.$run.results.txt    2> $template_nonuma.$run.timings.txt
-numactl -N 0 -m 0           ./bench > $template_numa.$run.results.txt      2> $template_numa.$run.timings.txt
-numactl -N 0 -m 0 chrt -f 1 ./bench > $template_numa_chrt.$run.results.txt 2> $template_numa_chrt.$run.timings.txt
+
+echo "!Runit-command: ./bench" >                             $template_nonuma.$run.results.txt
+                      ./bench >>                             $template_nonuma.$run.results.txt    2> $template_nonuma.$run.timings.txt
+echo "!Runit-command: numactl -N 0 -m 0 ./bench" >           $template_numa.$run.results.txt
+                      numactl -N 0 -m 0 ./bench >>           $template_numa.$run.results.txt      2> $template_numa.$run.timings.txt
+echo "!Runit-command: numactl -N 0 -m 0 chrt -f 1 ./bench" > $template_numa_chrt.$run.results.txt
+                      numactl -N 0 -m 0 chrt -f 1 ./bench >> $template_numa_chrt.$run.results.txt 2> $template_numa_chrt.$run.timings.txt
