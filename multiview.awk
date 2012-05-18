@@ -95,21 +95,19 @@ END {
 	for(i = 1; i <= header_count; i++) {
 		hname = headers[i];
 		printf("        <tr>\n");
-        printf("          <td class=\"header\">%s</td>\n", hname);
-		
+		printf("          <td class=\"header\">%s</td>\n", hname);
 		for (j = 1; j < ARGC; j++) {
 			sub("^[\t ]+", "", header_data[hname, ARGV[j]]);
 			printf("          <td class=\"header\">%s</td>\n", header_data[hname, ARGV[j]]);
 		}
 		printf("        </tr>\n");
 	}
+
 	printf("        <tr>\n");
 	printf("          <th>BENCHMARK</th>\n");
 	printf("          <th align=\"right\">USECS</th>\n");
-
 	for (i = 2; i < ARGC; i++) 
 		printf("          <th align=\"right\">USECS [percentage]</th>\n");
-
 	printf("        </tr>\n");
 
 	# Bubble sort the names of the benchmarks
@@ -167,6 +165,23 @@ END {
 		}
 		printf("        </tr>\n");
 
+	}
+	printf("      </tbody>\n");
+    printf("    </table>\n");
+
+	printf("    <table border=\"1\" cellspacing=\"1\">\n");
+	printf("      <tbody>\n");
+
+	printf("        <tr>\n");
+	printf("          <th class=\"header\">Column #</th>\n");
+	printf("          <th class=\"header\">Result File</th>\n");
+	printf("        </tr>\n");
+
+	for (j = 1; j < ARGC; j++) {
+		printf("        <tr>\n");
+    	printf("          <td class=\"header\">%d</td>\n", j);
+		printf("          <td class=\"header\">%s</td>\n", ARGV[j]);
+		printf("        </tr>\n");
 	}
 	printf("      </tbody>\n");
     printf("    </table>\n");
