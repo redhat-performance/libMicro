@@ -11,6 +11,7 @@ BEGIN {
 	benchmark_count = 0;
 	benchmark_name = "";
 	header_count = 0;
+	result_header = "";
 }
 
 /^##/ {
@@ -27,6 +28,7 @@ BEGIN {
 }
 
 /errors/ {
+	result_header = $0;
 	next;
 }
 
@@ -58,6 +60,16 @@ BEGIN {
 		else 
 			benchmark_data[$1,FILENAME] = -1;
 		benchmark_name = $1;
+
+		if (result_header != "") {
+			line = ++benchmark_results_linecnt[benchmark_name,FILENAME];
+			benchmark_results[benchmark_name,FILENAME,line] = sprintf("# %s", result_header);
+			result_header = "";
+		}
+		line = ++benchmark_results_linecnt[benchmark_name,FILENAME];
+		benchmark_results[benchmark_name,FILENAME,line] = sprintf("# %s", $0);
+		line = ++benchmark_results_linecnt[benchmark_name,FILENAME];
+		benchmark_results[benchmark_name,FILENAME,line] = "#";
 	}
 }
 
