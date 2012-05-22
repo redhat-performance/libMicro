@@ -91,24 +91,26 @@ if [ -f /proc/cpuinfo ]; then
 	p_type=`awk -F: '/model name/{print $2; exit}' /proc/cpuinfo`
 fi
 
-printf "!Libmicro_#:   %30s\n" $libmicro_version
-printf "!Options:      %30s\n" "$OPTS"
-printf "!Machine_name: %30s\n" $hostname
-printf "!OS_name:      %30s\n" `uname -s`
-printf "!OS_release:   %30s\n" `uname -r`
-printf "!OS_build:     %30.18s\n" "`uname -v`"
-printf "!Processor:    %30s\n" `uname -m`
-printf "!#CPUs:        %30s\n" $p_count
-printf "!CPU_MHz:      %30s\n" $p_mhz
-printf "!CPU_NAME:     %30s\n" "$p_type"
-printf "!IP_address:   %30s\n" `getent hosts $hostname | awk '{print $1}'`
-printf "!Run_by:       %30s\n" $LOGNAME
-printf "!Date:         %30s\n" "`date '+%D %R'`"
-printf "!Compiler:     %30s\n" `bin/tattle -c`
-printf "!Compiler Ver.:%30s\n" "`bin/tattle -v`"
-printf "!sizeof(long): %30s\n" `bin/tattle -s`
-printf "!extra_CFLAGS: %30s\n" "`bin/tattle -f`"
-printf "!TimerRes:     %30s\n" "`bin/tattle -r`"
+printf "!Libmicro_#:     %30s\n" $libmicro_version
+printf "!Options:        %30s\n" "$OPTS"
+printf "!Machine_name:   %30s\n" $hostname
+printf "!OS_name:        %30s\n" `uname -s`
+printf "!OS_release:     %30s\n" `uname -r`
+printf "!OS_build:       %30.18s\n" "`uname -v`"
+printf "!Processor:      %30s\n" `uname -m`
+printf "!#CPUs:          %30s\n" $p_count
+printf "!CPU_MHz:        %30s\n" $p_mhz
+printf "!CPU_NAME:       %30s\n" "$p_type"
+printf "!IP_address:     %30s\n" `getent hosts $hostname | awk '{print $1}'`
+printf "!Run_by:         %30s\n" $LOGNAME
+printf "!Date:           %30s\n" "`date '+%D %R'`"
+printf "!Compiler:       %30s\n" `bin/tattle -c`
+printf "!Compiler Ver.:  %30s\n" "`bin/tattle -v`"
+printf "!Libc Ver.:      %30s\n" "`bin/tattle -l`"
+printf "!Libpthread Ver.:%30s\n" "`bin/tattle -p`"
+printf "!sizeof(long):   %30s\n" `bin/tattle -s`
+printf "!extra_CFLAGS:   %30s\n" "`bin/tattle -f`"
+printf "!TimerRes:       %30s\n" "`bin/tattle -r`"
 
 sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s: %20s\n", $1, $3)}'
 

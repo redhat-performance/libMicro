@@ -92,17 +92,20 @@ main(int argc, char *argv[])
 	cleanup(compiler_version);
 	cleanup(extra_compiler_flags);
 
-	while ((c = getopt(argc, argv, "vcfrsVTR")) != -1) {
+	while ((c = getopt(argc, argv, "vcfrsVTRlp")) != -1) {
 		switch (c) {
 		case 'V':
 			(void) printf("%s\n", LIBMICRO_VERSION);
 			break;
+
 		case 'v':
 			(void) printf("%s\n", compiler_version);
 			break;
+
 		case 'c':
 			(void) printf("%s\n", CC);
 			break;
+
 		case 'f':
 			if (strlen(extra_compiler_flags) == 0)
 				(void) printf("[none]\n");
@@ -115,7 +118,6 @@ main(int argc, char *argv[])
 			break;
 
 		case 'r':
-
 			(void) printf("%lld nsecs\n", get_nsecs_resolution());
 			break;
 
@@ -145,6 +147,21 @@ main(int argc, char *argv[])
 #else
 			(void) printf("\n");
 #endif
+            case 'l':
+            case 'p': {
+                char buf[80];
+                int code = (c == 'l'
+                        ? _CS_GNU_LIBC_VERSION
+                        : _CS_GNU_LIBPTHREAD_VERSION);
+                int res = confstr(code, buf, sizeof(buf));
+                if (res > 0)
+                    printf("%s\n", buf);
+                else
+                    printf("\n");
+                break;
+            }
+        default:
+			(void) printf("\n");
 			break;
 		}
 	}
