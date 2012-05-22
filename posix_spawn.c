@@ -51,6 +51,7 @@ static char *argv[3];
 
 static int	optn = DEFN;
 static int	optp = DEFP;
+static int	optt = 0;
 
 static int	mmaps = 0;
 
@@ -63,11 +64,12 @@ benchmark_init(void)
 	lm_tsdsize = 0;
 	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "n:p:");
+	(void) sprintf(lm_optstr, "n:p:t");
 
 	(void) sprintf(lm_usage,
 		"\t[-n number of mmaps (default %d)]\n"
 		"\t[-p size of mmaps in pages (default %d)]\n"
+		"\t[-t touch all mmap'd pages\n"
 		"notes: measures posix_spawn/waitpid time of simple process()\n",
 		DEFN, DEFP);
 
@@ -87,6 +89,9 @@ benchmark_optswitch(int opt, char *optarg)
 		optp = atoi(optarg);
 		if (optp <= 0)
 			return -1;
+		break;
+	case 't':
+		optt = 1;
 		break;
 	default:
 		return -1;
@@ -115,10 +120,12 @@ benchmark_initbatch(void *tsd)
 				fprintf(stderr, "errno = %d, %s\n", errno, strerror(errno));
 				return 1;
 			}
-            int j;
-            for (j = 0; j < optp; j++) {
-                *(val + (pagesize * j)) = '1';
-            }
+			if (optt) {
+				int j;
+				for (j = 0; j < optp; j++) {
+					*(val + (pagesize * j)) = '1';
+				}
+			}
 		}
 	}
 

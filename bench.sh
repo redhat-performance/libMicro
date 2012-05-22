@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.4
+bench_version=0.4.1-rh.5
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -344,9 +344,29 @@ exec		$OPTS -N "exec" -B 10	-C 3000
 
 execw		$OPTS -N "execw"	-B 500	-C 60
 
-execw		$OPTS -N "execw_32n"	-B 250	-C 20	-n 32	-p 8192
-execw		$OPTS -N "execw_64n"	-B 150	-C 20	-n 64	-p 4096
-execw		$OPTS -N "execw_128n"	-B 100	-C 20	-n 128	-p 2048
+execw		$OPTS -N "execw_32n"	-B 500	-C 60	-n 32	-p 8192
+execw		$OPTS -N "execw_64n"	-B 500	-C 60	-n 64	-p 4096
+execw		$OPTS -N "execw_128n"	-B 500	-C 60	-n 128	-p 2048
+execw		$OPTS -N "execw_256n"	-B 500	-C 60	-n 256	-p 1024
+execw		$OPTS -N "execw_512n"	-B 500	-C 60	-n 512	-p 512
+execw		$OPTS -N "execw_1024n"	-B 500	-C 60	-n 1024	-p 256
+execw		$OPTS -N "execw_2048n"	-B 500	-C 60	-n 2048	-p 128
+execw		$OPTS -N "execw_4096n"	-B 500	-C 60	-n 4096	-p 64
+execw		$OPTS -N "execw_8192n"	-B 500	-C 60	-n 8192	-p 32
+
+execw		$OPTS -N "execw_32nt"	-B 250	-C 20	-n 32	-p 8192	-t
+execw		$OPTS -N "execw_64nt"	-B 150	-C 20	-n 64	-p 4096	-t
+execw		$OPTS -N "execw_128nt"	-B 100	-C 20	-n 128	-p 2048	-t
+
+execw		$OPTS -N "execw_32ntv"	-B 500	-C 60	-n 32	-p 8192	-t	-v
+execw		$OPTS -N "execw_64ntv"	-B 500	-C 60	-n 64	-p 4096	-t	-v
+execw		$OPTS -N "execw_128ntv"	-B 500	-C 60	-n 128	-p 2048	-t	-v
+execw		$OPTS -N "execw_256ntv"	-B 500	-C 60	-n 256	-p 1024	-t	-v
+execw		$OPTS -N "execw_512ntv"	-B 500	-C 60	-n 512	-p 512	-t	-v
+execw		$OPTS -N "execw_1024ntv"	-B 500	-C 60	-n 1024	-p 256	-t	-v
+execw		$OPTS -N "execw_2048ntv"	-B 500	-C 60	-n 2048	-p 128	-t	-v
+execw		$OPTS -N "execw_4096ntv"	-B 500	-C 60	-n 4096	-p 64	-t	-v
+execw		$OPTS -N "execw_8192ntv"	-B 500	-C 60	-n 8192	-p 32	-t	-v
 
 posix_spawn	$OPTS -N "posix_spawn"	-B 500	-C 60
 
@@ -359,6 +379,16 @@ posix_spawn		$OPTS -N "posix_spawn_1024n"	-B 500	-C 60	-n 1024	-p 256
 posix_spawn		$OPTS -N "posix_spawn_2048n"	-B 500	-C 60	-n 2048	-p 128
 posix_spawn		$OPTS -N "posix_spawn_4096n"	-B 500	-C 60	-n 4096	-p 64
 posix_spawn		$OPTS -N "posix_spawn_8192n"	-B 500	-C 60	-n 8192	-p 32
+
+posix_spawn		$OPTS -N "posix_spawn_32nt"	-B 500	-C 60	-n 32	-p 8192	-t
+posix_spawn		$OPTS -N "posix_spawn_64nt"	-B 500	-C 60	-n 64	-p 4096	-t
+posix_spawn		$OPTS -N "posix_spawn_128nt"	-B 500	-C 60	-n 128	-p 2048	-t
+posix_spawn		$OPTS -N "posix_spawn_256nt"	-B 500	-C 60	-n 256	-p 1024	-t
+posix_spawn		$OPTS -N "posix_spawn_512nt"	-B 500	-C 60	-n 512	-p 512	-t
+posix_spawn		$OPTS -N "posix_spawn_1024nt"	-B 500	-C 60	-n 1024	-p 256	-t
+posix_spawn		$OPTS -N "posix_spawn_2048nt"	-B 500	-C 60	-n 2048	-p 128	-t
+posix_spawn		$OPTS -N "posix_spawn_4096nt"	-B 500	-C 60	-n 4096	-p 64	-t
+posix_spawn		$OPTS -N "posix_spawn_8192nt"	-B 500	-C 60	-n 8192	-p 32	-t
 
 system		$OPTS -N "system" -I 1000000	-C 15000
 
