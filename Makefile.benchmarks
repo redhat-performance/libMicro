@@ -45,6 +45,7 @@ ALL=				\
 		connection	\
 		dup		\
 		exec		\
+		execw		\
 		exit		\
 		exp		\
 		fcntl		\
@@ -80,6 +81,7 @@ ALL=				\
 		open		\
 		pipe		\
 		poll		\
+		posix_spawn	\
 		pread		\
 		pthread_create	\
 		pwrite		\

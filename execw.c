@@ -1,0 +1,155 @@
+/*
+ * CDDL HEADER START
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the "License").	 You may not use this file except
+ * in compliance with the License.
+ *
+ * You can obtain a copy of the license at
+ * src/OPENSOLARIS.LICENSE
+ * or http://www.opensolaris.org/os/licensing.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * HEADER in each file and include the License file at
+ * usr/src/OPENSOLARIS.LICENSE.	 If applicable,
+ * add the following below this CDDL HEADER, with the
+ * fields enclosed by brackets "[]" replaced with your
+ * own identifying information: Portions Copyright [yyyy]
+ * [name of copyright owner]
+ *
+ * CDDL HEADER END
+ */
+
+/*
+ * Copyright 2012 Red Hat, Inc.	 All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
+ * exec w/ wait benchmark
+ */
+
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
+#include <errno.h>
+
+#include "libmicro.h"
+
+#define DEFN	0
+#define DEFP	2
+
+static char exec_path[1024];
+static char *argv[3];
+
+static int	optn = DEFN;
+static int	optp = DEFP;
+
+static int	mmaps = 0;
+
+static int	pagesize = 0;
+
+int
+benchmark_init(void)
+{
+	lm_defB = 128;
+	lm_tsdsize = 0;
+	pagesize = sysconf(_SC_PAGESIZE);
+
+	(void) sprintf(lm_optstr, "n:p:");
+
+	(void) sprintf(lm_usage,
+		"\t[-n number of mmaps (default %d)]\n"
+		"\t[-p size of mmaps in pages (default %d)]\n"
+		"notes: measures fork/execv/waitpid time of simple process()\n",
+		DEFN, DEFP);
+
+	return 0;
+}
+
+int
+benchmark_optswitch(int opt, char *optarg)
+{
+	switch (opt) {
+	case 'n':
+		optn = atoi(optarg);
+		if (optn < 0)
+			return -1;
+		break;
+	case 'p':
+		optp = atoi(optarg);
+		if (optp <= 0)
+			return -1;
+		break;
+	default:
+		return -1;
+	}
+	return 0;
+}
+
+/*ARGSUSED*/
+int
+benchmark_initbatch(void *tsd)
+{
+	(void) strcpy(exec_path, lm_procpath);
+	(void) strcat(exec_path, "/exec_bin");
+
+	argv[0] = exec_path;
+	argv[1] = "1";
+	argv[2] = NULL;
+
+	if (mmaps == 0) {
+		mmaps = 1;
+		int size = (pagesize * optp);
+		int i;
+		for (i = 0; i < optn; i++) {
+			char *val = (char *)mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0L);
+			if (val == MAP_FAILED) {
+				fprintf(stderr, "errno = %d, %s\n", errno, strerror(errno));
+				return 1;
+			}
+            int j;
+            for (j = 0; j < optp; j++) {
+                *(val + (pagesize * j)) = '1';
+            }
+		}
+	}
+
+	return 0;
+}
+
+/*ARGSUSED*/
+int
+benchmark(void *tsd, result_t *res)
+{
+	int c, i;
+	int status;
+
+	for (i = 0; i < lm_optB && !res->re_errors; i++) {
+		switch (c = fork()) {
+		case -1:
+			res->re_errors++;
+			break;
+		default:
+			if (waitpid(c, &status, 0) < 0)
+				res->re_errors++;
+
+			if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+				res->re_errors++;
+			break;
+		case 0:
+			if (execv(exec_path, argv) < 0)
+				res->re_errors++;
+		}
+	}
+
+	res->re_count = i;
+
+	return 0;
+}

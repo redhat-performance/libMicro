@@ -120,6 +120,8 @@ $(ELIDED_BENCHMARKS):	../elided.c
 	$(CC) -o $(@) $(@).o $($(@)_EXTRA_DEPS) $(CFLAGS) libmicro.a $($(@)_EXTRA_LIBS) $(EXTRA_LIBS) -lpthread -lm
 
 exec:	exec_bin
+execw:	exec_bin
+posix_spawn:	exec_bin
 
 exec_bin:	exec_bin.o
 	$(CC) -o exec_bin $(CFLAGS) exec_bin.o

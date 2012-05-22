@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.3
+bench_version=0.4.1-rh.4
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -341,6 +341,24 @@ exit		$OPTS -N "exit_1000"		-B 1000 -C 50
 exit		$OPTS -N "exit_10_nolibc"	-e -B 10	-C 5000
 
 exec		$OPTS -N "exec" -B 10	-C 3000
+
+execw		$OPTS -N "execw"	-B 500	-C 60
+
+execw		$OPTS -N "execw_32n"	-B 250	-C 20	-n 32	-p 8192
+execw		$OPTS -N "execw_64n"	-B 150	-C 20	-n 64	-p 4096
+execw		$OPTS -N "execw_128n"	-B 100	-C 20	-n 128	-p 2048
+
+posix_spawn	$OPTS -N "posix_spawn"	-B 500	-C 60
+
+posix_spawn		$OPTS -N "posix_spawn_32n"	-B 500	-C 60	-n 32	-p 8192
+posix_spawn		$OPTS -N "posix_spawn_64n"	-B 500	-C 60	-n 64	-p 4096
+posix_spawn		$OPTS -N "posix_spawn_128n"	-B 500	-C 60	-n 128	-p 2048
+posix_spawn		$OPTS -N "posix_spawn_256n"	-B 500	-C 60	-n 256	-p 1024
+posix_spawn		$OPTS -N "posix_spawn_512n"	-B 500	-C 60	-n 512	-p 512
+posix_spawn		$OPTS -N "posix_spawn_1024n"	-B 500	-C 60	-n 1024	-p 256
+posix_spawn		$OPTS -N "posix_spawn_2048n"	-B 500	-C 60	-n 2048	-p 128
+posix_spawn		$OPTS -N "posix_spawn_4096n"	-B 500	-C 60	-n 4096	-p 64
+posix_spawn		$OPTS -N "posix_spawn_8192n"	-B 500	-C 60	-n 8192	-p 32
 
 system		$OPTS -N "system" -I 1000000	-C 15000
 
