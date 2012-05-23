@@ -111,33 +111,3 @@ END {
         printf("\n");
     }
 }
-
-function colormap(value, bgcolor, r, g, b) 
-{	
-	if (value <= .2)
-		value = .2;
-	if (value > 5)
-		value = 5;
-
-	if (value < .9) {
-		r = colorcalc(.2, value, .9, 0, 255);
-		g = colorcalc(.2, value, .9, 153, 255);
-		b = colorcalc(.2, value, .9, 0, 255);
-		bgcolor=sprintf("#%2.2x%2.2x%2.2x",  r, g, b);
-	}
-	else if (value < 1.1)
-		bgcolor="#ffffff";
-	else {
-		r = 255;
-		g = colorcalc(1.1, value, 5, 255, 0);
-		b = colorcalc(1.1, value, 5, 255, 0);
-		bgcolor=sprintf("#%2.2x%2.2x%2.2x",  r, g, b);
-	}
-
-	return (bgcolor);
-}
-
-function colorcalc(min, value, max, mincolor, maxcolor)
-{
-	return((value - min)/(max-min) * (maxcolor-mincolor) + mincolor);
-}
