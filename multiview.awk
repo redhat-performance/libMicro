@@ -35,12 +35,12 @@ BEGIN {
 /^\!/ {
 	split($0, A_header, ":");
 	name = substr(A_header[1],2);
-	gsub(/^[ \t]+/, "", name)
-	gsub(/[ \t]+$/, "", name)
+	gsub(/^[ \t]+/, "", name);
+	gsub(/[ \t]+$/, "", name);
 	headers[name]=name;
-	val = A_header[2]
-	gsub(/^[ \t]+/, "", val)
-	gsub(/[ \t]+$/, "", val)
+	val = A_header[2];
+	gsub(/^[ \t]+/, "", val);
+	gsub(/[ \t]+$/, "", val);
 	header_data[name,FILENAME] = val;
 	if (header_names[name] == 0) {
 		header_names[name] = ++header_count;
@@ -80,7 +80,7 @@ END {
 	printf("  <head>\n");
 	printf("    <meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\" />\n");
 	printf("    <meta name=\"author\" content=\"autogen\" />\n");
-	printf("    <title>multiview comparison</title>\n")
+	printf("    <title>multiview comparison</title>\n");
 	printf("    <style type=\"text/css\">\n");
 	printf("      body { font-family: sans-serif; }\n");
 	printf("      table { border-collapse: collapse; }\n");
@@ -106,7 +106,7 @@ END {
 	printf("        <tr>\n");
 	printf("          <th>BENCHMARK</th>\n");
 	printf("          <th align=\"right\">USECS</th>\n");
-	for (i = 2; i < ARGC; i++) 
+	for (i = 2; i < ARGC; i++);
 		printf("          <th align=\"right\">USECS [percentage]</th>\n");
 	printf("        </tr>\n");
 
@@ -188,10 +188,8 @@ END {
 
     for (i = 1; i <= benchmark_count; i++) {
 		name = benchmarks[i];
-        #printf("Data for benchmark: %s\n", name);
 		for (j = 1; j < ARGC; j++) {
             cnt = benchmark_results_linecnt[name, ARGV[j]];
-            #printf("\tFILENAME = %s, cnt = %d\n", ARGV[j], cnt);
             printf("    <div id=\"%s_%d_res\" onclick=\"showHide('%s_%d'); return false;\" title=\"Results for %s from %s\" style=\"display:none; padding: 2px; border: 2px solid #000; position: absolute; background: #fff\">\n",
                    name, j, name, j, name, ARGV[j]);
             printf("      <pre>\n");
