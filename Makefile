@@ -63,6 +63,7 @@ TARBALL_CONTENTS = 	\
 	multiview	\
 	multiview.sh	\
 	multiview.awk	\
+	numactl.awk	\
 	OPENSOLARIS.LICENSE	\
 	tattle.c	\
 	pm_qos.c	\
