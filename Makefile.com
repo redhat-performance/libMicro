@@ -33,6 +33,7 @@ include ../Makefile.benchmarks
 EXTRA_CFILES= \
 		exec_bin.c 	\
 		elided.c	\
+		pm_qos.c	\
 		tattle.c
 
 #
@@ -52,14 +53,13 @@ cstyle:
 
 lint:	libmicro.ln $(ALL:%=%.lint) $(EXTRA_CFILES:%.c=%.lint)
 
-
 $(EXTRA_CFILES:%.c=%.lint):
 	$(LINT) ../$(@:%.lint=%.c) -I. -mu -lc libmicro.ln -lm
 
-%.lint:	../%.c libmicro.ln
+%.lint:	../%.c	libmicro.ln
 	$(LINT) -mu $(CPPFLAGS) $< libmicro.ln -lpthread -lsocket -lnsl -lm
 
-%.o:	../%.c
+%.o:	../%.c	../libmicro.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 libmicro.ln: ../libmicro.c ../libmicro_main.c ../libmicro.h ../benchmark_*.c
@@ -98,13 +98,12 @@ BENCHMARK_FUNCS=		\
 
 recurse_EXTRA_DEPS=recurse2.o
 
-
 recurse:	$(recurse_EXTRA_DEPS)
 
 libmicro.a:	libmicro.o libmicro_main.o $(BENCHMARK_FUNCS)
 		$(AR) -cr libmicro.a libmicro.o libmicro_main.o $(BENCHMARK_FUNCS)
 
-tattle:		../tattle.c	libmicro.a
+tattle:		../tattle.c	libmicro.a	../libmicro.h
 	echo "char * compiler_version = \""`$(COMPILER_VERSION_CMD)`"\";" > tattle.h
 	echo "char * CC = \""$(CC)"\";" >> tattle.h
 	echo "char * extra_compiler_flags = \""$(extra_CFLAGS)"\";" >> tattle.h
