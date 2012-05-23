@@ -118,8 +118,9 @@ benchmark_initbatch(void *tsd)
 		mmaps = 1;
 		int size = (pagesize * optp);
 		int i;
+		char *addr = NULL;
 		for (i = 0; i < optn; i++) {
-			char *val = (char *)mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0L);
+			char *val = (char *)mmap(addr, size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0L);
 			if (val == MAP_FAILED) {
 				fprintf(stderr, "errno = %d, %s\n", errno, strerror(errno));
 				return 1;
@@ -130,6 +131,7 @@ benchmark_initbatch(void *tsd)
 					*(val + (pagesize * j)) = '1';
 				}
 			}
+			addr = (val - (pagesize * (optp + 1)));
 		}
 	}
 
@@ -142,9 +144,9 @@ benchmark(void *tsd, result_t *res)
 {
 	int c, i;
 	int status;
-    int (*ffunc)(void);
+	int (*ffunc)(void);
 
-    ffunc = (optv ? vfork : fork);
+	ffunc = (optv ? vfork : fork);
 
 	for (i = 0; i < lm_optB && !res->re_errors; i++) {
 		switch (c = ffunc()) {
