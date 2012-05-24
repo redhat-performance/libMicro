@@ -45,7 +45,7 @@ BEGIN {
         if (names_by_name[name] == 1) {
             names_by_idx[name_idx++] = name;
         }
-        node_data[node,name] = substr(line[2], 2);
+        node_data[node,name] = substr(line[2], 2, length(line[2] - 3));
     }
     next;
 }
