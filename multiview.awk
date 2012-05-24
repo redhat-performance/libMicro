@@ -32,6 +32,11 @@ BEGIN {
 	next;
 }
 
+/^\!nh:/ {
+    # Ignore numactl --hardware summary until we can process it properly
+	next;
+}
+
 /^\!/ {
 	split($0, A_header, ":");
 	name = substr(A_header[1],2);
