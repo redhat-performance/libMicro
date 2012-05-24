@@ -92,8 +92,9 @@ printf "!Options:             %45s\n" "$OPTS"
 printf "!Machine_name:        %45s\n" $hostname
 printf "!OS_name:             %45s\n" `uname -s`
 printf "!OS_release:          %45s\n" `uname -r`
-printf "!OS_build:            %45.18s\n" "`uname -v`"
-printf "!IP_address:          %45s\n" `getent hosts $hostname | awk '{print $1}'`
+printf "!OS_build:            %45s\n" "`uname -v`"
+printf "!IPV4_address:        %45s\n" `getent ahostsv4 $hostname | grep STREAM | awk '{print $1}'`
+printf "!IPV6_address:        %45s\n" `getent ahostsv6 $hostname | grep STREAM | awk '{print $1}'`
 printf "!Run_by:              %45s\n" $LOGNAME
 printf "!Date:                %45s\n" "`date '+%D %R'`"
 printf "!Compiler:            %45s\n" `bin/tattle -c`
@@ -106,8 +107,7 @@ printf "!TimerRes:            %45s\n" "`bin/tattle -r`"
 
 printf "!CPU_NAME:            %45s\n" "$p_type"
 
-#lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | awk '{name=$1; val=$2; gsub(/^[ \t]+/, "", name); gsub(/[ \t]+$/, "", name); gsub(/^[ \t]+/, "", val); gsub(/[ \t]+$/, "", val); printf("!%-20s %45s\n", name ":", val);}'
-lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
+lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | sed 's/CPU_sockets/Sockets/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
 sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s %25s\n", $1 ":", $3)}'
 
 numactl --hardware | awk -f numactl.awk
