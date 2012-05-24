@@ -40,11 +40,13 @@ BEGIN {
         node_idx++;
     }
     name = items[3];
-    names_by_name[name]++;
-    if (names_by_name[name] == 1) {
-        names_by_idx[name_idx++] = name;
+    if (name != "cpus") {
+        names_by_name[name]++;
+        if (names_by_name[name] == 1) {
+            names_by_idx[name_idx++] = name;
+        }
+        node_data[node,name] = substr(line[2], 2);
     }
-    node_data[node,name] = line[2];
     next;
 }
 
@@ -54,7 +56,7 @@ BEGIN {
 
 /^node +[0-9]/ {
     theline = $0;
-    gsub("/  +/", " ", theline);
+    sub(/  +/, " ", theline);
     split(theline, tmp, " ");
     nidx = 0;
     for (idx = 1; idx <= length(tmp); idx++) {
@@ -76,7 +78,7 @@ BEGIN {
 /^ +[0-9]+: / {
     split($0, columns, ":");
     node = int(columns[1]);
-    gsub("/  +/", " ", columns[2]);
+    sub(/  +/, " ", columns[2]);
     split(columns[2], dist, " ");
     for (i = 1; i <= length(dist); i++)
     for (idx = 0; idx < node_idx; idx++) {
