@@ -18,7 +18,7 @@ fi
 HN=`hostname -s`
 VER=`bin/tattle -V`
 
-results="/shak/bench/libMicro/results"
+results="../results"
 if [ ! -d "$results" ]; then
     echo "Could not find results dir: $results"
     exit 1
