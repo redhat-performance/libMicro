@@ -47,6 +47,8 @@ static int			optu = 0;
 
 static char 			*optas = "4k";
 
+static int	pagesize = 0;
+
 typedef struct {
 	char 			*ts_buff;
 	int			ts_size;
@@ -54,22 +56,23 @@ typedef struct {
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
+	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "a:us:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "a:us:");
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_usage),
 	    "       [-s buffer-size (default %d)]\n"
 	    "       [-a alignment (force buffer alignment)]\n"
 	    "       [-u (try to always use uncached memory)]"
 	    "notes: measures memset()\n",
 	    DEFS);
 
-	(void) sprintf(lm_header, "%8s%16s", "size", "alignment");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s%16s", "size", "alignment");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -84,23 +87,23 @@ benchmark_optswitch(int opt, char *optarg)
 		break;
 	case 'a':
 		opta = sizetoll(optarg);
-		if (opta > 4096)
+		if (opta > pagesize)
 			opta = 0;
 		else
 			optas = optarg;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initworker(void *tsd)
 {
-	tsd_t 			*ts = (tsd_t *)tsd;
-	int			errors = 0;
-	int i;
+	tsd_t	*ts = (tsd_t *)tsd;
+	int		errors = 0;
+	int		i;
 
 	if (optu) {
 		ts->ts_size 	= 1024 * 1024 * 64;
@@ -115,16 +118,15 @@ benchmark_initworker(void *tsd)
 
 	for (i = 0; i < ts->ts_size; i++)
 		ts->ts_buff[i] = 0;
-	return (errors);
+	return errors;
 }
 
 /*ARGSUSED*/
 int
 benchmark(void *tsd, result_t *res)
 {
-	int			i;
-	tsd_t			*ts = (tsd_t *)tsd;
-
+	int		i;
+	tsd_t	*ts = (tsd_t *)tsd;
 
 	if (optu) {
 		char *buf = ts->ts_buff + ts->ts_offset;
@@ -155,15 +157,15 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 
-	(void) sprintf(result, "%8lld%12s", opts, optas);
+	(void) snprintf(result, sizeof(result), "%8lld%12s", opts, optas);
 
-	return (result);
+	return result;
 }

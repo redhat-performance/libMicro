@@ -56,14 +56,17 @@ static int			opts = 0;
 static int			fd = -1;
 static int			anon = 0;
 
+static int			pagesize = 0;
+
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
+	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "f:l:rsw");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:l:rsw");
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_usage),
 	    "       [-f file-to-map (default %s)]\n"
 	    "       [-l mapping-length (default %d)]\n"
 	    "       [-r] (read a byte from each page)\n"
@@ -72,9 +75,9 @@ benchmark_init()
 	    "notes: measures munmap()\n",
 	    DEFF, DEFL);
 
-	(void) sprintf(lm_header, "%8s %5s", "size", "flags");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s %5s", "size", "flags");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -98,18 +101,25 @@ benchmark_optswitch(int opt, char *optarg)
 		optw = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
-	if (!anon)
-		fd = open(optf, O_RDWR);
+    int error = 0;
 
-	return (0);
+	if (!anon) {
+		fd = open(optf, O_RDWR);
+        if (fd < 0) {
+            perror("benchmark_initrun(): open");
+            error = -1;
+        }
+    }
+
+	return error;
 }
 
 int
@@ -144,18 +154,18 @@ benchmark_initbatch(void *tsd)
 			continue;
 		}
 		if (optr) {
-			for (j = 0; j < optl; j += 4096) {
+			for (j = 0; j < optl; j += pagesize) {
 				ts->ts_foo += ts->ts_map[i][j];
 			}
 		}
 		if (optw) {
-			for (j = 0; j < optl; j += 4096) {
+			for (j = 0; j < optl; j += pagesize) {
 				ts->ts_map[i][j] = 1;
 			}
 		}
 	}
 
-	return (0);
+	return errors;
 }
 
 int
@@ -171,11 +181,11 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count += lm_optB;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 	char			flags[5];
@@ -186,7 +196,7 @@ benchmark_result()
 	flags[3] = opts ? 's' : '-';
 	flags[4] = 0;
 
-	(void) sprintf(result, "%8lld %5s", optl, flags);
+	(void) snprintf(result, sizeof(result), "%8lld %5s", optl, flags);
 
-	return (result);
+	return result;
 }

@@ -60,13 +60,14 @@ static vchar_t			*seg;
 static int			pagesize;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
+	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "f:l:rstw");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:l:rstw");
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_usage),
 	    "       [-f file-to-map (default %s)]\n"
 	    "       [-l mapping-length (default %d)]\n"
 	    "       [-r] (read a byte from each page)\n"
@@ -76,9 +77,9 @@ benchmark_init()
 	    "notes: measures mprotect()\n",
 	    DEFF, DEFL);
 
-	(void) sprintf(lm_header, "%8s %5s", "size", "flags");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s %5s", "size", "flags");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -105,19 +106,23 @@ benchmark_optswitch(int opt, char *optarg)
 		optw = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
 	int			flags;
 	int			i;
 
-	if (!anon)
+	if (!anon) {
 		fd = open(optf, O_RDWR);
+        if (fd < 0) {
+            return -1;
+        }
+    }
 
 	flags = opts ? MAP_SHARED : MAP_PRIVATE;
 	flags |= anon ? MAP_ANON : 0;
@@ -126,24 +131,22 @@ benchmark_initrun()
 	    flags, anon ? -1 : fd, 0L);
 
 	if (seg == MAP_FAILED) {
-		return (-1);
+		return -1;
 	}
 
 	if (optr) {
-		for (i = 0; i < lm_optB * optl; i += 4096) {
+		for (i = 0; i < lm_optB * optl; i += pagesize) {
 			foo += seg[i];
 		}
 	}
 
 	if (optw) {
-		for (i = 0; i < lm_optB * optl; i += 4096) {
+		for (i = 0; i < lm_optB * optl; i += pagesize) {
 			seg[i] = 1;
 		}
 	}
 
-	pagesize = getpagesize();
-
-	return (0);
+	return 0;
 }
 
 int
@@ -178,11 +181,11 @@ benchmark(void *tsd, result_t *res)
 	res->re_count += lm_optB;
 	ts->ts_batch++;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 	char			flags[6];
@@ -194,7 +197,7 @@ benchmark_result()
 	flags[4] = optt ? 't' : '-';
 	flags[5] = 0;
 
-	(void) sprintf(result, "%8lld %5s", optl, flags);
+	(void) snprintf(result, sizeof(result), "%8lld %5s", optl, flags);
 
-	return (result);
+	return result;
 }

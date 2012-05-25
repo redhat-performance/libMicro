@@ -71,7 +71,7 @@ char **				lm_argv = NULL;
 int				lm_opt1;
 int				lm_optA;
 int				lm_optB;
-int				lm_optC = 100;
+int				lm_optC;
 int				lm_optD;
 int				lm_optE;
 int				lm_optH;
@@ -86,7 +86,8 @@ int				lm_optW;
 
 int				lm_def1 = 0;
 int				lm_defB = 0; /* use lm_nsecs_per_op */
-int				lm_defD = 10;
+int             lm_defC = 100;
+int				lm_defD = 10*1000;
 int				lm_defH = 0;
 char				*lm_defN = NULL;
 int				lm_defP = 1;
@@ -171,7 +172,6 @@ actual_main(int argc, char *argv[])
 	/* before we do anything */
 	(void) benchmark_init();
 
-
 	nsecs_overhead = get_nsecs_overhead();
 	nsecs_resolution = get_nsecs_resolution();
 
@@ -181,6 +181,7 @@ actual_main(int argc, char *argv[])
 
 	lm_opt1	= lm_def1;
 	lm_optB	= lm_defB;
+    lm_optC = lm_defC;
 	lm_optD	= lm_defD;
 	lm_optH	= lm_defH;
 	lm_optN	= lm_defN;
@@ -224,7 +225,7 @@ actual_main(int argc, char *argv[])
 	 * Parse command line arguments
 	 */
 
-	(void) sprintf(optstr, "1AB:C:D:EHI:LMN:P:RST:VW?%s", lm_optstr);
+	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EHI:LMN:P:RST:VW?%s", lm_optstr);
 	while ((opt = getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case '1':
@@ -238,9 +239,27 @@ actual_main(int argc, char *argv[])
 			break;
 		case 'C':
 			lm_optC = sizetoint(optarg);
+            if (lm_optC > 0) {
+                lm_optD = 0;
+            }
+            else {
+                if (lm_optD <= 0) {
+                    (void) printf("warning: -C <= 0 and -D <= 0, defaulting -D to %d\n", lm_defD);
+                    lm_optD = lm_defD;
+                }
+            }
 			break;
 		case 'D':
 			lm_optD = sizetoint(optarg);
+            if (lm_optD > 0) {
+                lm_optC = 0;
+            }
+            else {
+                if (lm_optC <= 0) {
+                    (void) printf("warning: -D <= 0 and -C <= 0, defaulting -C to %d\n", lm_defC);
+                    lm_optC = lm_defC;
+                }
+            }
 			break;
 		case 'E':
 			lm_optE = 1;
@@ -331,6 +350,7 @@ actual_main(int argc, char *argv[])
 	if (tids == NULL) {
 		perror("malloc(tids)");
 		exit(1);
+
 	}
 
 	/* check that the case defines lm_tsdsize before proceeding */
@@ -397,7 +417,11 @@ actual_main(int argc, char *argv[])
 		/* wait for worker processes */
 		for (i = 0; i < lm_optP; i++) {
 			if (pids[i] > 0) {
-				(void) waitpid(pids[i], NULL, 0);
+				int ret = waitpid(pids[i], NULL, 0);
+                if (ret < 0) {
+                    perror("waitpid()");
+                    exit(1);
+                }
 			}
 		}
 	}
@@ -483,35 +507,41 @@ worker_thread(void *arg)
 		(void) benchmark(arg, &r);
 		r.re_t1 = getnsecs();
 
-		/* time to stop? */
-		if (r.re_t1 > lm_barrier->ba_deadline &&
-		    (!lm_optC || lm_optC < lm_barrier->ba_batches)) {
-			lm_barrier->ba_flag = 0;
-		}
-
 		/* record results and sync */
 		(void) barrier_queue(lm_barrier, &r);
 
-		(void) benchmark_finibatch(arg);
+		/* time to stop? */
+		if (lm_optC <= 0) {
+            if (r.re_t1 > lm_barrier->ba_deadline) {
+                lm_barrier->ba_flag = 0;
+            }
+        }
+        else {
+            if (lm_barrier->ba_batches >= lm_optC) {
+                lm_barrier->ba_flag = 0;
+            }
+        }
 
-		r.re_errors = 0;
+        /* errors from finishing this batch feed into the next batch */
+		r.re_errors = benchmark_finibatch(arg);
 	}
 
 	(void) benchmark_finiworker(arg);
 
-	return (0);
+	return 0;
 }
 
 void
-worker_process()
+worker_process(void)
 {
-	int			i;
+	int			i, ret;
 	void			*tsd;
 
 	for (i = 1; i < lm_optT; i++) {
 		tsd = gettsd(pindex, i);
-		if (pthread_create(&tids[i], NULL, worker_thread, tsd) != 0) {
-			perror("pthread_create");
+        ret = pthread_create(&tids[i], NULL, worker_thread, tsd);
+		if (ret != 0) {
+			fprintf(stderr, "worker_process(): pthread_create(%p, NULL, %p, %p) failed: (%d) %s\n", &tids[i], worker_thread, tsd, ret, strerror(ret));
 			exit(1);
 		}
 	}
@@ -520,20 +550,24 @@ worker_process()
 	(void) worker_thread(tsd);
 
 	for (i = 1; i < lm_optT; i++) {
-		(void) pthread_join(tids[i], NULL);
+		ret = pthread_join(tids[i], NULL);
+		if (ret != 0) {
+			fprintf(stderr, "worker_process(): pthread_join(%p, NULL) failed: (%d) %s\n", tids[i], ret, strerror(ret));
+			exit(1);
+		}
 	}
 }
 
 void
-usage()
+usage(void)
 {
 	(void) printf(
 	    "usage: %s\n"
 	    "       [-1] (single process; overrides -P > 1)\n"
 	    "       [-A] (align with clock)\n"
 	    "       [-B batch-size (default %d)]\n"
-	    "       [-C minimum number of samples (default 0)]\n"
-	    "       [-D duration in msecs (default %ds)]\n"
+	    "       [-C minimum number of samples (default 0)] (mutually exclusive with -D)\n"
+	    "       [-D duration in ms (default %dms)] (mutually exlusive with -C)\n"
 	    "       [-E (echo name to stderr)]\n"
 	    "       [-H] (suppress headers)\n"
 	    "       [-I] nsecs per op (used to compute batch size)"
@@ -847,7 +881,7 @@ barrier_queue(barrier_t *b, result_t *r)
 barrier_t *
 barrier_create(int hwm, int datasize)
 {
-	pthread_mutexattr_t	attr;
+	pthread_mutexattr_t	mattr;
 	pthread_condattr_t	cattr;
 	barrier_t		*b;
 
@@ -864,14 +898,38 @@ barrier_create(int hwm, int datasize)
 	b->ba_hwm = hwm;
 	b->ba_flag  = 0;
 
-	(void) pthread_mutexattr_init(&attr);
-	(void) pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+	int ret = pthread_mutexattr_init(&mattr);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_mutexattr_init(%p) failed: (%d) %s\n", &mattr, ret, strerror(ret));
+        exit(1);
+    }
+	(void) pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_mutexattr_setpshared(%p, %d) failed: (%d) %s\n", &mattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+        exit(1);
+    }
 
 	(void) pthread_condattr_init(&cattr);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_condattr_init(%p) failed: (%d) %s\n", &cattr, ret, strerror(ret));
+        exit(1);
+    }
 	(void) pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_condattr_setpshared(%p, %d) failed: (%d) %s\n", &cattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+        exit(1);
+    }
 
-	(void) pthread_mutex_init(&b->ba_lock, &attr);
+	(void) pthread_mutex_init(&b->ba_lock, &mattr);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_mutex_init(%p, %p) failed: (%d) %s\n", &b->ba_lock, &mattr, ret, strerror(ret));
+        exit(1);
+    }
 	(void) pthread_cond_init(&b->ba_cv, &cattr);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_create(): pthread_cond_init(%p, %p) failed: (%d) %s\n", &b->ba_cv, &cattr, ret, strerror(ret));
+        exit(1);
+    }
 
 	b->ba_waiters = 0;
 	b->ba_phase = 0;
@@ -879,15 +937,19 @@ barrier_create(int hwm, int datasize)
 	b->ba_count = 0;
 	b->ba_errors = 0;
 
-	return (b);
+	return b;
 }
 
 int
 barrier_destroy(barrier_t *b)
 {
-	(void) munmap((void *)b, sizeof (barrier_t));
+	int ret = munmap((void *)b, sizeof (barrier_t));
+    if (ret != 0) {
+        perror("barrier_destroy(): munmap");
+        exit(1);
+    }
 
-	return (0);
+	return 0;
 }
 
 int
@@ -895,7 +957,11 @@ barrier_queue(barrier_t *b, result_t *r)
 {
 	int			phase;
 
-	(void) pthread_mutex_lock(&b->ba_lock);
+	int ret = pthread_mutex_lock(&b->ba_lock);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_queue(): pthread_mutex_lock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
+        exit(1);
+    }
 
 	if (r != NULL) {
 		update_stats(b, r);
@@ -907,40 +973,53 @@ barrier_queue(barrier_t *b, result_t *r)
 	if (b->ba_hwm == b->ba_waiters) {
 		b->ba_waiters = 0;
 		b->ba_phase++;
-		(void) pthread_cond_broadcast(&b->ba_cv);
+		ret = pthread_cond_broadcast(&b->ba_cv);
+        if (ret != 0) {
+            fprintf(stderr, "barrier_queue(): pthread_cond_broadcast(%p) failed: (%d) %s\n", &b->ba_cv, ret, strerror(ret));
+            exit(1);
+        }
 	}
 
 	while (b->ba_phase == phase) {
-		(void) pthread_cond_wait(&b->ba_cv, &b->ba_lock);
+		ret = pthread_cond_wait(&b->ba_cv, &b->ba_lock);
+        if (ret != 0) {
+            fprintf(stderr, "barrier_queue(): pthread_cond_wait(%p, %p) failed: (%d) %s\n", &b->ba_cv, &b->ba_lock, ret, strerror(ret));
+            exit(1);
+        }
 	}
 
-	(void) pthread_mutex_unlock(&b->ba_lock);
-	return (0);
+	ret = pthread_mutex_unlock(&b->ba_lock);
+    if (ret != 0) {
+        fprintf(stderr, "barrier_queue(): pthread_mutex_unlock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
+        exit(1);
+    }
+
+	return 0;
 }
 #endif /* USE_SEMOP */
 
 int
-gettindex()
+gettindex(void)
 {
 	int			i;
 
 	if (tids == NULL) {
-		return (-1);
+		return -1;
 	}
 
 	for (i = 1; i < lm_optT; i++) {
 		if (pthread_self() == tids[i]) {
-			return (i);
+			return i;
 		}
 	}
 
-	return (0);
+	return 0;
 }
 
 int
-getpindex()
+getpindex(void)
 {
-	return (pindex);
+	return pindex;
 }
 
 void *
@@ -1200,7 +1279,7 @@ print_histo(barrier_t *b)
 	last = 0;
 	sum = 0.0;
 	count = 0;
-	for (i = 0; i < i95; i++) {
+	for (i = 0; i <= i95; i++) {
 		j = (HISTOSIZE - 1) * (b->ba_data[i] - min) / scale;
 
 		if (j >= HISTOSIZE) {
@@ -1216,7 +1295,7 @@ print_histo(barrier_t *b)
 	}
 	m95 = sum / count;
 
-	/* find the larges bucket */
+	/* find the largest bucket */
 	maxcount = 0;
 	for (i = 0; i < HISTOSIZE; i++)
 		if (histo[i].count > 0) {

@@ -45,15 +45,18 @@
 
 #define DEFN	0
 #define DEFP	2
+#define DEFR	0
 
 static char exec_path[1024];
 static char *argv[3];
 
 static int	optn = DEFN;
 static int	optp = DEFP;
+static int	optr = DEFR;
 static int	optt = 0;
 
 static int	mmaps = 0;
+static int	threads = 0;
 
 static int	pagesize = 0;
 
@@ -64,14 +67,15 @@ benchmark_init(void)
 	lm_tsdsize = 0;
 	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "n:p:t");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "n:p:r:t");
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_optstr),
 		"\t[-n number of mmaps (default %d)]\n"
 		"\t[-p size of mmaps in pages (default %d)]\n"
+		"\t[-r number of background sleepr threads (default %d)]\n"
 		"\t[-t touch all mmap'd pages\n"
 		"notes: measures posix_spawn/waitpid time of simple process()\n",
-		DEFN, DEFP);
+        DEFN, DEFP, DEFR);
 
 	return 0;
 }
@@ -82,13 +86,24 @@ benchmark_optswitch(int opt, char *optarg)
 	switch (opt) {
 	case 'n':
 		optn = atoi(optarg);
-		if (optn < 0)
+		if (optn < 0) {
+            optn = DEFN;
 			return -1;
+        }
 		break;
 	case 'p':
 		optp = atoi(optarg);
-		if (optp <= 0)
+		if (optp <= 0) {
+            optp = DEFP;
 			return -1;
+        }
+		break;
+	case 'r':
+		optr = atoi(optarg);
+		if (optr <= 0) {
+            optr = DEFR;
+			return -1;
+        }
 		break;
 	case 't':
 		optt = 1;
@@ -97,6 +112,13 @@ benchmark_optswitch(int opt, char *optarg)
 		return -1;
 	}
 	return 0;
+}
+
+void *sleeper_thread(void *arg) {
+    for (;;) {
+        sleep(1);
+    }
+    return NULL;
 }
 
 /*ARGSUSED*/
@@ -130,6 +152,19 @@ benchmark_initbatch(void *tsd)
 			addr = (val - (pagesize * (optp + 1)));
 		}
 	}
+
+    if (threads == 0) {
+        threads = 1;
+        int i, ret;
+        for (i = 0; i < optr; i++) {
+            pthread_t	tid;
+            ret = pthread_create(&tid, NULL, sleeper_thread, NULL);
+            if (ret != 0) {
+				fprintf(stderr, "errno = %d, %s\n", ret, strerror(ret));
+				return 1;
+            }
+        }
+    }
 
 	return 0;
 }

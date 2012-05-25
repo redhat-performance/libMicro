@@ -30,7 +30,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.9"
+#define	LIBMICRO_VERSION	"0.4.1-rh.10"
 
 #define	STRSIZE			1024
 
@@ -154,6 +154,7 @@ extern int			lm_argc;
 extern char			**lm_argv;
 
 extern int			lm_optB;
+extern int			lm_optC;
 extern int			lm_optD;
 extern int			lm_optH;
 extern char			*lm_optN;
@@ -162,6 +163,7 @@ extern int			lm_optS;
 extern int			lm_optT;
 
 extern int			lm_defB;
+extern int			lm_defC;
 extern int			lm_defD;
 extern int			lm_defH;
 extern char			*lm_defN;
