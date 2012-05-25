@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.8
+bench_version=0.4.1-rh.9
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -149,7 +149,10 @@ done <<.
 # Obligatory null system call: use very short time
 # for default since SuSe implements this "syscall" in userland
 #
-getpid		$OPTS -N "getpid"   -B 800
+getpid		$OPTS -N "getpid"	-B 32000
+getpid		$OPTS -N "getpid_s"	-B 32000	-C 3000	-s
+getpid		$OPTS -N "getpidT4"	-B 32000	-T 4
+getpid		$OPTS -N "getpidT4_s"	-B 32000	-C 3000	-T 4	-s
 
 getenv		$OPTS -N "getenv"	-s 100 -I 6
 getenv		$OPTS -N "getenvT2"	-s 100 -I 50	-T 2

@@ -36,29 +36,59 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/syscall.h>
 
 #include "libmicro.h"
 
+int	opts = 0;
+
 int
-benchmark_init()
+benchmark_init(void)
 {
 	(void) sprintf(lm_usage, "note: measures getpid()");
 
 	lm_tsdsize = 0;
 
-	return (0);
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s");
+
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"\t[-s skip libc making system call directly\n"
+		"note: measures getpid()\n");
+
+	return 0;
+}
+
+int
+benchmark_optswitch(int opt, char *optarg)
+{
+	switch (opt) {
+	case 's':
+		opts = 1;
+		break;
+	default:
+		return -1;
+	}
+	return 0;
 }
 
 /*ARGSUSED*/
 int
 benchmark(void *tsd, result_t *res)
 {
-	int			i;
+	int	i;
 
-	for (i = 0; i < lm_optB; i ++) {
-		(void) getpid();
-	}
+    if (opts) {
+		for (i = 0; i < lm_optB; i++) {
+    	    (void) syscall(SYS_getpid);
+		}
+    }
+    else {
+		for (i = 0; i < lm_optB; i++) {
+			(void) getpid();
+		}
+    }
+
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
