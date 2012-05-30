@@ -71,6 +71,8 @@ then
 	# Make an attempt to keep the system from going into
 	# energy savings mode (Intel systems only?).
 	bin/pm_qos > /dev/null 2>&1 < /dev/null &
+    PM_QOS_PID=$!
+    echo "PM_QOS_PID=$PM_QOS_PID"
 fi
 
 ARCH=`uname -m`
@@ -562,3 +564,8 @@ connection	$OPTS -N "conn_accept"		-B 256      -a
 
 close_tcp	$OPTS -N "close_tcp"		-B 32
 .
+
+# Clean up background processes
+if [ -n "$PM_QOS_PID" ]; then
+	kill -INT $PM_QOS_PID
+fi
