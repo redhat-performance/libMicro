@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.10
+bench_version=0.4.1-rh.11
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -185,17 +185,17 @@ cachetocache	$OPTS -N "cachetocache" -s 100k -T 2 -I 200
 isatty		$OPTS -N "isatty_yes"
 isatty		$OPTS -N "isatty_no"  -f $IFILE
 
-malloc		$OPTS -N "malloc_10"    -s 10    -g 10 -I 25
-malloc		$OPTS -N "malloc_100"   -s 100   -g 10 -I 25
-malloc		$OPTS -N "malloc_1k"    -s 1k    -g 10 -I 25
-malloc		$OPTS -N "malloc_10k"   -s 10k   -g 10 -I 25
-malloc		$OPTS -N "malloc_100k"  -s 100k  -g 10 -I 1000
+malloc		$OPTS -N "malloc_10"    -s 10    -g 10 -B 1000
+malloc		$OPTS -N "malloc_100"   -s 100   -g 10 -B 1000
+malloc		$OPTS -N "malloc_1k"    -s 1k    -g 10 -B 1000
+malloc		$OPTS -N "malloc_10k"   -s 10k   -g 10 -B 1000
+malloc		$OPTS -N "malloc_100k"  -s 100k  -g 10 -B 1000
 
-malloc		$OPTS -N "mallocT2_10"    -s 10   -g 10 -T 2 -I 50
-malloc		$OPTS -N "mallocT2_100"   -s 100  -g 10 -T 2 -I 100
-malloc		$OPTS -N "mallocT2_1k"    -s 1k   -g 10 -T 2 -I 100
-malloc		$OPTS -N "mallocT2_10k"   -s 10k  -g 10 -T 2 -I 100
-malloc		$OPTS -N "mallocT2_100k"  -s 100k -g 10 -T 2 -I 5000
+malloc		$OPTS -N "mallocT2_10"    -s 10   -g 10 -T 2 -B 1000
+malloc		$OPTS -N "mallocT2_100"   -s 100  -g 10 -T 2 -B 1000
+malloc		$OPTS -N "mallocT2_1k"    -s 1k   -g 10 -T 2 -B 1000
+malloc		$OPTS -N "mallocT2_10k"   -s 10k  -g 10 -T 2 -B 1000
+malloc		$OPTS -N "mallocT2_100k"  -s 100k -g 10 -T 2 -B 1000
 
 close		$OPTS -N "close_bad"	-B 768	-b
 close		$OPTS -N "close_tmp"	-B 640	-f $TFILE
@@ -228,9 +228,9 @@ strtol		$OPTS -N "strtol"      -B 200
 getcontext	$OPTS -N "getcontext"  -I 100
 setcontext	$OPTS -N "setcontext"  -I 12
 
-mutex		$OPTS -N "mutex_st"	-I 1
-mutex		$OPTS -N "mutex_mt"	-t -I 1
-mutex		$OPTS -N "mutex_T2"     -T 2  -I 6
+mutex		$OPTS -N "mutex_st"		-B 1000
+mutex		$OPTS -N "mutex_mt"	-t	-B 1000
+mutex		$OPTS -N "mutex_T2"     -T 2  -B 1000
 
 longjmp		$OPTS -N "longjmp"	-B 200
 siglongjmp	$OPTS -N "siglongjmp"	-B 200
@@ -569,3 +569,5 @@ close_tcp	$OPTS -N "close_tcp"		-B 32
 if [ -n "$PM_QOS_PID" ]; then
 	kill -INT $PM_QOS_PID
 fi
+
+exit 0

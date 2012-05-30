@@ -41,7 +41,7 @@
 
 #define	DEFF			"/dev/tty"
 static char			*optf = DEFF;
-static int 			optb = 0;
+static int			optb = 0;
 
 typedef struct {
 	int			ts_fd;
@@ -52,15 +52,15 @@ benchmark_init()
 {
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "f:b");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:b");
 
-	(void) sprintf(lm_usage,
-	    "       [-f file-to-isatty (default %s)]\n"
-	    "       [-b] (try to isatty an unopened fd)\n"
-	    "notes: measures isatty()",
-	    DEFF);
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"\t[-f file-to-isatty (default %s)]\n"
+		"\t[-b] (try to isatty an unopened fd)\n"
+		"notes: measures isatty()",
+		DEFF);
 
-	return (0);
+	return 0;
 }
 
 int
@@ -74,10 +74,10 @@ benchmark_optswitch(int opt, char *optarg)
 		optb = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
@@ -86,11 +86,12 @@ benchmark_initworker(void *tsd)
 	tsd_t			*ts = (tsd_t *)tsd;
 
 	ts->ts_fd = ((optb == 0) ?
-	    open(optf, O_RDONLY) : 1024);
+		open(optf, O_RDONLY) : 1024);
 	if (ts->ts_fd == -1) {
-		return (1);
+		perror("open()");
+		return 1;
 	}
-	return (0);
+	return 0;
 }
 
 int
@@ -106,5 +107,5 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
