@@ -68,9 +68,9 @@ benchmark_init()
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "ac");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-	    "\t[-a] (measure accept() only)\n"
-	    "\t[-c] (measure connect() only)\n"
-	    "notes: measures connect()/accept()\n");
+		"\t[-a] (measure accept() only)\n"
+		"\t[-c] (measure connect() only)\n"
+		"notes: measures connect()/accept()\n");
 
 	return 0;
 }
@@ -104,7 +104,7 @@ benchmark_initrun(void)
 	setfdlimit(3 * lm_optB * lm_optT + 10);
 
 	if ((host = gethostbyname("localhost")) == NULL) {
-        perror("gethostbyname");
+		perror("gethostbyname");
 		exit(3);
 	}
 
@@ -120,24 +120,24 @@ benchmark_initbatch_once(tsd_t *ts)
 
 	ts->ts_lsns = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_lsns == NULL) {
-        perror("malloc");
+		perror("malloc");
 		errors ++;
 	}
 	ts->ts_accs = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_accs == NULL) {
-        perror("malloc");
+		perror("malloc");
 		errors ++;
 	}
 	ts->ts_cons = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_cons == NULL) {
-        perror("malloc");
+		perror("malloc");
 		errors ++;
 	}
 	ts->ts_adds =
-	    (struct sockaddr_in *)malloc(lm_optB *
-	    sizeof (struct sockaddr_in));
+		(struct sockaddr_in *)malloc(lm_optB *
+		sizeof (struct sockaddr_in));
 	if (ts->ts_adds == NULL) {
-        perror("malloc");
+		perror("malloc");
 		errors ++;
 	}
 
@@ -161,15 +161,15 @@ benchmark_initbatch_once(tsd_t *ts)
 
 		for (;;) {
 			(void) memset(&ts->ts_adds[i], 0,
-			    sizeof (struct sockaddr_in));
+				sizeof (struct sockaddr_in));
 			ts->ts_adds[i].sin_family = AF_INET;
 			ts->ts_adds[i].sin_port = htons(j++);
 			(void) memcpy(&ts->ts_adds[i].sin_addr.s_addr,
-			    host->h_addr_list[0], sizeof (struct in_addr));
+				host->h_addr_list[0], sizeof (struct in_addr));
 
 			if (bind(ts->ts_lsns[i],
-			    (struct sockaddr *)&ts->ts_adds[i],
-			    sizeof (struct sockaddr_in)) == 0) {
+				(struct sockaddr *)&ts->ts_adds[i],
+				sizeof (struct sockaddr_in)) == 0) {
 				break;
 			}
 
@@ -215,8 +215,8 @@ benchmark_initbatch(void *tsd)
 
 		if (opta) {
 			result = connect(ts->ts_cons[i],
-			    (struct sockaddr *)&ts->ts_adds[i],
-			    sizeof (struct sockaddr_in));
+				(struct sockaddr *)&ts->ts_adds[i],
+				sizeof (struct sockaddr_in));
 			if ((result == -1) && (errno != EINPROGRESS)) {
 				perror("init:connect");
 				errors ++;
@@ -240,8 +240,8 @@ benchmark(void *tsd, result_t *res)
 		if (!opta) {
 		again:
 			result = connect(ts->ts_cons[i],
-			    (struct sockaddr *)&ts->ts_adds[i],
-			    sizeof (struct sockaddr_in));
+				(struct sockaddr *)&ts->ts_adds[i],
+				sizeof (struct sockaddr_in));
 			if (result != 0 && errno != EISCONN) {
 				if (errno == EINPROGRESS) {
 					struct pollfd pollfd;
@@ -264,9 +264,9 @@ benchmark(void *tsd, result_t *res)
 			for (;;) {
 				struct pollfd pollfd;
 				result = accept(ts->ts_lsns[i],
-				    (struct sockaddr *)&addr, &size);
+					(struct sockaddr *)&addr, &size);
 				if (result > 0 || (result == -1 &&
-				    errno != EAGAIN))
+					errno != EAGAIN))
 					break;
 				pollfd.fd = ts->ts_lsns[i];
 				pollfd.events = POLLIN;
