@@ -1236,17 +1236,25 @@ print_histo(barrier_t *b)
 	double			m95;
 	histo_t			*histo;
 
-	(void) printf("#	%12s %12s %32s %12s\n", "counts", "usecs/call",
-	    "", "means");
-
 	/* calculate how much data we've captured */
 	n = b->ba_batches > b->ba_datasize ? b->ba_datasize : b->ba_batches;
 
 	/* find the 95th percentile - index, value and range */
 	qsort((void *)b->ba_data, n, sizeof (double), doublecmp);
 	min = b->ba_data[0] + 0.000001;
-	i95 = n * 95 / 100;
-	p95 = b->ba_data[i95];
+
+    /* Skip over any infinity or NaN results */
+	for (i95 = ((n * 95) / 100); (i95 > 0); i95--) {
+        p95 = b->ba_data[i95];
+        if (p95 != INFINITY && p95 != NAN)
+            break;
+    }
+
+    if ((p95 == INFINITY) || (p95 == NAN)) {
+        printf("\tNo valid data present.\n");
+        return;
+    }
+
 	r95 = p95 - min + 1;
 
 	/* find a suitable min and scale */
@@ -1303,6 +1311,9 @@ print_histo(barrier_t *b)
 			if (histo[i].count > maxcount)
 				maxcount = histo[i].count;
 		}
+
+	(void) printf("#	%12s %12s %32s %12s\n", "counts", "usecs/call",
+	    "", "means");
 
 	/* print the buckets */
 	for (i = 0; i <= last; i++) {
