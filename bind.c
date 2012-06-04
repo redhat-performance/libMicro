@@ -74,9 +74,9 @@ benchmark_init()
 int
 benchmark_initrun()
 {
-	(void) setfdlimit(lm_optB * lm_optT + 10);
+	setfdlimit(lm_optB * lm_optT + 10);
 
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/

@@ -100,7 +100,7 @@ benchmark_optswitch(int opt, char *optarg)
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
 	int			i;
 	int			j;
@@ -109,35 +109,35 @@ benchmark_initrun()
 	if (optn % 2 != 0) {
 		(void) printf("ERROR: -n value must be even\n");
 		optn = optr = optw = 0;
-		return (-1);
+		return -1;
 	}
 
 	if (optn < 0 || optr < 0 || optw < 0) {
 		(void) printf("ERROR: -n, -r and -w values must be > 0\n");
 		optn = optr = optw = 0;
-		return (-1);
+		return -1;
 	}
 
 	if (optr > optn || optw > optn) {
 		(void) printf("ERROR: -r and -w values must be <= maxfd\n");
 		optn = optr = optw = 0;
-		return (-1);
+		return -1;
 	}
 
 	fds = (int *)malloc(optn * sizeof (int));
 	if (fds == NULL) {
 		(void) printf("ERROR: malloc() failed\n");
 		optn = optr = optw = 0;
-		return (-1);
+		return -1;
 	}
 
-	(void) setfdlimit(optn + 10);
+	setfdlimit(optn + 10);
 
 
 	for (i = 0; i < optn; i += 2) {
 		if (socketpair(PF_UNIX, SOCK_STREAM, 0, pair) == -1) {
 			(void) printf("ERROR: socketpair() failed\n");
-			return (-1);
+			return -1;
 		}
 
 		fds[i] = MIN(pair[0], pair[1]);
@@ -156,7 +156,7 @@ benchmark_initrun()
 		}
 	}
 
-	return (0);
+	return 0;
 }
 
 int

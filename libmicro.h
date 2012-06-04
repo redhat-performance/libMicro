@@ -189,7 +189,7 @@ int 		gettindex();
 void 		*gettsd(int p, int t);
 long long 	getusecs();
 long long 	getnsecs();
-int 		setfdlimit(int limit);
+void 		setfdlimit(int limit);
 long long 	sizetoll();
 int 		sizetoint();
 int		fit_line(double *, double *, int, double *, double *);

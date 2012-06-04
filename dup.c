@@ -82,10 +82,10 @@ benchmark_optswitch(int opt, char *optarg)
 int
 benchmark_initrun()
 {
-	(void) setfdlimit(lm_optB * lm_optT + 10);
+	setfdlimit(lm_optB * lm_optT + 10);
 	fd = (open(optf, O_RDONLY));
 
-	return (0);
+	return 0;
 }
 
 int

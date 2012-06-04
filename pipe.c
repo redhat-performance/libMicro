@@ -141,7 +141,7 @@ benchmark_optswitch(int opt, char *optarg)
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
 	if (optx == XP_FIFOS) {
 		if (geteuid() != 0) {
@@ -150,12 +150,12 @@ benchmark_initrun()
 		}
 	}
 
-	(void) setfdlimit(4 * lm_optT + 10);
+	setfdlimit(4 * lm_optT + 10);
 
 	rbuf = malloc(opts);
 	wbuf = malloc(opts);
 
-	return (0);
+	return 0;
 }
 
 int

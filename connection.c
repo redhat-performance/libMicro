@@ -99,11 +99,11 @@ benchmark_optswitch(int opt, char *optarg)
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
-	(void) setfdlimit(3 * lm_optB * lm_optT + 10);
+	setfdlimit(3 * lm_optB * lm_optT + 10);
 
-	return (0);
+	return 0;
 }
 
 int

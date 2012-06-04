@@ -93,12 +93,12 @@ benchmark_optswitch(int opt, char *optarg)
 
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
-	(void) setfdlimit(lm_optB * lm_optT + 10);
+	setfdlimit(lm_optB * lm_optT + 10);
 	family = lookup_family(optf);
 
-	return (0);
+	return 0;
 }
 
 int

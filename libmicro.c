@@ -1092,7 +1092,7 @@ getnsecs()
 
 #endif /* USE_GETHRTIME */
 
-int
+void
 setfdlimit(int limit)
 {
 	struct rlimit rlimit;
@@ -1103,7 +1103,7 @@ setfdlimit(int limit)
 	}
 
 	if (rlimit.rlim_cur > limit)
-		return (0); /* no worries */
+		return; /* no worries */
 
 	rlimit.rlim_cur = limit;
 
@@ -1115,7 +1115,7 @@ setfdlimit(int limit)
 		exit(3);
 	}
 
-	return (0);
+	return;
 }
 
 

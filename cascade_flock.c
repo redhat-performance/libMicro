@@ -107,7 +107,7 @@ benchmark_optswitch(int opt, char *optarg)
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
 	int			i;
 	int			errors = 0;
@@ -115,10 +115,10 @@ benchmark_initrun()
 
 	nthreads = lm_optP * lm_optT;
 	nfiles = nthreads * 2;
-	(void) setfdlimit(nfiles + 10);
+	setfdlimit(nfiles + 10);
 	files = (int *)malloc(nfiles * sizeof (int));
 	if (files == NULL) {
-		return (1);
+		return 1;
 	}
 
 	(void) sprintf(fname, "%s/cascade.%ld", optd, getpid());
@@ -133,7 +133,7 @@ benchmark_initrun()
 		}
 	}
 
-	return (errors);
+	return errors;
 }
 
 int
