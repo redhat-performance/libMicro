@@ -65,14 +65,14 @@ benchmark_init()
 	lm_defB = 256;
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "ac");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "ac");
 
-	(void) sprintf(lm_usage,
-	    "       [-a] (measure accept() only)\n"
-	    "       [-c] (measure connect() only)\n"
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+	    "\t[-a] (measure accept() only)\n"
+	    "\t[-c] (measure connect() only)\n"
 	    "notes: measures connect()/accept()\n");
 
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/
@@ -87,7 +87,7 @@ benchmark_optswitch(int opt, char *optarg)
 		optc = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
 
 	if (opta && optc) {
@@ -95,7 +95,7 @@ benchmark_optswitch(int opt, char *optarg)
 		optc = 0;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
@@ -103,33 +103,41 @@ benchmark_initrun(void)
 {
 	setfdlimit(3 * lm_optB * lm_optT + 10);
 
+	if ((host = gethostbyname("localhost")) == NULL) {
+        perror("gethostbyname");
+		exit(3);
+	}
+
 	return 0;
 }
 
 int
-benchmark_initbatch_once(void *tsd)
+benchmark_initbatch_once(tsd_t *ts)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
 	int			i, j;
 
 	int			errors = 0;
 
 	ts->ts_lsns = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_lsns == NULL) {
+        perror("malloc");
 		errors ++;
 	}
 	ts->ts_accs = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_accs == NULL) {
+        perror("malloc");
 		errors ++;
 	}
 	ts->ts_cons = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_cons == NULL) {
+        perror("malloc");
 		errors ++;
 	}
 	ts->ts_adds =
 	    (struct sockaddr_in *)malloc(lm_optB *
 	    sizeof (struct sockaddr_in));
-	if (ts->ts_accs == NULL) {
+	if (ts->ts_adds == NULL) {
+        perror("malloc");
 		errors ++;
 	}
 
@@ -148,11 +156,6 @@ benchmark_initbatch_once(void *tsd)
 
 		if (fcntl(ts->ts_lsns[i], F_SETFL, O_NDELAY) == -1) {
 			perror("fcntl");
-			errors ++;
-		}
-
-
-		if ((host = gethostbyname("localhost")) == NULL) {
 			errors ++;
 		}
 
@@ -180,7 +183,7 @@ benchmark_initbatch_once(void *tsd)
 			errors ++;
 		}
 	}
-	return (errors);
+	return errors;
 }
 
 int
@@ -193,7 +196,7 @@ benchmark_initbatch(void *tsd)
 
 	if (ts->ts_once++ == 0) {
 		if (errors += benchmark_initbatch_once(tsd) == -1) {
-			return (-1);
+			return -1;
 		}
 	}
 
@@ -221,14 +224,11 @@ benchmark_initbatch(void *tsd)
 		}
 	}
 
-	return (errors);
+	return errors;
 }
 
 int
 benchmark(void *tsd, result_t *res)
-
-
-
 {
 	tsd_t			*ts = (tsd_t *)tsd;
 	int			i;
@@ -284,7 +284,7 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 int
@@ -301,5 +301,5 @@ benchmark_finibatch(void *tsd)
 		(void) close(ts->ts_cons[i]);
 	}
 
-	return (0);
+	return 0;
 }
