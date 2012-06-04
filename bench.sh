@@ -72,7 +72,6 @@ then
 	# energy savings mode (Intel systems only?).
 	bin/pm_qos > /dev/null 2>&1 < /dev/null &
     PM_QOS_PID=$!
-    echo "PM_QOS_PID=$PM_QOS_PID"
 fi
 
 ARCH=`uname -m`
