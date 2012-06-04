@@ -74,6 +74,7 @@ int				lm_optB;
 int				lm_optC;
 int				lm_optD;
 int				lm_optE;
+int				lm_optG = 0;
 int				lm_optH;
 int				lm_optI;
 int				lm_optL = 0;
@@ -86,7 +87,7 @@ int				lm_optW;
 
 int				lm_def1 = 0;
 int				lm_defB = 0; /* use lm_nsecs_per_op */
-int             lm_defC = 100;
+int				lm_defC = 100;
 int				lm_defD = 10*1000;
 int				lm_defH = 0;
 char				*lm_defN = NULL;
@@ -111,7 +112,7 @@ size_t				lm_tsdsize = 0;
 
 
 /*
- *  Globals we do not export to the user
+ *	Globals we do not export to the user
  */
 
 static barrier_t		*lm_barrier;
@@ -130,16 +131,16 @@ static long long		lm_hz = 0;
  * Forward references
  */
 
-static void 		worker_process();
-static void 		usage();
-static void 		print_stats(barrier_t *);
-static void 		print_histo(barrier_t *);
-static int 		remove_outliers(double *, int, stats_t *);
+static void			worker_process();
+static void			usage();
+static void			print_stats(barrier_t *);
+static void			print_histo(barrier_t *);
+static int		remove_outliers(double *, int, stats_t *);
 static long long	nsecs_overhead;
 static long long	nsecs_resolution;
 static long long	get_nsecs_overhead();
 static int		crunch_stats(double *, int, stats_t *);
-static void 		compute_stats(barrier_t *);
+static void			compute_stats(barrier_t *);
 /*
  * main routine; renamed in this file to allow linking with other
  * files
@@ -172,6 +173,13 @@ actual_main(int argc, char *argv[])
 	/* before we do anything */
 	(void) benchmark_init();
 
+	/* check that the case defines lm_tsdsize before proceeding */
+	if (lm_tsdsize == (size_t)-1) {
+		(void) fprintf(stderr, "error in benchmark_init: "
+			"lm_tsdsize not set\n");
+		exit(1);
+	}
+
 	nsecs_overhead = get_nsecs_overhead();
 	nsecs_resolution = get_nsecs_resolution();
 
@@ -181,7 +189,7 @@ actual_main(int argc, char *argv[])
 
 	lm_opt1	= lm_def1;
 	lm_optB	= lm_defB;
-    lm_optC = lm_defC;
+	lm_optC = lm_defC;
 	lm_optD	= lm_defD;
 	lm_optH	= lm_defH;
 	lm_optN	= lm_defN;
@@ -225,7 +233,7 @@ actual_main(int argc, char *argv[])
 	 * Parse command line arguments
 	 */
 
-	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EHI:LMN:P:RST:VW?%s", lm_optstr);
+	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:RST:VW?%s", lm_optstr);
 	while ((opt = getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case '1':
@@ -239,30 +247,33 @@ actual_main(int argc, char *argv[])
 			break;
 		case 'C':
 			lm_optC = sizetoint(optarg);
-            if (lm_optC > 0) {
-                lm_optD = 0;
-            }
-            else {
-                if (lm_optD <= 0) {
-                    (void) printf("warning: -C <= 0 and -D <= 0, defaulting -D to %d\n", lm_defD);
-                    lm_optD = lm_defD;
-                }
-            }
+			if (lm_optC > 0) {
+				lm_optD = 0;
+			}
+			else {
+				if (lm_optD <= 0) {
+					(void) printf("warning: -C <= 0 and -D <= 0, defaulting -D to %d\n", lm_defD);
+					lm_optD = lm_defD;
+				}
+			}
 			break;
 		case 'D':
 			lm_optD = sizetoint(optarg);
-            if (lm_optD > 0) {
-                lm_optC = 0;
-            }
-            else {
-                if (lm_optC <= 0) {
-                    (void) printf("warning: -D <= 0 and -C <= 0, defaulting -C to %d\n", lm_defC);
-                    lm_optC = lm_defC;
-                }
-            }
+			if (lm_optD > 0) {
+				lm_optC = 0;
+			}
+			else {
+				if (lm_optC <= 0) {
+					(void) printf("warning: -D <= 0 and -C <= 0, defaulting -C to %d\n", lm_defC);
+					lm_optC = lm_defC;
+				}
+			}
 			break;
 		case 'E':
 			lm_optE = 1;
+			break;
+		case 'G':
+			lm_optG = atoi(optarg);
 			break;
 		case 'H':
 			lm_optH = 1;
@@ -336,9 +347,11 @@ actual_main(int argc, char *argv[])
 	 * now that the options are set
 	 */
 
+	if (lm_optG > 9) fprintf(stderr, "actual_main() calling benchmark_initrun()\n");
 	if (benchmark_initrun() == -1) {
 		exit(1);
 	}
+	if (lm_optG > 9) fprintf(stderr, "actual_main() benchmark_initrun() returned\n");
 
 	/* allocate dynamic data */
 	pids = (pid_t *)malloc(lm_optP * sizeof (pid_t));
@@ -353,19 +366,12 @@ actual_main(int argc, char *argv[])
 
 	}
 
-	/* check that the case defines lm_tsdsize before proceeding */
-	if (lm_tsdsize == (size_t)-1) {
-		(void) fprintf(stderr, "error in benchmark_init: "
-		    "lm_tsdsize not set\n");
-		exit(1);
-	}
-
 	/* round up tsdsize to nearest 128 to eliminate false sharing */
 	tsdsize = ((lm_tsdsize + 127) / 128) * 128;
 
 	/* allocate sufficient TSD for each thread in each process */
 	tsdseg = (void *)mmap(NULL, lm_optT * lm_optP * tsdsize + 8192,
-	    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
+		PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (tsdseg == NULL) {
 		perror("mmap(tsd)");
 		exit(1);
@@ -418,10 +424,10 @@ actual_main(int argc, char *argv[])
 		for (i = 0; i < lm_optP; i++) {
 			if (pids[i] > 0) {
 				int ret = waitpid(pids[i], NULL, 0);
-                if (ret < 0) {
-                    perror("waitpid()");
-                    exit(1);
-                }
+				if (ret < 0) {
+					perror("waitpid()");
+					exit(1);
+				}
 			}
 		}
 	}
@@ -435,18 +441,18 @@ actual_main(int argc, char *argv[])
 	/* print result header (unless suppressed) */
 	if (!lm_optH) {
 		(void) printf("%12s %3s %3s %12s %12s %8s %8s %s\n",
-		    "", "prc", "thr",
-		    "usecs/call",
-		    "samples", "errors", "cnt/samp", lm_header);
+			"", "prc", "thr",
+			"usecs/call",
+			"samples", "errors", "cnt/samp", lm_header);
 	}
 
 	/* print result */
 
 	(void) printf("%-12s %3d %3d %12.5f %12d %8lld %8d %s\n",
-	    lm_optN, lm_optP, lm_optT,
-	    (lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
-	    b->ba_batches, b->ba_errors, lm_optB,
-	    benchmark_result());
+		lm_optN, lm_optP, lm_optT,
+		(lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
+		b->ba_batches, b->ba_errors, lm_optB,
+		benchmark_result());
 
 	/* print arguments benchmark was invoked with ? */
 	if (lm_optL) {
@@ -467,14 +473,18 @@ actual_main(int argc, char *argv[])
 	(void) fflush(stderr);
 
 	/* cleanup by stages */
+	if (lm_optG > 9) fprintf(stderr, "actual_main(): calling benchmark_finirun()\n");
 	(void) benchmark_finirun();
+	if (lm_optG > 9) fprintf(stderr, "actual_main(): benchmark_finirun() returned\n");
 	(void) barrier_destroy(b);
+	if (lm_optG > 9) fprintf(stderr, "actual_main(): calling benchmark_fini()\n");
 	(void) benchmark_fini();
+	if (lm_optG > 9) fprintf(stderr, "actual_main(): benchmark_fini() returned\n");
 
 	if (lm_optE) {
 		(void) fprintf(stderr, " for %12.5f seconds\n",
-		    (double)(getnsecs() - startnsecs) /
-		    1.e9);
+			(double)(getnsecs() - startnsecs) /
+			1.e9);
 		(void) fflush(stderr);
 	}
 	return (0);
@@ -484,14 +494,18 @@ void *
 worker_thread(void *arg)
 {
 	result_t		r;
-	long long 		last_sleep = 0;
+	long long		last_sleep = 0;
 	long long		t;
 
+	if (lm_optG > 9) fprintf(stderr, "worker_thread(): calling benchmark_initworker()\n");
 	r.re_errors = benchmark_initworker(arg);
+	if (lm_optG > 9) fprintf(stderr, "worker_thread(): benchmark_initworker() returned\n");
 
 	while (lm_barrier->ba_flag) {
 		r.re_count = 0;
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): calling benchmark_initbatch()\n");
 		r.re_errors += benchmark_initbatch(arg);
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): benchmark_initbatch() returned\n");
 
 		/* sync to clock */
 
@@ -503,30 +517,36 @@ worker_thread(void *arg)
 		(void) barrier_queue(lm_barrier, NULL);
 
 		/* time the test */
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): calling benchmark()\n");
 		r.re_t0 = getnsecs();
 		(void) benchmark(arg, &r);
 		r.re_t1 = getnsecs();
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): benchmark() returned\n");
 
 		/* record results and sync */
 		(void) barrier_queue(lm_barrier, &r);
 
 		/* time to stop? */
 		if (lm_optC <= 0) {
-            if (r.re_t1 > lm_barrier->ba_deadline) {
-                lm_barrier->ba_flag = 0;
-            }
-        }
-        else {
-            if (lm_barrier->ba_batches >= lm_optC) {
-                lm_barrier->ba_flag = 0;
-            }
-        }
+			if (r.re_t1 > lm_barrier->ba_deadline) {
+				lm_barrier->ba_flag = 0;
+			}
+		}
+		else {
+			if (lm_barrier->ba_batches >= lm_optC) {
+				lm_barrier->ba_flag = 0;
+			}
+		}
 
-        /* errors from finishing this batch feed into the next batch */
+		/* errors from finishing this batch feed into the next batch */
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): calling benchmark_finibatch()\n");
 		r.re_errors = benchmark_finibatch(arg);
+		if (lm_optG > 9) fprintf(stderr, "worker_thread(): benchmark_finibatch() returned\n");
 	}
 
+	if (lm_optG > 9) fprintf(stderr, "worker_thread(): calling benchmark_finiworker()\n");
 	(void) benchmark_finiworker(arg);
+	if (lm_optG > 9) fprintf(stderr, "worker_thread(): benchmark_finiworker() returned\n");
 
 	return 0;
 }
@@ -539,7 +559,7 @@ worker_process(void)
 
 	for (i = 1; i < lm_optT; i++) {
 		tsd = gettsd(pindex, i);
-        ret = pthread_create(&tids[i], NULL, worker_thread, tsd);
+		ret = pthread_create(&tids[i], NULL, worker_thread, tsd);
 		if (ret != 0) {
 			fprintf(stderr, "worker_process(): pthread_create(%p, NULL, %p, %p) failed: (%d) %s\n", &tids[i], worker_thread, tsd, ret, strerror(ret));
 			exit(1);
@@ -562,27 +582,27 @@ void
 usage(void)
 {
 	(void) printf(
-	    "usage: %s\n"
-	    "       [-1] (single process; overrides -P > 1)\n"
-	    "       [-A] (align with clock)\n"
-	    "       [-B batch-size (default %d)]\n"
-	    "       [-C minimum number of samples (default 0)] (mutually exclusive with -D)\n"
-	    "       [-D duration in ms (default %dms)] (mutually exlusive with -C)\n"
-	    "       [-E (echo name to stderr)]\n"
-	    "       [-H] (suppress headers)\n"
-	    "       [-I] nsecs per op (used to compute batch size)"
-	    "       [-L] (print argument line)\n"
-	    "       [-M] (reports mean rather than median)\n"
-	    "       [-N test-name (default '%s')]\n"
-	    "       [-P processes (default %d)]\n"
-	    "       [-S] (print detailed stats)\n"
-	    "       [-T threads (default %d)]\n"
-	    "       [-V] (print the libMicro version and exit)\n"
-	    "       [-W] (flag possible benchmark problems)\n"
-	    "%s\n",
-	    lm_procname,
-	    lm_defB, lm_defD, lm_procname, lm_defP, lm_defT,
-	    lm_usage);
+		"usage: %s\n"
+		"\t[-1] (single process; overrides -P > 1)\n"
+		"\t[-A] (align with clock)\n"
+		"\t[-B batch-size (default %d)]\n"
+		"\t[-C minimum number of samples (default 0)] (mutually exclusive with -D)\n"
+		"\t[-D duration in ms (default %dms)] (mutually exlusive with -C)\n"
+		"\t[-E (echo name to stderr)]\n"
+		"\t[-H] (suppress headers)\n"
+		"\t[-I] nsecs per op (used to compute batch size)"
+		"\t[-L] (print argument line)\n"
+		"\t[-M] (reports mean rather than median)\n"
+		"\t[-N test-name (default '%s')]\n"
+		"\t[-P processes (default %d)]\n"
+		"\t[-S] (print detailed stats)\n"
+		"\t[-T threads (default %d)]\n"
+		"\t[-V] (print the libMicro version and exit)\n"
+		"\t[-W] (flag possible benchmark problems)\n"
+		"%s\n",
+		lm_procname,
+		lm_defB, lm_defD, lm_procname, lm_defP, lm_defT,
+		lm_usage);
 }
 
 void
@@ -595,17 +615,17 @@ print_warnings(barrier_t *b)
 		if (!head++) {
 			(void) printf("#\n# WARNINGS\n");
 		}
-        assert(nsecs_resolution > 0);
-        assert(lm_optB > 0);
-        float median = b->ba_corrected.st_median;
-        if (median <= 0.0) median = 1.0;
+		assert(nsecs_resolution > 0);
+		assert(lm_optB > 0);
+		float median = b->ba_corrected.st_median;
+		if (median <= 0.0) median = 1.0;
 		increase = (long long)(floor((nsecs_resolution * 100.0) /
-		    ((double)lm_optB * median * 1000.0)) +
-		    1.0);
+			((double)lm_optB * median * 1000.0)) +
+			1.0);
 		(void) printf("#     Quantization error likely; "
-                "increase batch size (-B option, "
-                "currently %d) %lldX to avoid.\n",
-                lm_optB, increase);
+				"increase batch size (-B option, "
+				"currently %d) %lldX to avoid.\n",
+				lm_optB, increase);
 	}
 
 	/*
@@ -625,8 +645,8 @@ print_stats(barrier_t *b)
 {
 	(void) printf("#\n");
 	(void) printf("# STATISTICS         %12s          %12s\n",
-	    "usecs/call (raw)",
-	    "usecs/call (outliers removed)");
+		"usecs/call (raw)",
+		"usecs/call (outliers removed)");
 
 	if (b->ba_count == 0) {
 		(void) printf("zero samples\n");
@@ -634,41 +654,41 @@ print_stats(barrier_t *b)
 	}
 
 	(void) printf("#                    min %12.5f            %12.5f\n",
-	    b->ba_raw.st_min,
-	    b->ba_corrected.st_min);
+		b->ba_raw.st_min,
+		b->ba_corrected.st_min);
 
 	(void) printf("#                    max %12.5f            %12.5f\n",
-	    b->ba_raw.st_max,
-	    b->ba_corrected.st_max);
+		b->ba_raw.st_max,
+		b->ba_corrected.st_max);
 	(void) printf("#                   mean %12.5f            %12.5f\n",
-	    b->ba_raw.st_mean,
-	    b->ba_corrected.st_mean);
+		b->ba_raw.st_mean,
+		b->ba_corrected.st_mean);
 	(void) printf("#                 median %12.5f            %12.5f\n",
-	    b->ba_raw.st_median,
-	    b->ba_corrected.st_median);
+		b->ba_raw.st_median,
+		b->ba_corrected.st_median);
 	(void) printf("#                 stddev %12.5f            %12.5f\n",
-	    b->ba_raw.st_stddev,
-	    b->ba_corrected.st_stddev);
+		b->ba_raw.st_stddev,
+		b->ba_corrected.st_stddev);
 	(void) printf("#         standard error %12.5f            %12.5f\n",
-	    b->ba_raw.st_stderr,
-	    b->ba_corrected.st_stderr);
+		b->ba_raw.st_stderr,
+		b->ba_corrected.st_stderr);
 	(void) printf("#   99%% confidence level %12.5f            %12.5f\n",
-	    b->ba_raw.st_99confidence,
-	    b->ba_corrected.st_99confidence);
+		b->ba_raw.st_99confidence,
+		b->ba_corrected.st_99confidence);
 	(void) printf("#                   skew %12.5f            %12.5f\n",
-	    b->ba_raw.st_skew,
-	    b->ba_corrected.st_skew);
+		b->ba_raw.st_skew,
+		b->ba_corrected.st_skew);
 	(void) printf("#               kurtosis %12.5f            %12.5f\n",
-	    b->ba_raw.st_kurtosis,
-	    b->ba_corrected.st_kurtosis);
+		b->ba_raw.st_kurtosis,
+		b->ba_corrected.st_kurtosis);
 
 	(void) printf("#       time correlation %12.5f            %12.5f\n",
-	    b->ba_raw.st_timecorr,
-	    b->ba_corrected.st_timecorr);
+		b->ba_raw.st_timecorr,
+		b->ba_corrected.st_timecorr);
 	(void) printf("#\n");
 
 	(void) printf("#           elasped time %12.5f\n", (b->ba_endtime -
-	    b->ba_starttime) / 1.0e9);
+		b->ba_starttime) / 1.0e9);
 	(void) printf("#      number of samples %12d\n",   b->ba_batches);
 	(void) printf("#     number of outliers %12d\n", b->ba_outliers);
 	(void) printf("#      getnsecs overhead %12d\n", (int)nsecs_overhead);
@@ -713,7 +733,7 @@ update_stats(barrier_t *b, result_t *r)
 
 
 		time = (double)b->ba_t1 - (double)b->ba_t0 -
-		    (double)nsecs_overhead;
+			(double)nsecs_overhead;
 
 		if (time < 100 * nsecs_resolution)
 			b->ba_quant++;
@@ -723,13 +743,13 @@ update_stats(barrier_t *b, result_t *r)
 		 */
 
 		nsecs_per_call = time / (double)b->ba_count0 *
-		    (double)(lm_optT * lm_optP);
+			(double)(lm_optT * lm_optP);
 
-		b->ba_count  += b->ba_count0;
+		b->ba_count	 += b->ba_count0;
 		b->ba_errors += b->ba_errors0;
 
 		b->ba_data[b->ba_batches % b->ba_datasize] =
-		    nsecs_per_call;
+			nsecs_per_call;
 
 		b->ba_batches++;
 	}
@@ -744,16 +764,16 @@ barrier_create(int hwm, int datasize)
 
 	/*LINTED*/
 	b = (barrier_t *)mmap(NULL,
-	    sizeof (barrier_t) + (datasize - 1) * sizeof (double),
-	    PROT_READ | PROT_WRITE,
-	    MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
+		sizeof (barrier_t) + (datasize - 1) * sizeof (double),
+		PROT_READ | PROT_WRITE,
+		MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (b == (barrier_t *)MAP_FAILED) {
 		return (NULL);
 	}
 	b->ba_datasize = datasize;
 
-	b->ba_flag  = 0;
-	b->ba_hwm   = hwm;
+	b->ba_flag	= 0;
+	b->ba_hwm	= hwm;
 	b->ba_semid = semget(IPC_PRIVATE, 3, 0600);
 	if (b->ba_semid == -1) {
 		(void) munmap((void *)b, sizeof (barrier_t));
@@ -762,7 +782,7 @@ barrier_create(int hwm, int datasize)
 
 	/* [hwm - 1, 0, 0] */
 	s[0].sem_num = 0;
-	s[0].sem_op  = hwm - 1;
+	s[0].sem_op	 = hwm - 1;
 	s[0].sem_flg = 0;
 	if (semop(b->ba_semid, s, 1) == -1) {
 		perror("semop(1)");
@@ -797,18 +817,18 @@ barrier_queue(barrier_t *b, result_t *r)
 	/*
 	 * {s0(-(hwm-1))}
 	 * if ! nowait {s1(-(hwm-1))}
-	 *   (all other threads)
-	 *   update shared stats
-	 *   {s0(hwm-1), s1(1)}
-	 *   {s0(1), s2(-1)}
+	 *	 (all other threads)
+	 *	 update shared stats
+	 *	 {s0(hwm-1), s1(1)}
+	 *	 {s0(1), s2(-1)}
 	 * else
-	 *   (last thread)
-	 *   update shared stats
-	 *   {s2(hwm-1)}
+	 *	 (last thread)
+	 *	 update shared stats
+	 *	 {s2(hwm-1)}
 	 */
 
 	s[0].sem_num = 0;
-	s[0].sem_op  = -(b->ba_hwm - 1);
+	s[0].sem_op	 = -(b->ba_hwm - 1);
 	s[0].sem_flg = 0;
 	if (semop(b->ba_semid, s, 1) == -1) {
 		perror("semop(2)");
@@ -816,7 +836,7 @@ barrier_queue(barrier_t *b, result_t *r)
 	}
 
 	s[0].sem_num = 1;
-	s[0].sem_op  = -(b->ba_hwm - 1);
+	s[0].sem_op	 = -(b->ba_hwm - 1);
 	s[0].sem_flg = IPC_NOWAIT;
 	if (semop(b->ba_semid, s, 1) == -1) {
 		if (errno != EAGAIN) {
@@ -833,10 +853,10 @@ barrier_queue(barrier_t *b, result_t *r)
 		b->ba_waiters++;
 
 		s[0].sem_num = 0;
-		s[0].sem_op  = b->ba_hwm - 1;
+		s[0].sem_op	 = b->ba_hwm - 1;
 		s[0].sem_flg = 0;
 		s[1].sem_num = 1;
-		s[1].sem_op  = 1;
+		s[1].sem_op	 = 1;
 		s[1].sem_flg = 0;
 		if (semop(b->ba_semid, s, 2) == -1) {
 			perror("semop(4)");
@@ -844,10 +864,10 @@ barrier_queue(barrier_t *b, result_t *r)
 		}
 
 		s[0].sem_num = 0;
-		s[0].sem_op  = 1;
+		s[0].sem_op	 = 1;
 		s[0].sem_flg = 0;
 		s[1].sem_num = 2;
-		s[1].sem_op  = -1;
+		s[1].sem_op	 = -1;
 		s[1].sem_flg = 0;
 		if (semop(b->ba_semid, s, 2) == -1) {
 			perror("semop(5)");
@@ -865,7 +885,7 @@ barrier_queue(barrier_t *b, result_t *r)
 		b->ba_phase++;
 
 		s[0].sem_num = 2;
-		s[0].sem_op  = b->ba_hwm - 1;
+		s[0].sem_op	 = b->ba_hwm - 1;
 		s[0].sem_flg = 0;
 		if (semop(b->ba_semid, s, 1) == -1) {
 			perror("semop(6)");
@@ -887,49 +907,49 @@ barrier_create(int hwm, int datasize)
 
 	/*LINTED*/
 	b = (barrier_t *)mmap(NULL,
-	    sizeof (barrier_t) + (datasize - 1) * sizeof (double),
-	    PROT_READ | PROT_WRITE,
-	    MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
+		sizeof (barrier_t) + (datasize - 1) * sizeof (double),
+		PROT_READ | PROT_WRITE,
+		MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (b == (barrier_t *)MAP_FAILED) {
 		return (NULL);
 	}
 	b->ba_datasize = datasize;
 
 	b->ba_hwm = hwm;
-	b->ba_flag  = 0;
+	b->ba_flag	= 0;
 
 	int ret = pthread_mutexattr_init(&mattr);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_mutexattr_init(%p) failed: (%d) %s\n", &mattr, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutexattr_init(%p) failed: (%d) %s\n", &mattr, ret, strerror(ret));
+		exit(1);
+	}
 	(void) pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_mutexattr_setpshared(%p, %d) failed: (%d) %s\n", &mattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutexattr_setpshared(%p, %d) failed: (%d) %s\n", &mattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+		exit(1);
+	}
 
 	(void) pthread_condattr_init(&cattr);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_condattr_init(%p) failed: (%d) %s\n", &cattr, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_condattr_init(%p) failed: (%d) %s\n", &cattr, ret, strerror(ret));
+		exit(1);
+	}
 	(void) pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_condattr_setpshared(%p, %d) failed: (%d) %s\n", &cattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_condattr_setpshared(%p, %d) failed: (%d) %s\n", &cattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+		exit(1);
+	}
 
 	(void) pthread_mutex_init(&b->ba_lock, &mattr);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_mutex_init(%p, %p) failed: (%d) %s\n", &b->ba_lock, &mattr, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutex_init(%p, %p) failed: (%d) %s\n", &b->ba_lock, &mattr, ret, strerror(ret));
+		exit(1);
+	}
 	(void) pthread_cond_init(&b->ba_cv, &cattr);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_create(): pthread_cond_init(%p, %p) failed: (%d) %s\n", &b->ba_cv, &cattr, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_cond_init(%p, %p) failed: (%d) %s\n", &b->ba_cv, &cattr, ret, strerror(ret));
+		exit(1);
+	}
 
 	b->ba_waiters = 0;
 	b->ba_phase = 0;
@@ -944,10 +964,10 @@ int
 barrier_destroy(barrier_t *b)
 {
 	int ret = munmap((void *)b, sizeof (barrier_t));
-    if (ret != 0) {
-        perror("barrier_destroy(): munmap");
-        exit(1);
-    }
+	if (ret != 0) {
+		perror("barrier_destroy(): munmap");
+		exit(1);
+	}
 
 	return 0;
 }
@@ -958,10 +978,10 @@ barrier_queue(barrier_t *b, result_t *r)
 	int			phase;
 
 	int ret = pthread_mutex_lock(&b->ba_lock);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_queue(): pthread_mutex_lock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_queue(): pthread_mutex_lock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
+		exit(1);
+	}
 
 	if (r != NULL) {
 		update_stats(b, r);
@@ -974,25 +994,25 @@ barrier_queue(barrier_t *b, result_t *r)
 		b->ba_waiters = 0;
 		b->ba_phase++;
 		ret = pthread_cond_broadcast(&b->ba_cv);
-        if (ret != 0) {
-            fprintf(stderr, "barrier_queue(): pthread_cond_broadcast(%p) failed: (%d) %s\n", &b->ba_cv, ret, strerror(ret));
-            exit(1);
-        }
+		if (ret != 0) {
+			fprintf(stderr, "barrier_queue(): pthread_cond_broadcast(%p) failed: (%d) %s\n", &b->ba_cv, ret, strerror(ret));
+			exit(1);
+		}
 	}
 
 	while (b->ba_phase == phase) {
 		ret = pthread_cond_wait(&b->ba_cv, &b->ba_lock);
-        if (ret != 0) {
-            fprintf(stderr, "barrier_queue(): pthread_cond_wait(%p, %p) failed: (%d) %s\n", &b->ba_cv, &b->ba_lock, ret, strerror(ret));
-            exit(1);
-        }
+		if (ret != 0) {
+			fprintf(stderr, "barrier_queue(): pthread_cond_wait(%p, %p) failed: (%d) %s\n", &b->ba_cv, &b->ba_lock, ret, strerror(ret));
+			exit(1);
+		}
 	}
 
 	ret = pthread_mutex_unlock(&b->ba_lock);
-    if (ret != 0) {
-        fprintf(stderr, "barrier_queue(): pthread_mutex_unlock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
-        exit(1);
-    }
+	if (ret != 0) {
+		fprintf(stderr, "barrier_queue(): pthread_mutex_unlock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
+		exit(1);
+	}
 
 	return 0;
 }
@@ -1029,7 +1049,7 @@ gettsd(int p, int t)
 		return (NULL);
 
 	return ((void *)((unsigned long)tsdseg +
-	    (((p * lm_optT) + t) * tsdsize)));
+		(((p * lm_optT) + t) * tsdsize)));
 }
 
 #ifdef USE_GETHRTIME
@@ -1087,7 +1107,7 @@ getnsecs()
 	(void) gettimeofday(&tv, NULL);
 
 	return ((long long)tv.tv_sec * 1000000000LL +
-	    (long long) tv.tv_usec * 1000LL);
+		(long long) tv.tv_usec * 1000LL);
 }
 
 #endif /* USE_GETHRTIME */
@@ -1243,17 +1263,17 @@ print_histo(barrier_t *b)
 	qsort((void *)b->ba_data, n, sizeof (double), doublecmp);
 	min = b->ba_data[0] + 0.000001;
 
-    /* Skip over any infinity or NaN results */
+	/* Skip over any infinity or NaN results */
 	for (i95 = ((n * 95) / 100); (i95 > 0); i95--) {
-        p95 = b->ba_data[i95];
-        if (p95 != INFINITY && p95 != NAN)
-            break;
-    }
+		p95 = b->ba_data[i95];
+		if (p95 != INFINITY && p95 != NAN)
+			break;
+	}
 
-    if ((p95 == INFINITY) || (p95 == NAN)) {
-        printf("\tNo valid data present.\n");
-        return;
-    }
+	if ((p95 == INFINITY) || (p95 == NAN)) {
+		printf("\tNo valid data present.\n");
+		return;
+	}
 
 	r95 = p95 - min + 1;
 
@@ -1312,19 +1332,19 @@ print_histo(barrier_t *b)
 				maxcount = histo[i].count;
 		}
 
-	(void) printf("#	%12s %12s %32s %12s\n", "counts", "usecs/call",
-	    "", "means");
+	(void) printf("#    %12s %12s %32s %12s\n", "counts", "usecs/call",
+		"", "means");
 
 	/* print the buckets */
 	for (i = 0; i <= last; i++) {
 		(void) printf("#       %12lld %12.5f |", histo[i].count,
-		    (min + scale * (double)i / (HISTOSIZE - 1)));
+			(min + scale * (double)i / (HISTOSIZE - 1)));
 
 		print_bar(histo[i].count, maxcount);
 
 		if (histo[i].count > 0)
 			(void) printf("%12.5f\n",
-			    histo[i].sum / histo[i].count);
+				histo[i].sum / histo[i].count);
 		else
 			(void) printf("%12s\n", "-");
 	}
@@ -1352,7 +1372,7 @@ print_histo(barrier_t *b)
 	/* quantify any buffer overflow */
 	if (b->ba_batches > b->ba_datasize)
 		(void) printf("#       %12s %12d\n", "data dropped",
-		    b->ba_batches - b->ba_datasize);
+			b->ba_batches - b->ba_datasize);
 }
 
 static void
@@ -1388,11 +1408,11 @@ compute_stats(barrier_t *b)
 
 		do {
 			removed = remove_outliers(b->ba_data, b->ba_batches,
-			    &b->ba_corrected);
+				&b->ba_corrected);
 			b->ba_outliers += removed;
 			b->ba_batches -= removed;
 			(void) crunch_stats(b->ba_data, b->ba_batches,
-			    &b->ba_corrected);
+				&b->ba_corrected);
 			} while (removed != 0 && b->ba_batches > 40);
 	}
 
@@ -1450,8 +1470,8 @@ crunch_stats(double *data, int count, stats_t *stats)
 	free(dupdata);
 
 	std = 0.0;
-	sk  = 0.0;
-	ku  = 0.0;
+	sk	= 0.0;
+	ku	= 0.0;
 
 	stats->st_max = -1;
 	stats->st_min = 1.0e99; /* hard to find portable values */
@@ -1463,9 +1483,9 @@ crunch_stats(double *data, int count, stats_t *stats)
 			stats->st_min = data[i];
 
 		diff = data[i] - mean;
-		std += diff * diff;
-		sk  += diff * diff * diff;
-		ku  += diff * diff * diff * diff;
+		std	+= diff * diff;
+		sk	+= diff * diff * diff;
+		ku	+= diff * diff * diff * diff;
 	}
 
 	stats->st_stddev   = std = sqrt(std/(double)(count - 1));
@@ -1473,14 +1493,14 @@ crunch_stats(double *data, int count, stats_t *stats)
 	stats->st_99confidence = stats->st_stderr * 2.326;
 	stats->st_skew	   = sk / (std * std * std) / (double)(count);
 	stats->st_kurtosis = ku / (std * std * std * std) /
-	    (double)(count) - 3;
+		(double)(count) - 3;
 
 	return (0);
 }
 
 /*
  * does a least squares fit to the set of points x, y and
- * fits a line y = a + bx.  Returns a, b
+ * fits a line y = a + bx. Returns a, b
  */
 
 int
@@ -1560,19 +1580,19 @@ get_nsecs_overhead()
 }
 
 /*
- * Determine the resolution of the system's high resolution counter.
- * Most hardware has a nanosecond resolution counter, but some systems still
- * use course resolution (e.g. derived instead by a periodic interrupt).
+ * Determine the resolution of the system's high resolution counter. Most
+ * hardware has a nanosecond resolution counter, but some systems still use
+ * course resolution (e.g. derived instead by a periodic interrupt).
  *
  * Algorithm:
  * Determine a busy loop that is long enough for successive nanosecond counter
- * reads to report different times.  Then take 1000 samples with busy loop
- * interval successively increases by i.  The counter resolution is assumed
- * to be the smallest non-zero time delta between these 1000 samples.
+ * reads to report different times. Then take 1000 samples with busy loop
+ * interval successively increases by i. The counter resolution is assumed to
+ * be the smallest non-zero time delta between these 1000 samples.
  *
  * One last wrinkle is all 1000 samples may have the same delta on a system
- * with a very fast and consistent hardware counter based getnsecs().
- * In that case assume the resolution is 1ns.
+ * with a very fast and consistent hardware counter based getnsecs(). In that
+ * case assume the resolution is 1ns.
  */
 long long
 get_nsecs_resolution()
