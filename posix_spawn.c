@@ -138,7 +138,7 @@ benchmark_initbatch(void *tsd)
 		int i;
 		char *addr = NULL;
 		for (i = 0; i < optn; i++) {
-			char *val = (char *)mmap(addr, size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0L);
+			char *val = (char *)mmap(addr, size, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0L);
 			if (val == MAP_FAILED) {
 				fprintf(stderr, "errno = %d, %s\n", errno, strerror(errno));
 				return 1;

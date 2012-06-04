@@ -114,7 +114,7 @@ benchmark_initrun()
 	lock = (pthread_mutex_t *)mmap(NULL,
 	    getpagesize(),
 	    PROT_READ | PROT_WRITE,
-	    optp?(MAP_ANON | MAP_SHARED):MAP_ANON|MAP_PRIVATE,
+            optp?(MAP_ANONYMOUS | MAP_SHARED):(MAP_ANONYMOUS|MAP_PRIVATE),
 	    -1, 0L) + opto;
 
 	if (lock == MAP_FAILED) {

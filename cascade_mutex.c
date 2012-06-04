@@ -112,7 +112,7 @@ benchmark_initrun()
 	locks = (pthread_mutex_t *)mmap(NULL,
 	    nlocks * sizeof (pthread_mutex_t),
 	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_SHARED,
+	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (locks == MAP_FAILED) {
 		return (1);

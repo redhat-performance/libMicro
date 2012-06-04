@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <string.h>
 #include <strings.h>
 
 #include "libmicro.h"
@@ -140,7 +141,7 @@ benchmark_initbatch(void *tsd)
 		if (anon) {
 			ts->ts_map[i] = (vchar_t *)mmap(NULL, optl,
 			    PROT_READ | PROT_WRITE,
-			    MAP_ANON | (opts ? MAP_SHARED : MAP_PRIVATE),
+			    MAP_ANONYMOUS | (opts ? MAP_SHARED : MAP_PRIVATE),
 			    -1, 0L);
 		} else {
 			ts->ts_map[i] = (vchar_t *)mmap(NULL, optl,

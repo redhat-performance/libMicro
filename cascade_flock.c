@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/file.h>
 #include <fcntl.h>
 
 #include "libmicro.h"

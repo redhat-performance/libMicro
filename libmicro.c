@@ -365,7 +365,7 @@ actual_main(int argc, char *argv[])
 
 	/* allocate sufficient TSD for each thread in each process */
 	tsdseg = (void *)mmap(NULL, lm_optT * lm_optP * tsdsize + 8192,
-	    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0L);
+	    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (tsdseg == NULL) {
 		perror("mmap(tsd)");
 		exit(1);
@@ -746,7 +746,7 @@ barrier_create(int hwm, int datasize)
 	b = (barrier_t *)mmap(NULL,
 	    sizeof (barrier_t) + (datasize - 1) * sizeof (double),
 	    PROT_READ | PROT_WRITE,
-	    MAP_SHARED | MAP_ANON, -1, 0L);
+	    MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (b == (barrier_t *)MAP_FAILED) {
 		return (NULL);
 	}
@@ -889,7 +889,7 @@ barrier_create(int hwm, int datasize)
 	b = (barrier_t *)mmap(NULL,
 	    sizeof (barrier_t) + (datasize - 1) * sizeof (double),
 	    PROT_READ | PROT_WRITE,
-	    MAP_SHARED | MAP_ANON, -1, 0L);
+	    MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (b == (barrier_t *)MAP_FAILED) {
 		return (NULL);
 	}

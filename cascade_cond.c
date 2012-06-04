@@ -120,7 +120,7 @@ benchmark_initrun()
 	mxs = (pthread_mutex_t *)mmap(NULL,
 	    nlocks * sizeof (pthread_mutex_t),
 	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_SHARED,
+	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (mxs == MAP_FAILED) {
 		return (1);
@@ -130,7 +130,7 @@ benchmark_initrun()
 	cvs = (pthread_cond_t *)mmap(NULL,
 	    nlocks * sizeof (pthread_cond_t),
 	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_SHARED,
+	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (cvs == MAP_FAILED) {
 		return (1);
@@ -140,7 +140,7 @@ benchmark_initrun()
 	conds = (int *)mmap(NULL,
 	    nlocks * sizeof (pthread_cond_t),
 	    PROT_READ | PROT_WRITE,
-	    MAP_ANON | MAP_SHARED,
+	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (conds == MAP_FAILED) {
 		return (1);

@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <string.h>
 #include <strings.h>
 
 #include "libmicro.h"
@@ -125,7 +126,7 @@ benchmark_initrun(void)
     }
 
 	flags = opts ? MAP_SHARED : MAP_PRIVATE;
-	flags |= anon ? MAP_ANON : 0;
+	flags |= anon ? MAP_ANONYMOUS : 0;
 
 	seg = (vchar_t *)mmap(NULL, lm_optB * optl, PROT_READ | PROT_WRITE,
 	    flags, anon ? -1 : fd, 0L);
