@@ -59,8 +59,11 @@ static int			opta = 0;
 static int			optc = 0;
 static struct hostent		*host;
 
+static struct linger	linger = { 1, 1 };
+static int				reuseaddr = 1;
+
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_defB = 256;
 	lm_tsdsize = sizeof (tsd_t);
@@ -114,8 +117,6 @@ benchmark_initrun(void)
 int
 benchmark_initbatch_once(tsd_t *ts)
 {
-	int			i, j;
-
 	int			errors = 0;
 
 	ts->ts_lsns = (int *)malloc(lm_optB * sizeof (int));
@@ -141,46 +142,69 @@ benchmark_initbatch_once(tsd_t *ts)
 		errors ++;
 	}
 
-	j = FIRSTPORT;
+	int				port = FIRSTPORT;
+	int				i;
 	for (i = 0; i < lm_optB; i++) {
+		ts->ts_cons[i] = -2;
+		ts->ts_accs[i] = -2;
 		ts->ts_lsns[i] = socket(AF_INET, SOCK_STREAM, 0);
-		if (ts->ts_lsns[i] == -1) {
-			perror("socket");
+		if (ts->ts_lsns[i] < 0) {
+			perror("init:socket:lsns");
 			errors ++;
 		}
-
-		/*
-		 * make accept socket non-blocking so in case of errors
-		 * we don't hang
-		 */
-
-		if (fcntl(ts->ts_lsns[i], F_SETFL, O_NDELAY) == -1) {
-			perror("fcntl");
+		else if (fcntl(ts->ts_lsns[i], F_SETFL, O_NDELAY) == -1) {
+			/*
+			 * make accept socket non-blocking so in case of errors we don't
+			 * hang
+			 */
+			perror("init:fcntl:lsns");
 			errors ++;
+			(void) close(ts->ts_lsns[i]);
+			ts->ts_lsns[i] = -3;
 		}
+		else if (setsockopt(ts->ts_lsns[i], SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr)) == -1) {
+			perror("init:setsockopt:lsns-reuseaddr");
+			errors ++;
+			(void) close(ts->ts_lsns[i]);
+			ts->ts_lsns[i] = -3;
+		}
+		else if (setsockopt(ts->ts_lsns[i], SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1) {
+			perror("init:setsockopt:lsns-linger");
+			errors ++;
+			(void) close(ts->ts_lsns[i]);
+			ts->ts_lsns[i] = -3;
+		}
+		else {
+			int bret;
+			do {
+				(void) memset(&ts->ts_adds[i], 0,
+					sizeof (struct sockaddr_in));
+				ts->ts_adds[i].sin_family = AF_INET;
+				ts->ts_adds[i].sin_port = htons(port++);
+				(void) memcpy(&ts->ts_adds[i].sin_addr.s_addr,
+					host->h_addr_list[0], sizeof (struct in_addr));
 
-		for (;;) {
-			(void) memset(&ts->ts_adds[i], 0,
-				sizeof (struct sockaddr_in));
-			ts->ts_adds[i].sin_family = AF_INET;
-			ts->ts_adds[i].sin_port = htons(j++);
-			(void) memcpy(&ts->ts_adds[i].sin_addr.s_addr,
-				host->h_addr_list[0], sizeof (struct in_addr));
+				bret = bind(ts->ts_lsns[i],
+						(struct sockaddr *)&ts->ts_adds[i],
+						sizeof (struct sockaddr_in));
+				if (bret != 0) {
+					if (errno != EADDRINUSE) {
+						perror("init:bind");
+						errors++;
+						(void) close(ts->ts_lsns[i]);
+						ts->ts_lsns[i] = -3;
+					}
+				}
+			} while (bret == -1 && errno == EADDRINUSE);
 
-			if (bind(ts->ts_lsns[i],
-				(struct sockaddr *)&ts->ts_adds[i],
-				sizeof (struct sockaddr_in)) == 0) {
-				break;
+			if (ts->ts_lsns[i] >= 0) {
+				if (listen(ts->ts_lsns[i], 5) == -1) {
+					perror("init:listen");
+					errors++;
+					(void) close(ts->ts_lsns[i]);
+					ts->ts_lsns[i] = -3;
+				}
 			}
-
-			if (errno != EADDRINUSE) {
-				errors ++;
-			}
-		}
-
-		if (listen(ts->ts_lsns[i], 5) == -1) {
-			perror("listen");
-			errors ++;
 		}
 	}
 	return errors;
@@ -189,37 +213,38 @@ benchmark_initbatch_once(tsd_t *ts)
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t		*ts = (tsd_t *)tsd;
 	int			errors = 0;
-	int			result;
 
 	if (ts->ts_once++ == 0) {
-		if (errors += benchmark_initbatch_once(tsd) == -1) {
-			return -1;
+		if (errors += benchmark_initbatch_once(tsd) != 0) {
+			return errors;
 		}
 	}
 
-
+	int	i;
 	for (i = 0; i < lm_optB; i++) {
 		ts->ts_cons[i] = socket(AF_INET, SOCK_STREAM, 0);
 		if (ts->ts_cons[i] == -1) {
 			perror("init:socket");
 			errors ++;
 		}
-
-		if (fcntl(ts->ts_cons[i], F_SETFL, O_NDELAY) == -1) {
+		else if (fcntl(ts->ts_cons[i], F_SETFL, O_NDELAY) == -1) {
 			perror("init:fcntl");
 			errors ++;
+			(void) close(ts->ts_cons[i]);
+			ts->ts_cons[i] = -3;
 		}
-
-		if (opta) {
+		else if (opta) {
+			int	result;
 			result = connect(ts->ts_cons[i],
 				(struct sockaddr *)&ts->ts_adds[i],
 				sizeof (struct sockaddr_in));
 			if ((result == -1) && (errno != EINPROGRESS)) {
 				perror("init:connect");
 				errors ++;
+				(void) close(ts->ts_cons[i]);
+				ts->ts_cons[i] = -3;
 			}
 		}
 	}
@@ -233,55 +258,99 @@ benchmark(void *tsd, result_t *res)
 	tsd_t			*ts = (tsd_t *)tsd;
 	int			i;
 	int			result;
-	struct sockaddr_in	addr;
-	socklen_t		size;
+    int			aretries = 0;
+    int		    cretries = 0;
+    int			apolls = 0;
+    int			cpolls = 0;
 
 	for (i = 0; i < lm_optB; i++) {
-		if (!opta) {
-		again:
-			result = connect(ts->ts_cons[i],
-				(struct sockaddr *)&ts->ts_adds[i],
-				sizeof (struct sockaddr_in));
-			if (result != 0 && errno != EISCONN) {
-				if (errno == EINPROGRESS) {
-					struct pollfd pollfd;
-					if (optc)
-						continue;
-					pollfd.fd = ts->ts_cons[i];
-					pollfd.events = POLLOUT;
-					if (poll(&pollfd, 1, -1) == 1)
-						goto again;
+		if (!opta && (ts->ts_cons[i] >= 0)) {
+			int done = 0, error = 0;
+			do {
+				result = connect(ts->ts_cons[i],
+					(struct sockaddr *)&ts->ts_adds[i],
+					sizeof (struct sockaddr_in));
+				if (result == 0) {
+					done = 1;
 				}
+				else {
+					if (errno != EINPROGRESS) {
+						res->re_errors ++;
+						perror("benchmark:connect");
+						error = 1;
+					}
+					else {
+						if (optc) {
+							done = 1;
+						}
+						else {
+                            cpolls++;
+							struct pollfd pollfd;
+							pollfd.fd = ts->ts_cons[i];
+							pollfd.events = POLLOUT;
+							int pollres = poll(&pollfd, 1, -1);
+							if (pollres < 0) {
+								res->re_errors ++;
+								perror("benchmark:connect:poll");
+								error = 1;
+							}
+							else if (pollres != 1) {
+								fprintf(stderr, "benchmark:connect: poll() returned unexpected value: %d\n", pollres);
+								res->re_errors ++;
+								error = 1;
+							}
+							else {
+								// Retry connect() attempt
+                                cretries++;
+							}
+						}
+					}
+				}
+			} while (!done && !error);
 
-				res->re_errors ++;
-				perror("benchmark:connect");
+			if (optc || error)
 				continue;
-			}
 		}
 
-		if (!optc) {
-			size = sizeof (struct sockaddr);
-			for (;;) {
-				struct pollfd pollfd;
+		if (!optc && (ts->ts_lsns[i] >= 0)) {
+			struct sockaddr_in	addr;
+			socklen_t	size = sizeof (struct sockaddr);
+			int pollres;
+			do {
+				pollres = 0;
 				result = accept(ts->ts_lsns[i],
 					(struct sockaddr *)&addr, &size);
-				if (result > 0 || (result == -1 &&
-					errno != EAGAIN))
-					break;
-				pollfd.fd = ts->ts_lsns[i];
-				pollfd.events = POLLIN;
-				if (poll(&pollfd, 1, -1) != 1)
-					break;
-			}
+				if (result < 0) {
+					if (errno != EAGAIN) {
+						res->re_errors ++;
+						perror("benchmark:accept");
+					}
+					else {
+						apolls++;
+						struct pollfd pollfd;
+						pollfd.fd = ts->ts_lsns[i];
+						pollfd.events = POLLIN;
+						pollres = poll(&pollfd, 1, -1);
+                        if (pollres < 0) {
+                            res->re_errors ++;
+                            perror("benchmark:accept:poll");
+                        }
+						else if (pollres != 1) {
+                            res->re_errors ++;
+                            fprintf(stderr, "benchmark:accept: poll() returned unexpected value: %d\n", pollres);
+						}
+                        else {
+                            // Retry accept() attempt
+                            aretries++;
+                        }
+					}
+				}
+			} while (pollres == 1);
 
 			ts->ts_accs[i] = result;
-			if (result == -1) {
-				res->re_errors ++;
-				perror("benchmark:accept");
-				continue;
-			}
 		}
 	}
+
 	res->re_count = i;
 
 	return 0;
@@ -290,15 +359,16 @@ benchmark(void *tsd, result_t *res)
 int
 benchmark_finibatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t		*ts = (tsd_t *)tsd;
 	int			i;
 
 	for (i = 0; i < lm_optB; i++) {
-
-		if (!optc) {
+		if (ts->ts_accs[i] >= 0) {
 			(void) close(ts->ts_accs[i]);
 		}
-		(void) close(ts->ts_cons[i]);
+		if (ts->ts_cons[i] >= 0) {
+			(void) close(ts->ts_cons[i]);
+		}
 	}
 
 	return 0;

@@ -30,7 +30,7 @@
 # Use is subject to license terms.
 #
 
-bench_version=0.4.1-rh.11
+bench_version=0.4.1-rh.12
 libmicro_version=`bin/tattle -V`
 
 case $libmicro_version in
@@ -305,7 +305,11 @@ bind		$OPTS -N "bind"			-B 200
 
 listen		$OPTS -N "listen"		-B 800
 
-connection	$OPTS -N "connection"		-B 256
+connection	$OPTS -N "connection"	-B 512	-C 100
+connection	$OPTS -N "conn_connect"	-B 512			-c
+connection	$OPTS -N "conn_accept"	-B 512	-C 100	-a
+
+close_tcp	$OPTS -N "close_tcp"		-B 32
 
 poll		$OPTS -N "poll_10"	-n 10	-I 25
 poll		$OPTS -N "poll_100"	-n 100	-I 1000
@@ -511,15 +515,13 @@ munmap		$OPTS -N "unmap_a8k"	-l 8k	-I 25		-f MAP_ANON
 munmap		$OPTS -N "unmap_a128k"	-l 128k	-I 25		-f MAP_ANON
 
 munmap		$OPTS -N "unmap_rz8k"	-l 8k	-I 25	-r	-f /dev/zero
-munmap		$OPTS -N "unmap_rz128k"	-l 128k	-I 50 -r	-f /dev/zero
+munmap		$OPTS -N "unmap_rz128k"	-l 128k	-I 50   -r	-f /dev/zero
 munmap		$OPTS -N "unmap_rt8k"	-l 8k	-I 50	-r	-f $TFILE
 munmap		$OPTS -N "unmap_rt128k"	-l 128k	-I 150	-r	-f $TFILE
 munmap		$OPTS -N "unmap_ru8k"	-l 8k	-I 50	-r	-f $VFILE
 munmap		$OPTS -N "unmap_ru128k"	-l 128k	-I 1500	-r	-f $VFILE
 munmap		$OPTS -N "unmap_ra8k"	-l 8k	-I 25	-r	-f MAP_ANON
 munmap		$OPTS -N "unmap_ra128k"	-l 128k	-I 50	-r	-f MAP_ANON
-
-connection	$OPTS -N "conn_connect"		-B 256 	-c
 
 munmap		$OPTS -N "unmap_wz8k"	-l 8k	-I 500	-w	-f /dev/zero
 munmap		$OPTS -N "unmap_wz128k"	-l 128k	-I 4000	-w	-f /dev/zero
@@ -530,7 +532,7 @@ munmap		$OPTS -N "unmap_wu128k"	-l 128k	-I 5000	-w	-f $VFILE
 munmap		$OPTS -N "unmap_wa8k"	-l 8k	-I 500	-w	-f MAP_ANON
 munmap		$OPTS -N "unmap_wa128k"	-l 128k	-I 5000	-w	-f MAP_ANON
 
-mprotect	$OPTS -N "mprot_z8k"	-l 8k  -I 30			-f /dev/zero
+mprotect	$OPTS -N "mprot_z8k"	-l 8k   -I 30			-f /dev/zero
 mprotect	$OPTS -N "mprot_z128k"	-l 128k	-I 50			-f /dev/zero
 mprotect	$OPTS -N "mprot_wz8k"	-l 8k	-I 50	-w		-f /dev/zero
 mprotect	$OPTS -N "mprot_wz128k"	-l 128k	-I 50	-w		-f /dev/zero
@@ -558,10 +560,6 @@ pipe		$OPTS -N "pipe_tmp1"	-s 1	-I 2000	-x tcp  -m mp
 pipe		$OPTS -N "pipe_tst4k"	-s 4k	-I 500	-x tcp  -m st
 pipe		$OPTS -N "pipe_tmt4k"	-s 4k	-I 2000	-x tcp  -m mt
 pipe		$OPTS -N "pipe_tmp4k"	-s 4k	-I 2000	-x tcp  -m mp
-
-connection	$OPTS -N "conn_accept"		-B 256      -a
-
-close_tcp	$OPTS -N "close_tcp"		-B 32
 .
 
 # Clean up background processes
