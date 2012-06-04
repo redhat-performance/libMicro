@@ -124,26 +124,26 @@ typedef struct {
  * Barrier interfaces
  */
 
-barrier_t *barrier_create(int hwm, int datasize);
-int barrier_destroy(barrier_t *bar);
-int barrier_queue(barrier_t *bar, result_t *res);
+barrier_t *barrier_create(int, int);
+int barrier_destroy(barrier_t *);
+int barrier_queue(barrier_t *, result_t *);
 
 
 /*
  * Functions that can be provided by the user
  */
 
-int	benchmark(void *tsd, result_t *res);
-int	benchmark_init();
-int	benchmark_fini();
-int	benchmark_initrun();
-int	benchmark_finirun();
-int	benchmark_initworker();
-int	benchmark_finiworker();
-int	benchmark_initbatch(void *tsd);
-int	benchmark_finibatch(void *tsd);
-int	benchmark_optswitch(int opt, char *optarg);
-char	*benchmark_result();
+int	benchmark(void *, result_t *);
+int	benchmark_init(void);
+int	benchmark_fini(void);
+int	benchmark_initrun(void);
+int	benchmark_finirun(void);
+int	benchmark_initworker(void *);
+int	benchmark_finiworker(void *);
+int	benchmark_initbatch(void *);
+int	benchmark_finibatch(void *);
+int	benchmark_optswitch(int, char *);
+char	*benchmark_result(void);
 
 
 /*
@@ -184,15 +184,15 @@ extern size_t			lm_tsdsize;
  * Utility functions
  */
 
-int 		getpindex();
-int 		gettindex();
-void 		*gettsd(int p, int t);
-long long 	getusecs();
-long long 	getnsecs();
-void 		setfdlimit(int limit);
-long long 	sizetoll();
-int 		sizetoint();
+int 		getpindex(void);
+int 		gettindex(void);
+void 		*gettsd(int, int);
+long long 	getusecs(void);
+long long 	getnsecs(void);
+void 		setfdlimit(int);
+long long 	sizetoll(const char *);
+int 		sizetoint(const char *);
 int		fit_line(double *, double *, int, double *, double *);
-long long	get_nsecs_resolution();
+long long	get_nsecs_resolution(void);
 
 #endif /* LIBMICRO_H */
