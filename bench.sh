@@ -30,8 +30,10 @@
 # Use is subject to license terms.
 #
 
+DIRNAME=$(dirname $0)
+
 bench_version=0.4.1-rh.13
-libmicro_version=`bin/tattle -V`
+libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
 $bench_version)
@@ -70,7 +72,7 @@ if [ "$UID" -eq "$ROOT_UID" ]
 then
 	# Make an attempt to keep the system from going into
 	# energy savings mode (Intel systems only?).
-	bin/pm_qos > /dev/null 2>&1 < /dev/null &
+	$DIRNAME/bin/pm_qos > /dev/null 2>&1 < /dev/null &
     PM_QOS_PID=$!
 fi
 
@@ -98,26 +100,34 @@ printf "!IPV4_address:        %45s\n" `getent ahostsv4 $hostname | grep STREAM |
 printf "!IPV6_address:        %45s\n" `getent ahostsv6 $hostname | grep STREAM | awk '{print $1}'`
 printf "!Run_by:              %45s\n" $LOGNAME
 printf "!Date:                %45s\n" "`date '+%D %R'`"
-printf "!Compiler:            %45s\n" `bin/tattle -c`
-printf "!Compiler Ver.:       %45s\n" "`bin/tattle -v`"
-printf "!Libc Ver.:           %45s\n" "`bin/tattle -l`"
-printf "!Libpthread Ver.:     %45s\n" "`bin/tattle -p`"
-printf "!sizeof(long):        %45s\n" `bin/tattle -s`
-printf "!extra_CFLAGS:        %45s\n" "`bin/tattle -f`"
-printf "!TimerRes:            %45s\n" "`bin/tattle -r`"
+printf "!Compiler:            %45s\n" `$DIRNAME/bin/tattle -c`
+printf "!Compiler Ver.:       %45s\n" "`$DIRNAME/bin/tattle -v`"
+printf "!Libc Ver.:           %45s\n" "`$DIRNAME/bin/tattle -l`"
+printf "!Libpthread Ver.:     %45s\n" "`$DIRNAME/bin/tattle -p`"
+printf "!sizeof(long):        %45s\n" `$DIRNAME/bin/tattle -s`
+printf "!extra_CFLAGS:        %45s\n" "`$DIRNAME/bin/tattle -f`"
+printf "!TimerRes:            %45s\n" "`$DIRNAME/bin/tattle -r`"
 
 printf "!CPU_NAME:            %45s\n" "$p_type"
 
 lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | sed 's/CPU_sockets/Sockets/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
 sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s %25s\n", $1 ":", $3)}'
 
-numactl --hardware | awk -f numactl.awk
+numactl --hardware | awk -f $DIRNAME/numactl.awk
 
 mkdir -p $TMPROOT/bin
-cp bin-$ARCH/exec_bin $TMPROOT/bin/
+cp $DIRNAME/bin-$ARCH/exec_bin $TMPROOT/bin/
 
 while read A B
 do
+    # If we encounter a problem where the "trap" runs above, we will have lost
+    # the TMPROOT directory. So just exit the loop when we detect that it no
+    # longer exists.
+	if [ ! -e $TMPROOT ]
+    then
+        break
+    fi
+
 	# $A contains the command, $B contains the arguments
 	# we echo blank lines and comments
 	# we ship anything which fails to match *$1* (useful
@@ -142,7 +152,7 @@ do
 
 	if [ ! -f $TMPROOT/bin/$A ]
 	then
-		cp bin-$ARCH/$A $TMPROOT/bin/$A
+		cp $DIRNAME/bin-$ARCH/$A $TMPROOT/bin/$A
 	fi
 	(cd $TMPROOT && eval "bin/$A $B")
 done <<.
