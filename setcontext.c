@@ -61,7 +61,7 @@ benchmark(void *tsd, result_t *res)
 	if (i++ < lm_optB)
 		(void) setcontext(&uc);
 
-	res->re_count += lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

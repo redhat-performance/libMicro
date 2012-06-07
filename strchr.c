@@ -125,7 +125,7 @@ benchmark(void *tsd, result_t *res)
 		ts->ts_fakegcc = strchr(src, 'X');
 	}
 
-	res->re_count = lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

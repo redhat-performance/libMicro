@@ -108,7 +108,7 @@ benchmark(void *tsd, result_t *res)
 			continue;
 		}
 	}
-	res->re_count = lm_optB;
+	res->re_count = i;
 
 	(void) barrier_queue(b, NULL);
 

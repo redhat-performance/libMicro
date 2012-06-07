@@ -94,7 +94,7 @@ benchmark(void *tsd, result_t *res)
 		(void) kill(pid, SIGUSR1);
 		(void) kill(pid, SIGUSR1);
 	}
-	res->re_count += lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

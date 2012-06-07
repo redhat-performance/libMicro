@@ -45,23 +45,23 @@ typedef struct {
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_usage),
 	    "notes: measures mktime()\n");
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t	*ts = (tsd_t *)tsd;
 
-	time_t		clock1;
-	time_t		clock2;
+	time_t	clock1;
+	time_t	clock2;
 
 	clock1 = time(NULL);
 	clock2 = clock1 + 1;
@@ -69,16 +69,15 @@ benchmark_initbatch(void *tsd)
 	(void) localtime_r(&clock1, &ts->ts_tm1);
 	(void) localtime_r(&clock2, &ts->ts_tm2);
 
-	return (0);
+	return 0;
 }
-
 
 int
 benchmark(void *tsd, result_t *res)
 {
 	int			i;
-	tsd_t			*ts = (tsd_t *)tsd;
-	struct tm		t1, t2;
+	tsd_t		*ts = (tsd_t *)tsd;
+	struct tm	t1, t2;
 
 	for (i = 0; i < lm_optB; i += 10) {
 		t1 = ts->ts_tm1;
@@ -106,7 +105,7 @@ benchmark(void *tsd, result_t *res)
 		(void) mktime(&t1);
 		(void) mktime(&t2);
 	}
-	res->re_count = lm_optB;
+	res->re_count = i;
 
-	return (0);
+	return 0;
 }

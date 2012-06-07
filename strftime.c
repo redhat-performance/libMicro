@@ -41,28 +41,28 @@
 static char *optf = DEFF;
 
 typedef struct {
-	int		ts_once;
-	struct tm 	ts_tm1;
-	struct tm 	ts_tm2;
+	int			ts_once;
+	struct tm	ts_tm1;
+	struct tm	ts_tm2;
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
-
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "f:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:");
 
-	(void) sprintf(lm_usage,
-	    "       [-f format (default = \"%s\")]\n"
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+	    "\t[-f format (default = \"%s\")]\n"
 	    "notes: measures strftime()\n",
 	    DEFF);
 
-	(void) sprintf(lm_header, "%8s", "format");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "format");
 
-	return (0);
+	return 0;
 }
+
 int
 benchmark_optswitch(int opt, char *optarg)
 {
@@ -72,44 +72,43 @@ benchmark_optswitch(int opt, char *optarg)
 		optf = optarg;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
-
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char	result[256];
 
-	(void) sprintf(result, "%8s", optf);
+	(void) snprintf(result, sizeof(result), "%8s", optf);
 
-	return (result);
+	return result;
 }
-
 
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t	*ts = (tsd_t *)tsd;
 
-	static time_t		clock1 = 0L;
-	static time_t		clock2 = 1L;
+	if (ts->ts_once++ == 0) {
+    	static time_t	clock1 = 0L;
+    	static time_t	clock2 = 1L;
 
-	(void) localtime_r(&clock1, &ts->ts_tm1);
-	(void) localtime_r(&clock2, &ts->ts_tm2);
+    	(void) localtime_r(&clock1, &ts->ts_tm1);
+    	(void) localtime_r(&clock2, &ts->ts_tm2);
+    }
 
-	return (0);
+	return 0;
 }
-
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	int			i;
-	tsd_t			*ts = (tsd_t *)tsd;
-	char			s[MAXSIZE];
+	int		i;
+	tsd_t	*ts = (tsd_t *)tsd;
+	char	s[MAXSIZE];
 
 	for (i = 0; i < lm_optB; i += 10) {
 		(void) strftime(s, MAXSIZE, optf, &ts->ts_tm1);
@@ -123,7 +122,7 @@ benchmark(void *tsd, result_t *res)
 		(void) strftime(s, MAXSIZE, optf, &ts->ts_tm1);
 		(void) strftime(s, MAXSIZE, optf, &ts->ts_tm2);
 	}
-	res->re_count = lm_optB;
+	res->re_count = i;
 
-	return (0);
+	return 0;
 }

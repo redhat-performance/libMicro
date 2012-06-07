@@ -126,7 +126,7 @@ benchmark(void *tsd, result_t *res)
 		(void) strcpy(src, src2);
 	}
 
-	res->re_count = lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

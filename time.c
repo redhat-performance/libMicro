@@ -63,7 +63,7 @@ benchmark(void *tsd, result_t *res)
 		(void) time(NULL);
 		(void) time(NULL);
 	}
-	res->re_count += lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

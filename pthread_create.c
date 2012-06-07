@@ -134,10 +134,11 @@ benchmark(void *tsd, result_t *res)
 			perror("pthread_create");
 			ts->ts_threads[i] = 0;
 			res->re_errors++;
+            res->re_count = i;
 			return (0);
 		}
 	}
-	res->re_count = lm_optB;
+	res->re_count = i;
 
 	return (0);
 }

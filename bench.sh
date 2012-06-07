@@ -32,7 +32,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.13
+bench_version=0.4.1-rh.14
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -168,31 +168,32 @@ getpid		$OPTS -N "getpid_s"	-B 32000	-s
 getpid		$OPTS -N "getpidT4"	-B 32000	-T 4
 getpid		$OPTS -N "getpidT4_s"	-B 32000	-T 4	-s
 
-getenv		$OPTS -N "getenv"	-s 100 -I 6
-getenv		$OPTS -N "getenvT2"	-s 100 -I 50	-T 2
+getenv		$OPTS -N "getenv"	-B 100			-s 100
+getenv		$OPTS -N "getenvT2"	-B 100	-T 2	-s 100
 
 gettimeofday	$OPTS -N "gettimeofday" -B 4000000
 
 clock_gettime	$OPTS -N "clock_gettime" -B 4000000
 
-log		$OPTS -N "log"	-I 3
-exp		$OPTS -N "exp"	-I 3
+log		$OPTS -N "log"	-B 100
+exp		$OPTS -N "exp"	-B 100
+
 lrand48		$OPTS -N "lrand48"  -B 800
 
 memset		$OPTS -N "memset_10"	-s 10	-B 400
 memset		$OPTS -N "memset_256"	-s 256	-B 200
-memset		$OPTS -N "memset_256_u"	-s 256	 -a 1 -B 200
-memset		$OPTS -N "memset_1k"	-s 1k	 -I 1
-memset		$OPTS -N "memset_4k"    -s 4k    -I 6
-memset		$OPTS -N "memset_4k_uc" -s 4k    -u -I 6
+memset		$OPTS -N "memset_256_u"	-s 256	-a 1	-B 200
+memset		$OPTS -N "memset_1k"	-s 1k
+memset		$OPTS -N "memset_4k"    -s 4k
+memset		$OPTS -N "memset_4k_uc" -s 4k	-u
 
-memset		$OPTS -N "memset_10k"	-s 10k	-I 150
-memset		$OPTS -N "memset_1m"	-s 1m	-I 200000
-memset		$OPTS -N "memset_10m"	-s 10m	-I 2000000
-memset		$OPTS -N "memsetP2_10m"	-s 10m	-P 2	-I 2000000
+memset		$OPTS -N "memset_10k"	-s 10k
+memset		$OPTS -N "memset_1m"	-s 1m
+memset		$OPTS -N "memset_10m"	-s 10m
+memset		$OPTS -N "memsetP2_10m"	-s 10m	-P 2
 
 memrand		$OPTS -N "memrand"	-s 128m -B 10000
-cachetocache	$OPTS -N "cachetocache" -s 100k -T 2 -I 200
+cachetocache	$OPTS -N "cachetocache" -s 100k -T 2
 
 isatty		$OPTS -N "isatty_yes"
 isatty		$OPTS -N "isatty_no"  -f $IFILE
@@ -216,9 +217,9 @@ close		$OPTS -N "close_zero"	-B 640	-f /dev/zero
 
 memcpy		$OPTS -N "memcpy_10"	-s 10	-B 200
 memcpy		$OPTS -N "memcpy_1k"	-s 1k	-B 200
-memcpy		$OPTS -N "memcpy_10k"	-s 10k	-I 5
-memcpy		$OPTS -N "memcpy_1m"	-s 1m   -I 7000
-memcpy		$OPTS -N "memcpy_10m"	-s 10m  -I 1250000
+memcpy		$OPTS -N "memcpy_10k"	-s 10k
+memcpy		$OPTS -N "memcpy_1m"	-s 1m
+memcpy		$OPTS -N "memcpy_10m"	-s 10m
 
 strcpy		$OPTS -N "strcpy_10"	-s 10   -B 400
 strcpy		$OPTS -N "strcpy_1k"	-s 1k   -B 200
@@ -232,87 +233,87 @@ strchr		$OPTS -N "strchr_1k"	-s 1k   -B 200
 strcmp		$OPTS -N "strcmp_10"	-s 10   -B 400
 strcmp		$OPTS -N "strcmp_1k"	-s 1k   -B 200
 
-strcasecmp	$OPTS -N "scasecmp_10"	-s 10 -B 200
-strcasecmp	$OPTS -N "scasecmp_1k"	-s 1k -I 155
+strcasecmp	$OPTS -N "scasecmp_10"	-s 10	-B 200
+strcasecmp	$OPTS -N "scasecmp_1k"	-s 1k
 
-strtol		$OPTS -N "strtol"      -B 200
+strtol		$OPTS -N "strtol"	-B 200
 
-getcontext	$OPTS -N "getcontext"  -I 100
-setcontext	$OPTS -N "setcontext"  -I 12
+getcontext	$OPTS -N "getcontext"
+setcontext	$OPTS -N "setcontext"
 
-mutex		$OPTS -N "mutex_st"		-B 1000
-mutex		$OPTS -N "mutex_mt"	-t	-B 1000
-mutex		$OPTS -N "mutex_T2"     -T 2  -B 1000
+mutex		$OPTS -N "mutex_st"				-B 1000
+mutex		$OPTS -N "mutex_mt"	-t			-B 1000
+mutex		$OPTS -N "mutex_T2"     -T 2	-B 1000
 
-longjmp		$OPTS -N "longjmp"	-B 200
+longjmp		$OPTS -N "longjmp"		-B 200
 siglongjmp	$OPTS -N "siglongjmp"	-B 200
 
-getrusage	$OPTS -N "getrusage"	-I 200
+getrusage	$OPTS -N "getrusage"
 
-times		$OPTS -N "times"	-I 1
-time		$OPTS -N "time"		-I 2
-localtime_r	$OPTS -N "localtime_r"	-I 100
-strftime	$OPTS -N "strftime" -I 250
+times		$OPTS -N "times"
+time		$OPTS -N "time"	
+localtime_r	$OPTS -N "localtime_r"
+strftime	$OPTS -N "strftime"
 
-mktime		$OPTS -N "mktime"       -I 500
-mktime		$OPTS -N "mktimeT2" -T 2 -I 1000
+mktime		$OPTS -N "mktime"		
+mktime		$OPTS -N "mktimeT2" -T 2
 
-cascade_mutex	$OPTS -N "c_mutex_1"	-B 100
-cascade_mutex	$OPTS -N "c_mutex_10"	-T 10 -I 5000
-cascade_mutex	$OPTS -N "c_mutex_200"	-T 200	-I 2000000
+cascade_mutex	$OPTS -N "c_mutex_1"			-B 100
+cascade_mutex	$OPTS -N "c_mutex_10"	-T 10
+cascade_mutex	$OPTS -N "c_mutex_200"	-T 200
 
-cascade_cond	$OPTS -N "c_cond_1"	-B 100
-cascade_cond	$OPTS -N "c_cond_10"	-T 10	-I 3000
-cascade_cond	$OPTS -N "c_cond_200"	-T 200	-I 2000000
+cascade_cond	$OPTS -N "c_cond_1"				-B 100
+cascade_cond	$OPTS -N "c_cond_10"	-T 10
+cascade_cond	$OPTS -N "c_cond_200"	-T 200
 
-cascade_lockf	$OPTS -N "c_lockf_1"	-I 1000
-cascade_lockf	$OPTS -N "c_lockf_10"	-P 10 -I 50000
-cascade_lockf	$OPTS -N "c_lockf_200"	-P 200 -I 5000000
+cascade_lockf	$OPTS -N "c_lockf_1"
+cascade_lockf	$OPTS -N "c_lockf_10"	-P 10
+cascade_lockf	$OPTS -N "c_lockf_200"	-P 200
 
-cascade_flock	$OPTS -N "c_flock"	-I 500
-cascade_flock	$OPTS -N "c_flock_10"	-P 10   -I 6250
-cascade_flock	$OPTS -N "c_flock_200"	-P 200	-I 5000000
+cascade_flock	$OPTS -N "c_flock"
+cascade_flock	$OPTS -N "c_flock_10"	-P 10
+cascade_flock	$OPTS -N "c_flock_200"	-P 200
 
-cascade_fcntl	$OPTS -N "c_fcntl_1"		-I 1000
-cascade_fcntl	$OPTS -N "c_fcntl_10"	-P 10 -I 20000
-cascade_fcntl	$OPTS -N "c_fcntl_200"	-P 200	-I 5000000
+cascade_fcntl	$OPTS -N "c_fcntl_1"	
+cascade_fcntl	$OPTS -N "c_fcntl_10"	-P 10
+cascade_fcntl	$OPTS -N "c_fcntl_200"	-P 200
 
-file_lock	$OPTS -N "file_lock"   -I 50
+file_lock	$OPTS -N "file_lock"
 
-getsockname	$OPTS -N "getsockname"	-I 5
-getpeername	$OPTS -N "getpeername"	-I 5
+getsockname	$OPTS -N "getsockname"
+getpeername	$OPTS -N "getpeername"
 
-chdir		$OPTS -N "chdir_tmp"	-I 1000		$TDIR1 $TDIR2
-chdir		$OPTS -N "chdir_usr"	-I 1000		$VDIR1 $VDIR2
+chdir		$OPTS -N "chdir_tmp"	$TDIR1 $TDIR2
+chdir		$OPTS -N "chdir_usr"	$VDIR1 $VDIR2
 
-chdir		$OPTS -N "chgetwd_tmp"	-I 1500	-g $TDIR1 $TDIR2
-chdir		$OPTS -N "chgetwd_usr"	-I 1500	-g $VDIR1 $VDIR2
+chdir		$OPTS -N "chgetwd_tmp"	-g $TDIR1 $TDIR2
+chdir		$OPTS -N "chgetwd_usr"	-g $VDIR1 $VDIR2
 
-realpath	$OPTS -N "realpath_tmp" -I 3000		-f $TDIR1
-realpath	$OPTS -N "realpath_usr"	-I 3000	-f $VDIR1
+realpath	$OPTS -N "realpath_tmp"	-f $TDIR1
+realpath	$OPTS -N "realpath_usr"	-f $VDIR1
 
-stat		$OPTS -N "stat_tmp" -I 25		-f $TFILE
-stat		$OPTS -N "stat_usr" -I 25		-f $VFILE
+stat		$OPTS -N "stat_tmp"		-f $TFILE
+stat		$OPTS -N "stat_usr"		-f $VFILE
 
-fcntl		$OPTS -N "fcntl_tmp"	-I 5	-f $TFILE
-fcntl		$OPTS -N "fcntl_usr"	-I 5	-f $VFILE
-fcntl_ndelay	$OPTS -N "fcntl_ndelay"	-I 5
+fcntl		$OPTS -N "fcntl_tmp"	-f $TFILE
+fcntl		$OPTS -N "fcntl_usr"	-f $VFILE
+fcntl_ndelay	$OPTS -N "fcntl_ndelay"
 
-lseek		$OPTS -N "lseek_t8k"	-s 8k	-I 5	-f $TFILE
-lseek		$OPTS -N "lseek_u8k"	-s 8k	-I 5	-f $VFILE
+lseek		$OPTS -N "lseek_t8k"	-s 8k	-f $TFILE
+lseek		$OPTS -N "lseek_u8k"	-s 8k	-f $VFILE
 
 open		$OPTS -N "open_tmp"		-B 256	-f $TFILE
 open		$OPTS -N "open_usr"		-B 256	-f $VFILE
-open		$OPTS -N "open_zero"		-B 256	-f /dev/zero
+open		$OPTS -N "open_zero"	-B 256	-f /dev/zero
 
-dup		$OPTS -N "dup"			-B 768
+dup		$OPTS -N "dup"	-B 768
 
 socket		$OPTS -N "socket_u"		-B 256
 socket		$OPTS -N "socket_i"		-B 256	-f PF_INET
 
-socketpair	$OPTS -N "socketpair"		-B 256
+socketpair	$OPTS -N "socketpair"	-B 256
 
-setsockopt	$OPTS -N "setsockopt"		-I 10
+setsockopt	$OPTS -N "setsockopt"	
 
 bind		$OPTS -N "bind"			-B 200
 
@@ -322,33 +323,35 @@ connection	$OPTS -N "connection"	-B 512	-C 100
 connection	$OPTS -N "conn_connect"	-B 512			-c
 connection	$OPTS -N "conn_accept"	-B 512	-C 100	-a
 
-close_tcp	$OPTS -N "close_tcp"		-B 32
+close_tcp	$OPTS -N "close_tcp"	-B 32
 
-poll		$OPTS -N "poll_10"	-n 10	-I 25
-poll		$OPTS -N "poll_100"	-n 100	-I 1000
-poll		$OPTS -N "poll_1000"	-n 1000	-I 5000
+poll		$OPTS -N "poll_10"		-n 10
+poll		$OPTS -N "poll_100"		-n 100
+poll		$OPTS -N "poll_1000"	-n 1000
 
-poll		$OPTS -N "poll_w10"	-n 10	-I 25		-w 1
-poll		$OPTS -N "poll_w100"	-n 100	-I 2000		-w 10
-poll		$OPTS -N "poll_w1000"	-n 1000	-I 20000	-w 100
+poll		$OPTS -N "poll_w10"		-n 10	-w 1
+poll		$OPTS -N "poll_w100"	-n 100	-w 10
+poll		$OPTS -N "poll_w1000"	-n 1000	-w 100
 
-select		$OPTS -N "select_10"	-n 10	-I 25
-select		$OPTS -N "select_100"	-n 100	-I 1000
-select		$OPTS -N "select_1000"	-n 1000	-I 5000
+select		$OPTS -N "select_10"	-n 10
+select		$OPTS -N "select_100"	-n 100
+select		$OPTS -N "select_1000"	-n 1000
 
-select		$OPTS -N "select_w10"	-n 10	-I 25		-w 1
-select		$OPTS -N "select_w100"	-n 100	-I 2000		-w 10
-select		$OPTS -N "select_w1000"	-n 1000	-I 20000        -w 100
+select		$OPTS -N "select_w10"	-n 10	-w 1
+select		$OPTS -N "select_w100"	-n 100	-w 10
+select		$OPTS -N "select_w1000"	-n 1000	-w 100
 
-semop		$OPTS -N "semop" -I 10
+semop		$OPTS -N "semop"
 
-sigaction	$OPTS -N "sigaction" -I 5
-signal		$OPTS -N "signal" -I 500
-sigprocmask	$OPTS -N "sigprocmask" -I 5
+sigaction	$OPTS -N "sigaction"
+signal		$OPTS -N "signal"
+sigprocmask	$OPTS -N "sigprocmask"
 
 pthread_create  $OPTS -N "pthread_16"		-B 16
 pthread_create  $OPTS -N "pthread_32"		-B 32
+pthread_create  $OPTS -N "pthread_64"		-B 64
 pthread_create  $OPTS -N "pthread_128"		-B 128
+pthread_create  $OPTS -N "pthread_256"		-B 256
 pthread_create  $OPTS -N "pthread_512"		-B 512
 
 fork		$OPTS -N "fork_10"		-B 10
@@ -359,9 +362,9 @@ exit		$OPTS -N "exit_10"		-B 10
 exit		$OPTS -N "exit_100"		-B 100
 exit		$OPTS -N "exit_1000"	-B 1000
 
-exit		$OPTS -N "exit_10_nolibc"	-e -B 10
+exit		$OPTS -N "exit_10_nolibc"	-e	-B 10
 
-exec		$OPTS -N "exec" -B 10
+exec		$OPTS -N "exec"	-B 100
 
 execw		$OPTS -N "execw"	-B 500
 
@@ -425,7 +428,7 @@ posix_spawn	$OPTS -N "posix_spawn_4096nt"	-B 500	-n 4096	-p 64	-t
 posix_spawn	$OPTS -N "posix_spawn_8192nt"	-B 500	-n 8192	-p 32	-t
 posix_spawn	$OPTS -N "posix_spawn_8192nt1000r"	-B 500	-n 8192	-p 32	-t	-r 1000
 
-system		$OPTS -N "system" -I 1000000
+system		$OPTS -N "system"
 
 recurse		$OPTS -N "recurse"		-B 512
 
@@ -444,135 +447,135 @@ read		$OPTS -N "read_zw100k"	-s 100k	-B 40	-w	-f /dev/zero
 
 write		$OPTS -N "write_t1k"	-s 1k	-B 200	-f $TFILE
 write		$OPTS -N "write_t10k"	-s 10k	-B 100	-f $TFILE
-write		$OPTS -N "write_t100k"	-s 100k	-B 10	-f $TFILE
+write		$OPTS -N "write_t100k"	-s 100k	-B 20	-f $TFILE
 
 write		$OPTS -N "write_u1k"	-s 1k	-B 200	-f $VFILE
 write		$OPTS -N "write_u10k"	-s 10k	-B 100	-f $VFILE
-write		$OPTS -N "write_u100k"	-s 100k	-B 10	-f $VFILE
+write		$OPTS -N "write_u100k"	-s 100k	-B 20	-f $VFILE
 
 write		$OPTS -N "write_n1k"	-s 1k	-B 200	-f /dev/null
 write		$OPTS -N "write_n10k"	-s 10k	-B 100	-f /dev/null
 write		$OPTS -N "write_n100k"	-s 100k	-B 50	-f /dev/null
 
 writev		$OPTS -N "writev_t1k"	-s 1k	-B 200	-f $TFILE
-writev		$OPTS -N "writev_t10k"	-s 10k	-B 10        -f $TFILE
-writev		$OPTS -N "writev_t100k"	-s 100k		-f $TFILE
+writev		$OPTS -N "writev_t10k"	-s 10k	-B 100	-f $TFILE
+writev		$OPTS -N "writev_t100k"	-s 100k	-B 20	-f $TFILE
 
-writev		$OPTS -N "writev_u1k"	-s 1k	-B 100	-f $VFILE
-writev		$OPTS -N "writev_u10k"	-s 10k	-B 10	-f $VFILE
-writev		$OPTS -N "writev_u100k"	-s 100k		-f $VFILE
+writev		$OPTS -N "writev_u1k"	-s 1k	-B 200	-f $VFILE
+writev		$OPTS -N "writev_u10k"	-s 10k	-B 100	-f $VFILE
+writev		$OPTS -N "writev_u100k"	-s 100k	-B 20	-f $VFILE
 
 writev		$OPTS -N "writev_n1k"	-s 1k	-B 200	-f /dev/null
 writev		$OPTS -N "writev_n10k"	-s 10k	-B 100	-f /dev/null
-writev		$OPTS -N "writev_n100k"	-s 100k	-B 10	-f /dev/null
+writev		$OPTS -N "writev_n100k"	-s 100k	-B 20	-f /dev/null
 
-pread		$OPTS -N "pread_t1k"	-s 1k	-I 15		-f $TFILE
-pread		$OPTS -N "pread_t10k"	-s 10k	-I 50		-f $TFILE
-pread		$OPTS -N "pread_t100k"	-s 100k	-I 500	-f $TFILE
+pread		$OPTS -N "pread_t1k"	-s 1k	-f $TFILE
+pread		$OPTS -N "pread_t10k"	-s 10k	-f $TFILE
+pread		$OPTS -N "pread_t100k"	-s 100k	-f $TFILE
 
-pread		$OPTS -N "pread_u1k"	-s 1k	-I 15		-f $VFILE
-pread		$OPTS -N "pread_u10k"	-s 10k	-I 50		-f $VFILE
-pread		$OPTS -N "pread_u100k"	-s 100k	-I 500	-f $VFILE
+pread		$OPTS -N "pread_u1k"	-s 1k	-f $VFILE
+pread		$OPTS -N "pread_u10k"	-s 10k	-f $VFILE
+pread		$OPTS -N "pread_u100k"	-s 100k	-f $VFILE
 
-pread		$OPTS -N "pread_z1k"	-s 1k	-I 15		-f /dev/zero
-pread		$OPTS -N "pread_z10k"	-s 10k	-I 50		-f /dev/zero
-pread		$OPTS -N "pread_z100k"	-s 100k	-I 200	-f /dev/zero
-pread		$OPTS -N "pread_zw100k"	-s 100k	-w -I 250	-f /dev/zero
+pread		$OPTS -N "pread_z1k"	-s 1k	-f /dev/zero
+pread		$OPTS -N "pread_z10k"	-s 10k	-f /dev/zero
+pread		$OPTS -N "pread_z100k"	-s 100k	-f /dev/zero
+pread		$OPTS -N "pread_zw100k"	-s 100k	-w	-f /dev/zero
 
-pwrite		$OPTS -N "pwrite_t1k"	-s 1k	-I 50		-f $TFILE
-pwrite		$OPTS -N "pwrite_t10k"	-s 10k	-I 100		-f $TFILE
-pwrite		$OPTS -N "pwrite_t100k"	-s 100k	-I 1000	-f $TFILE
+pwrite		$OPTS -N "pwrite_t1k"	-s 1k	-f $TFILE
+pwrite		$OPTS -N "pwrite_t10k"	-s 10k	-f $TFILE
+pwrite		$OPTS -N "pwrite_t100k"	-s 100k	-f $TFILE
 
-pwrite		$OPTS -N "pwrite_u1k"	-s 1k	-I 50		-f $VFILE
-pwrite		$OPTS -N "pwrite_u10k"	-s 10k	-I 100		-f $VFILE
-pwrite		$OPTS -N "pwrite_u100k"	-s 100k	-I 1000	-f $VFILE
+pwrite		$OPTS -N "pwrite_u1k"	-s 1k	-f $VFILE
+pwrite		$OPTS -N "pwrite_u10k"	-s 10k	-f $VFILE
+pwrite		$OPTS -N "pwrite_u100k"	-s 100k	-f $VFILE
 
-pwrite		$OPTS -N "pwrite_n1k"	-s 1k	-B 200		-f /dev/null
-pwrite		$OPTS -N "pwrite_n10k"	-s 10k	-B 100		-f /dev/null
-pwrite		$OPTS -N "pwrite_n100k"	-s 100k	-B 50		-f /dev/null
+pwrite		$OPTS -N "pwrite_n1k"	-s 1k	-B 200	-f /dev/null
+pwrite		$OPTS -N "pwrite_n10k"	-s 10k	-B 100	-f /dev/null
+pwrite		$OPTS -N "pwrite_n100k"	-s 100k	-B 50	-f /dev/null
 
-mmap		$OPTS -N "mmap_z8k"	-l 8k   -I 3		-f /dev/zero
-mmap		$OPTS -N "mmap_z128k"	-l 128k	-I 30		-f /dev/zero
-mmap		$OPTS -N "mmap_t8k"	-l 8k	-I 30		-f $TFILE
-mmap		$OPTS -N "mmap_t128k"	-l 128k	-I 30		-f $TFILE
-mmap		$OPTS -N "mmap_u8k"	-l 8k	-I 3		-f $VFILE
-mmap		$OPTS -N "mmap_u128k"	-l 128k	-I 30		-f $VFILE
-mmap		$OPTS -N "mmap_a8k"	-l 8k	-I 10		-f MAP_ANON
-mmap		$OPTS -N "mmap_a128k"	-l 128k	-I 2		-f MAP_ANON
+mmap		$OPTS -N "mmap_z8k"		-l 8k		-f /dev/zero
+mmap		$OPTS -N "mmap_z128k"	-l 128k		-f /dev/zero
+mmap		$OPTS -N "mmap_t8k"		-l 8k		-f $TFILE
+mmap		$OPTS -N "mmap_t128k"	-l 128k		-f $TFILE
+mmap		$OPTS -N "mmap_u8k"		-l 8k		-f $VFILE
+mmap		$OPTS -N "mmap_u128k"	-l 128k		-f $VFILE
+mmap		$OPTS -N "mmap_a8k"		-l 8k		-f MAP_ANON
+mmap		$OPTS -N "mmap_a128k"	-l 128k		-f MAP_ANON
 
-mmap		$OPTS -N "mmap_rz8k"	-l 8k	-I 1000 -r	-f /dev/zero
-mmap		$OPTS -N "mmap_rz128k"	-l 128k	-I 1000 -r	-f /dev/zero
-mmap		$OPTS -N "mmap_rt8k"	-l 8k	-I 1000 -r	-f $TFILE
-mmap		$OPTS -N "mmap_rt128k"	-l 128k	-I 10000 -r	-f $TFILE
-mmap		$OPTS -N "mmap_ru8k"	-l 8k	-I 1000 -r	-f $VFILE
-mmap		$OPTS -N "mmap_ru128k"	-l 128k	-I 10000 -r	-f $VFILE
-mmap		$OPTS -N "mmap_ra8k"	-l 8k	-I 500 -r	-f MAP_ANON
-mmap		$OPTS -N "mmap_ra128k"	-l 128k	-I 5000 -r	-f MAP_ANON
+mmap		$OPTS -N "mmap_rz8k"	-l 8k -r	-f /dev/zero
+mmap		$OPTS -N "mmap_rz128k"	-l 128k -r	-f /dev/zero
+mmap		$OPTS -N "mmap_rt8k"	-l 8k -r	-f $TFILE
+mmap		$OPTS -N "mmap_rt128k"	-l 128k -r	-f $TFILE
+mmap		$OPTS -N "mmap_ru8k"	-l 8k -r	-f $VFILE
+mmap		$OPTS -N "mmap_ru128k"	-l 128k -r	-f $VFILE
+mmap		$OPTS -N "mmap_ra8k"	-l 8k -r	-f MAP_ANON
+mmap		$OPTS -N "mmap_ra128k"	-l 128k -r	-f MAP_ANON
 
-mmap		$OPTS -N "mmap_wz8k"	-l 8k	-I 1250 -w	-f /dev/zero
-mmap		$OPTS -N "mmap_wz128k"	-l 128k	-I 25000 -w	-f /dev/zero
-mmap		$OPTS -N "mmap_wt8k"	-l 8k	-I 1250 -w	-f $TFILE
-mmap		$OPTS -N "mmap_wt128k"	-l 128k	-I 25000 -w	-f $TFILE
-mmap		$OPTS -N "mmap_wu8k"	-l 8k	-I 1250 -w	-f $VFILE
-mmap		$OPTS -N "mmap_wu128k"	-l 128k	-I 12500 -w	-f $VFILE
-mmap		$OPTS -N "mmap_wa8k"	-l 8k	-I 1500 -w	-f MAP_ANON
-mmap		$OPTS -N "mmap_wa128k"	-l 128k	-I 25000 -w	-f MAP_ANON
+mmap		$OPTS -N "mmap_wz8k"	-l 8k -w	-f /dev/zero
+mmap		$OPTS -N "mmap_wz128k"	-l 128k -w	-f /dev/zero
+mmap		$OPTS -N "mmap_wt8k"	-l 8k -w	-f $TFILE
+mmap		$OPTS -N "mmap_wt128k"	-l 128k -w	-f $TFILE
+mmap		$OPTS -N "mmap_wu8k"	-l 8k -w	-f $VFILE
+mmap		$OPTS -N "mmap_wu128k"	-l 128k -w	-f $VFILE
+mmap		$OPTS -N "mmap_wa8k"	-l 8k -w	-f MAP_ANON
+mmap		$OPTS -N "mmap_wa128k"	-l 128k -w	-f MAP_ANON
 
-munmap		$OPTS -N "unmap_z8k"	-l 8k   -I 25		-f /dev/zero
-munmap		$OPTS -N "unmap_z128k"	-l 128k	-I 25		-f /dev/zero
-munmap		$OPTS -N "unmap_t8k"	-l 8k	-I 25		-f $TFILE
-munmap		$OPTS -N "unmap_t128k"	-l 128k	-I 25		-f $TFILE
-munmap		$OPTS -N "unmap_u8k"	-l 8k	-I 25		-f $VFILE
-munmap		$OPTS -N "unmap_u128k"	-l 128k	-I 25		-f $VFILE
-munmap		$OPTS -N "unmap_a8k"	-l 8k	-I 25		-f MAP_ANON
-munmap		$OPTS -N "unmap_a128k"	-l 128k	-I 25		-f MAP_ANON
+munmap		$OPTS -N "unmap_z8k"	-l 8k		-f /dev/zero
+munmap		$OPTS -N "unmap_z128k"	-l 128k		-f /dev/zero
+munmap		$OPTS -N "unmap_t8k"	-l 8k		-f $TFILE
+munmap		$OPTS -N "unmap_t128k"	-l 128k		-f $TFILE
+munmap		$OPTS -N "unmap_u8k"	-l 8k		-f $VFILE
+munmap		$OPTS -N "unmap_u128k"	-l 128k		-f $VFILE
+munmap		$OPTS -N "unmap_a8k"	-l 8k		-f MAP_ANON
+munmap		$OPTS -N "unmap_a128k"	-l 128k		-f MAP_ANON
 
-munmap		$OPTS -N "unmap_rz8k"	-l 8k	-I 25	-r	-f /dev/zero
-munmap		$OPTS -N "unmap_rz128k"	-l 128k	-I 50   -r	-f /dev/zero
-munmap		$OPTS -N "unmap_rt8k"	-l 8k	-I 50	-r	-f $TFILE
-munmap		$OPTS -N "unmap_rt128k"	-l 128k	-I 150	-r	-f $TFILE
-munmap		$OPTS -N "unmap_ru8k"	-l 8k	-I 50	-r	-f $VFILE
-munmap		$OPTS -N "unmap_ru128k"	-l 128k	-I 1500	-r	-f $VFILE
-munmap		$OPTS -N "unmap_ra8k"	-l 8k	-I 25	-r	-f MAP_ANON
-munmap		$OPTS -N "unmap_ra128k"	-l 128k	-I 50	-r	-f MAP_ANON
+munmap		$OPTS -N "unmap_rz8k"	-l 8k	-r	-f /dev/zero
+munmap		$OPTS -N "unmap_rz128k"	-l 128k	-r	-f /dev/zero
+munmap		$OPTS -N "unmap_rt8k"	-l 8k	-r	-f $TFILE
+munmap		$OPTS -N "unmap_rt128k"	-l 128k	-r	-f $TFILE
+munmap		$OPTS -N "unmap_ru8k"	-l 8k	-r	-f $VFILE
+munmap		$OPTS -N "unmap_ru128k"	-l 128k	-r	-f $VFILE
+munmap		$OPTS -N "unmap_ra8k"	-l 8k	-r	-f MAP_ANON
+munmap		$OPTS -N "unmap_ra128k"	-l 128k	-r	-f MAP_ANON
 
-munmap		$OPTS -N "unmap_wz8k"	-l 8k	-I 500	-w	-f /dev/zero
-munmap		$OPTS -N "unmap_wz128k"	-l 128k	-I 4000	-w	-f /dev/zero
-munmap		$OPTS -N "unmap_wt8k"	-l 8k	-I 500	-w	-f $TFILE
-munmap		$OPTS -N "unmap_wt128k"	-l 128k	-I 5000	-w	-f $TFILE
-munmap		$OPTS -N "unmap_wu8k"	-l 8k	-I 500	-w	-f $VFILE
-munmap		$OPTS -N "unmap_wu128k"	-l 128k	-I 5000	-w	-f $VFILE
-munmap		$OPTS -N "unmap_wa8k"	-l 8k	-I 500	-w	-f MAP_ANON
-munmap		$OPTS -N "unmap_wa128k"	-l 128k	-I 5000	-w	-f MAP_ANON
+munmap		$OPTS -N "unmap_wz8k"	-l 8k	-w	-f /dev/zero
+munmap		$OPTS -N "unmap_wz128k"	-l 128k	-w	-f /dev/zero
+munmap		$OPTS -N "unmap_wt8k"	-l 8k	-w	-f $TFILE
+munmap		$OPTS -N "unmap_wt128k"	-l 128k	-w	-f $TFILE
+munmap		$OPTS -N "unmap_wu8k"	-l 8k	-w	-f $VFILE
+munmap		$OPTS -N "unmap_wu128k"	-l 128k	-w	-f $VFILE
+munmap		$OPTS -N "unmap_wa8k"	-l 8k	-w	-f MAP_ANON
+munmap		$OPTS -N "unmap_wa128k"	-l 128k	-w	-f MAP_ANON
 
-mprotect	$OPTS -N "mprot_z8k"	-l 8k   -I 30			-f /dev/zero
-mprotect	$OPTS -N "mprot_z128k"	-l 128k	-I 50			-f /dev/zero
-mprotect	$OPTS -N "mprot_wz8k"	-l 8k	-I 50	-w		-f /dev/zero
-mprotect	$OPTS -N "mprot_wz128k"	-l 128k	-I 50	-w		-f /dev/zero
-mprotect	$OPTS -N "mprot_twz8k"  -l 8k   -I 50	-w	-t	-f /dev/zero
-mprotect	$OPTS -N "mprot_tw128k" -l 128k -I 10	-w	-t	-f /dev/zero
-mprotect	$OPTS -N "mprot_tw4m"   -l 4m   -B 10	-w	-t	-f /dev/zero
+mprotect	$OPTS -N "mprot_z8k"	-l 8k			-f /dev/zero
+mprotect	$OPTS -N "mprot_z128k"	-l 128k			-f /dev/zero
+mprotect	$OPTS -N "mprot_wz8k"	-l 8k	-w		-f /dev/zero
+mprotect	$OPTS -N "mprot_wz128k"	-l 128k	-w		-f /dev/zero
+mprotect	$OPTS -N "mprot_twz8k"  -l 8k	-w	-t	-f /dev/zero
+mprotect	$OPTS -N "mprot_tw128k" -l 128k	-w	-t	-f /dev/zero
+mprotect	$OPTS -N "mprot_tw4m"   -l 4m   -w	-t	-f /dev/zero
 
-pipe		$OPTS -N "pipe_pst1"	-s 1	-I 5	-x pipe -m st
-pipe		$OPTS -N "pipe_pmt1"	-s 1	-I 2000	-x pipe -m mt
-pipe		$OPTS -N "pipe_pmp1"	-s 1	-I 2000	-x pipe -m mp
-pipe		$OPTS -N "pipe_pst4k"	-s 4k	-I 50	-x pipe -m st
-pipe		$OPTS -N "pipe_pmt4k"	-s 4k	-I 2000	-x pipe -m mt
-pipe		$OPTS -N "pipe_pmp4k"	-s 4k	-I 2000	-x pipe -m mp
+pipe		$OPTS -N "pipe_pst1"	-s 1	-x pipe -m st
+pipe		$OPTS -N "pipe_pmt1"	-s 1	-x pipe -m mt
+pipe		$OPTS -N "pipe_pmp1"	-s 1	-x pipe -m mp
+pipe		$OPTS -N "pipe_pst4k"	-s 4k	-x pipe -m st
+pipe		$OPTS -N "pipe_pmt4k"	-s 4k	-x pipe -m mt
+pipe		$OPTS -N "pipe_pmp4k"	-s 4k	-x pipe -m mp
 
-pipe		$OPTS -N "pipe_sst1"	-s 1	-I 50	-x sock -m st
-pipe		$OPTS -N "pipe_smt1"	-s 1	-I 2000	-x sock -m mt
-pipe		$OPTS -N "pipe_smp1"	-s 1	-I 2000	-x sock -m mp
-pipe		$OPTS -N "pipe_sst4k"	-s 4k	-I 50	-x sock -m st
-pipe		$OPTS -N "pipe_smt4k"	-s 4k	-I 2000	-x sock -m mt
-pipe		$OPTS -N "pipe_smp4k"	-s 4k	-I 2000	-x sock -m mp
+pipe		$OPTS -N "pipe_sst1"	-s 1	-x sock -m st
+pipe		$OPTS -N "pipe_smt1"	-s 1	-x sock -m mt
+pipe		$OPTS -N "pipe_smp1"	-s 1	-x sock -m mp
+pipe		$OPTS -N "pipe_sst4k"	-s 4k	-x sock -m st
+pipe		$OPTS -N "pipe_smt4k"	-s 4k	-x sock -m mt
+pipe		$OPTS -N "pipe_smp4k"	-s 4k	-x sock -m mp
 
-pipe		$OPTS -N "pipe_tst1"	-s 1	-I 500	-x tcp  -m st
-pipe		$OPTS -N "pipe_tmt1"	-s 1	-I 2000	-x tcp  -m mt
-pipe		$OPTS -N "pipe_tmp1"	-s 1	-I 2000	-x tcp  -m mp
-pipe		$OPTS -N "pipe_tst4k"	-s 4k	-I 500	-x tcp  -m st
-pipe		$OPTS -N "pipe_tmt4k"	-s 4k	-I 2000	-x tcp  -m mt
-pipe		$OPTS -N "pipe_tmp4k"	-s 4k	-I 2000	-x tcp  -m mp
+pipe		$OPTS -N "pipe_tst1"	-s 1	-x tcp  -m st
+pipe		$OPTS -N "pipe_tmt1"	-s 1	-x tcp  -m mt
+pipe		$OPTS -N "pipe_tmp1"	-s 1	-x tcp  -m mp
+pipe		$OPTS -N "pipe_tst4k"	-s 4k	-x tcp  -m st
+pipe		$OPTS -N "pipe_tmt4k"	-s 4k	-x tcp  -m mt
+pipe		$OPTS -N "pipe_tmp4k"	-s 4k	-x tcp  -m mp
 .
 
 # Clean up background processes
