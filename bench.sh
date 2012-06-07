@@ -121,6 +121,13 @@ numactl --hardware | awk -f $DIRNAME/numactl.awk
 mkdir -p $TMPROOT/bin
 cp $DIRNAME/bin-$ARCH/exec_bin $TMPROOT/bin/
 
+if [ "$UID" -eq "$ROOT_UID" ]
+then
+    # Clear the system caches before starting the run
+	sync; sync
+    echo 3 > /proc/sys/vm/drop_caches
+fi
+
 while read A B
 do
     # If we encounter a problem where the "trap" runs above, we will have lost
@@ -180,12 +187,12 @@ exp		$OPTS -N "exp"	-B 100
 
 lrand48		$OPTS -N "lrand48"  -B 800
 
-memset		$OPTS -N "memset_10"	-s 10	-B 400
-memset		$OPTS -N "memset_256"	-s 256	-B 200
+memset		$OPTS -N "memset_10"	-s 10			-B 400
+memset		$OPTS -N "memset_256"	-s 256			-B 200
 memset		$OPTS -N "memset_256_u"	-s 256	-a 1	-B 200
-memset		$OPTS -N "memset_1k"	-s 1k
-memset		$OPTS -N "memset_4k"    -s 4k
-memset		$OPTS -N "memset_4k_uc" -s 4k	-u
+memset		$OPTS -N "memset_1k"	-s 1k			-B 200
+memset		$OPTS -N "memset_4k"    -s 4k			-B 200
+memset		$OPTS -N "memset_4k_uc" -s 4k	-u		-B 200
 
 memset		$OPTS -N "memset_10k"	-s 10k
 memset		$OPTS -N "memset_1m"	-s 1m
@@ -250,8 +257,8 @@ siglongjmp	$OPTS -N "siglongjmp"	-B 200
 
 getrusage	$OPTS -N "getrusage"
 
-times		$OPTS -N "times"
-time		$OPTS -N "time"	
+times		$OPTS -N "times"	-B 1000
+time		$OPTS -N "time"		-B 1000
 localtime_r	$OPTS -N "localtime_r"
 strftime	$OPTS -N "strftime"
 
