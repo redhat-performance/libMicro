@@ -446,19 +446,19 @@ actual_main(int argc, char *argv[])
 
 	/* print result header (unless suppressed) */
 	if (!lm_optH) {
-		(void) printf("%12s %3s %3s %12s %12s %8s %8s %s\n",
-			"", "prc", "thr",
-			"usecs/call",
-			"samples", "errors", "cnt/samp", lm_header);
+		(void) printf("%*s %3s %3s %12s %12s %8s %8s %s\n",
+				strlen(lm_optN), "", "prc", "thr",
+				"usecs/call",
+				"samples", "errors", "cnt/samp", lm_header);
 	}
 
 	/* print result */
 
-	(void) printf("%-12s %3d %3d %12.5f %12d %8lld %8d %s\n",
-		lm_optN, lm_optP, lm_optT,
-		(lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
-		b->ba_batches, b->ba_errors, lm_optB,
-		benchmark_result());
+	(void) printf("%-*s %3d %3d %12.5f %12d %8lld %8d %s\n",
+			strlen(lm_optN), lm_optN, lm_optP, lm_optT,
+			(lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
+			b->ba_batches, b->ba_errors, lm_optB,
+			benchmark_result());
 
 	/* print arguments benchmark was invoked with ? */
 	if (lm_optL) {
