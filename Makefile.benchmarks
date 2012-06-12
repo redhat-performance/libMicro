@@ -40,6 +40,7 @@ ALL=				\
 		cascade_flock	\
 		chdir		\
 		clock_gettime	\
+		clock_nanosleep	\
 		close		\
 		close_tcp	\
 		connection	\
@@ -77,6 +78,7 @@ ALL=				\
 		msync		\
 		munmap		\
 		mutex		\
+		nanosleep	\
 		nop		\
 		open		\
 		pipe		\
@@ -88,6 +90,7 @@ ALL=				\
 		read		\
 		realpath	\
 		recurse		\
+		sched_yield	\
 		select		\
 		semop		\
 		setcontext	\

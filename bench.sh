@@ -32,7 +32,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.14
+bench_version=0.4.1-rh.15
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -175,12 +175,59 @@ getpid		$OPTS -N "getpid_s"	-B 32000	-s
 getpid		$OPTS -N "getpidT4"	-B 32000	-T 4
 getpid		$OPTS -N "getpidT4_s"	-B 32000	-T 4	-s
 
+sched_yield		$OPTS -N "sched_yield"		-B 32000
+sched_yield		$OPTS -N "sched_yield_s"	-B 32000	-s
+sched_yield		$OPTS -N "sched_yieldT4"	-B 32000	-T 4
+sched_yield		$OPTS -N "sched_yieldT4_s"	-B 32000	-T 4	-s
+
 getenv		$OPTS -N "getenv"	-B 100			-s 100
 getenv		$OPTS -N "getenvT2"	-B 100	-T 2	-s 100
 
 gettimeofday	$OPTS -N "gettimeofday" -B 4000000
 
 clock_gettime	$OPTS -N "clock_gettime" -B 4000000
+
+nanosleep		$OPTS -N "nanosleep"	-B 32000
+nanosleep		$OPTS -N "nanosleep_s"	-B 32000	-s
+nanosleep		$OPTS -N "nanosleep_r"	-B 32000	-r
+nanosleep		$OPTS -N "nanosleep_rs"	-B 32000	-s	-r
+
+nanosleep		$OPTS -N "nanosleepT4"		-B 32000	-T 4
+nanosleep		$OPTS -N "nanosleepT4_s"	-B 32000	-T 4	-s
+nanosleep		$OPTS -N "nanosleepT4_r"	-B 32000	-T 4	-r
+nanosleep		$OPTS -N "nanosleepT4_rs"	-B 32000	-T 4	-s	-r
+
+nanosleep		$OPTS -N "nanosleep_d10"		-B 1000	-d 10
+nanosleep		$OPTS -N "nanosleep_d100"		-B 1000	-d 100
+nanosleep		$OPTS -N "nanosleep_d1000"		-B 1000	-d 1000
+nanosleep		$OPTS -N "nanosleep_d10000"		-B 1000	-d 10000
+nanosleep		$OPTS -N "nanosleep_d100000"	-B 1000	-d 100000
+
+clock_nanosleep		$OPTS -N "clock_nanosleep"		-B 32000
+clock_nanosleep		$OPTS -N "clock_nanosleep_s"	-B 32000	-s
+clock_nanosleep		$OPTS -N "clock_nanosleep_r"	-B 32000	-r
+clock_nanosleep		$OPTS -N "clock_nanosleep_rs"	-B 32000	-s	-r
+
+clock_nanosleep		$OPTS -N "clock_nanosleep"		-B 32000	-m
+clock_nanosleep		$OPTS -N "clock_nanosleep_s"	-B 32000	-m	-s
+clock_nanosleep		$OPTS -N "clock_nanosleep_r"	-B 32000	-m	-r
+clock_nanosleep		$OPTS -N "clock_nanosleep_rs"	-B 32000	-m	-s	-r
+
+clock_nanosleep		$OPTS -N "clock_nanosleepT4"	-B 32000	-T 4
+clock_nanosleep		$OPTS -N "clock_nanosleepT4_s"	-B 32000	-T 4	-s
+clock_nanosleep		$OPTS -N "clock_nanosleepT4"	-B 32000	-T 4	-r
+clock_nanosleep		$OPTS -N "clock_nanosleepT4_s"	-B 32000	-T 4	-s	-r
+
+clock_nanosleep		$OPTS -N "clock_nanosleepT4"	-B 32000	-T 4	-m
+clock_nanosleep		$OPTS -N "clock_nanosleepT4_s"	-B 32000	-T 4	-m	-s
+clock_nanosleep		$OPTS -N "clock_nanosleepT4"	-B 32000	-T 4	-m	-r
+clock_nanosleep		$OPTS -N "clock_nanosleepT4_s"	-B 32000	-T 4	-m	-s	-r
+
+clock_nanosleep		$OPTS -N "clock_nanosleep_d10"		-B 1000	-d 10
+clock_nanosleep		$OPTS -N "clock_nanosleep_d100"		-B 1000	-d 100
+clock_nanosleep		$OPTS -N "clock_nanosleep_d1000"	-B 1000	-d 1000
+clock_nanosleep		$OPTS -N "clock_nanosleep_d10000"	-B 1000	-d 10000
+clock_nanosleep		$OPTS -N "clock_nanosleep_d100000"	-B 1000	-d 100000
 
 log		$OPTS -N "log"	-B 100
 exp		$OPTS -N "exp"	-B 100
