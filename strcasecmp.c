@@ -40,29 +40,29 @@ static int unaligned = 0;
 static int opts = 100;
 
 typedef struct {
-	int	ts_once;
-	char 	*ts_a;
-	char 	*ts_b;
-	int	ts_fakegcc;
+	int		ts_once;
+	char	*ts_a;
+	char	*ts_b;
+	int		ts_fakegcc;
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "s:n");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s:n");
 
-	(void) sprintf(lm_usage,
-	    "       [-s string size (default %d)]\n"
-	    "       [-n causes unaligned cmp]\n"
-	    "notes: measures strcasecmp()\n",
-	    opts);
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+			"\t[-s string size (default %d)]\n"
+			"\t[-n causes unaligned cmp]\n"
+			"notes: measures strcasecmp()\n",
+			opts);
 
-	(void) sprintf(lm_header, "%8s", "size");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "size");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -76,18 +76,18 @@ benchmark_optswitch(int opt, char *optarg)
 		opts = sizetoll(optarg);
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t		*ts = (tsd_t *)tsd;
 
-	static char *demo =
-	    "The quick brown fox jumps over the lazy dog.";
+	static char	*demo =
+		"The quick brown fox jumps over the lazy dog.";
 
 	if (ts->ts_once++ == 0) {
 		int l = strlen(demo);
@@ -103,18 +103,18 @@ benchmark_initbatch(void *tsd)
 		ts->ts_a[opts] = 0;
 		ts->ts_b[opts] = 0;
 	}
-	return (0);
+	return 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	int			i;
-	tsd_t			*ts = (tsd_t *)tsd;
+	int		i;
+	tsd_t	*ts = (tsd_t *)tsd;
 
-	char 	*src 	= ts->ts_a;
-	char 	*src2 	= ts->ts_b;
-	int	*sum 	= &ts->ts_fakegcc;
+	char	*src	= ts->ts_a;
+	char	*src2	= ts->ts_b;
+	int		*sum	= &ts->ts_fakegcc;
 
 	res->re_errors = 0;
 
@@ -133,18 +133,18 @@ benchmark(void *tsd, result_t *res)
 
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char	result[256];
 
 	if (unaligned == 0)
-		(void) sprintf(result, "%8d", opts);
+		(void) snprintf(result, sizeof(result), "%8d", opts);
 	else
-		(void) sprintf(result, "%8d <unaligned>", opts);
+		(void) snprintf(result, sizeof(result), "%8d <unaligned>", opts);
 
-	return (result);
+	return result;
 }
