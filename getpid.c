@@ -45,15 +45,15 @@ int	opts = 0;
 int
 benchmark_init(void)
 {
-	(void) sprintf(lm_usage, "note: measures getpid()");
-
 	lm_tsdsize = 0;
 
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-		"\t[-s skip libc making system call directly\n"
-		"note: measures getpid()\n");
+			"\t-s skip libc making system call directly\n"
+			"note: measures getpid()\n");
+
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "method");
 
 	return 0;
 }
@@ -77,18 +77,27 @@ benchmark(void *tsd, result_t *res)
 {
 	int	i;
 
-    if (opts) {
+	if (opts) {
 		for (i = 0; i < lm_optB; i++) {
-    	    (void) syscall(SYS_getpid);
+			(void) syscall(SYS_getpid);
 		}
-    }
-    else {
+	}
+	else {
 		for (i = 0; i < lm_optB; i++) {
 			(void) getpid();
 		}
-    }
+	}
 
 	res->re_count = i;
 
 	return 0;
+}
+
+char *benchmark_result(void)
+{
+	static char	result[256];
+
+	(void) snprintf(result, sizeof(result), "%8s", (opts ? "syscall" : "libc"));
+
+	return result;
 }
