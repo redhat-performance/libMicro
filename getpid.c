@@ -93,7 +93,8 @@ benchmark(void *tsd, result_t *res)
 	return 0;
 }
 
-char *benchmark_result(void)
+char *
+benchmark_result(void)
 {
 	static char	result[256];
 
