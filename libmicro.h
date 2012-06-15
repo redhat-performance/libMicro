@@ -156,6 +156,7 @@ extern char			**lm_argv;
 extern int			lm_optB;
 extern int			lm_optC;
 extern int			lm_optD;
+extern int			lm_optG;
 extern int			lm_optH;
 extern char			*lm_optN;
 extern int			lm_optP;
