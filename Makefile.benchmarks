@@ -75,6 +75,7 @@ ALL=				\
 		mktime		\
 		mprotect	\
 		mmap		\
+		mmap_frag	\
 		msync		\
 		munmap		\
 		mutex		\

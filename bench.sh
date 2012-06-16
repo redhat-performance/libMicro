@@ -32,7 +32,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.15
+bench_version=0.4.1-rh.16
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -574,6 +574,8 @@ mmap		$OPTS -N "mmap_wu8k"	-l 8k -w	-f $VFILE
 mmap		$OPTS -N "mmap_wu128k"	-l 128k -w	-f $VFILE
 mmap		$OPTS -N "mmap_wa8k"	-l 8k -w	-f MAP_ANON
 mmap		$OPTS -N "mmap_wa128k"	-l 128k -w	-f MAP_ANON
+
+mmap_frag	$OPTS -N "mmap_frag"	-B 10000	-C 1000
 
 munmap		$OPTS -N "unmap_z8k"	-l 8k		-f /dev/zero
 munmap		$OPTS -N "unmap_z128k"	-l 128k		-f /dev/zero
