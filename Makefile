@@ -57,17 +57,14 @@ TARBALL_CONTENTS = 	\
 	benchmark_initrun.c	\
 	benchmark_initworker.c	\
 	benchmark_finiworker.c	\
-	bench		\
 	bench.sh	\
 	mk_tarball	\
-	multiview	\
 	multiview.sh	\
 	multiview.awk	\
 	numactl.awk	\
 	OPENSOLARIS.LICENSE	\
 	tattle.c	\
 	pm_qos.c	\
-	wrapper		\
 	wrapper.sh	\
 	README
 
@@ -95,9 +92,8 @@ bin:
 $(BINS): bin wrapper
 	@ln -sf ../wrapper $@
 
-
 libMicro.tar:	FORCE
-	@chmod +x ./mk_tarball wrapper
+	@chmod +x ./mk_tarball
 	@./mk_tarball $(TARBALL_CONTENTS) 
 
 FORCE:
