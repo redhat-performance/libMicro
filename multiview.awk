@@ -171,9 +171,9 @@ END {
 				factor = b/a;
 				bgcolor = colormap(factor);
 				if (factor > 1)
-				  percentage = -(factor * 100 - 100);
+					percentage = -(factor * 100 - 100);
 				if (factor <= 1)
-				  percentage = 100/factor - 100;
+					percentage = 100/factor - 100;
 
 				printf(" bgcolor=\"%s\"><pre>%11.5f[%#+7.1f%%]</pre></td>\n",
 					bgcolor, b, percentage);
