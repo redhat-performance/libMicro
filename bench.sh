@@ -604,6 +604,8 @@ munmap		$OPTS -N "unmap_wu128k"	-l 128k	-w	-f $VFILE
 munmap		$OPTS -N "unmap_wa8k"	-l 8k	-w	-f MAP_ANON
 munmap		$OPTS -N "unmap_wa128k"	-l 128k	-w	-f MAP_ANON
 
+munmap_frag	$OPTS -N "munmap_frag"	-B 2500	-C 1000
+
 mprotect	$OPTS -N "mprot_z8k"	-l 8k			-f /dev/zero
 mprotect	$OPTS -N "mprot_z128k"	-l 128k			-f /dev/zero
 mprotect	$OPTS -N "mprot_wz8k"	-l 8k	-w		-f /dev/zero

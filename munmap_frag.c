@@ -32,19 +32,20 @@
  * Adapted from agua_frag_test.c, which was based on mmap.rep.anon.c, Version
  * 4, see BZ https://bugzilla.redhat.com/show_bug.cgi?id=790921.
  *
- * This version benchmarks the mmap() calls.
+ * This version benchmarks the munmap() calls that are used to create the
+ * holes in the VMAs.
  *
  * Notes:
  *
- *  1. ITER_SIM_TX from the original is now the lm_optB (-B) parameter value
+ *  1. CLR_MMAP_TX from the original is now the lm_optB (-B) parameter value
  *     - See bench.sh which should contain the default value used
- *     - The original test used 10,000 for this value
+ *     - The original test used 2,500 for this value
  *  2. The original program measured the time it took to run the entire
  *     benchmark loop, and reported the statistics that way; here the
- *     benchmark() routine is the original inner "while()" loop, with a few
- *     changes
- *     - The mlist_dealloc() is performed outside the measurement window, by
- *       moving that code to benchmark_finibatch()
+ *     benchmark() routine is just calling the first mlist_dealloc(),
+ *     with the benchmark_initbatch() performing the original mmap() calls
+ *     for setup outside the measurement window, and benchmark_finibatch()
+ *     calling mlist_dealloc() when capping the total number of mmaps.
  *     - While the original ran this for 1,000 * KLOOPS, where KLOOPS was
  *       defined to be 10 (so 10,000), that takes about 40+ minutes to run;
  *       see bench.sh for the equivalent value specified by -C
@@ -83,21 +84,21 @@ typedef struct {
     int     loop_iter;
 } tsd_t;
 
-#define INITIAL_GAP				 5
-#define GAP_INCREMENT			 3
-#define GAP_MAXIMUM				20
+#define INITIAL_GAP              5
+#define GAP_INCREMENT            3
+#define GAP_MAXIMUM             20
 
-#define MEMSIZE_1			   128
-#define MEMSIZE_2			 25000
-#define MEMSIZE_3			100000
+#define MEMSIZE_1              128
+#define MEMSIZE_2            25000
+#define MEMSIZE_3           100000
 
-#define CLR_MMAP_CNT_DEF	 35000	/* override using -c XX */
-#define MAX_MMAP_CNT_DEF	200000	/* override using -m XX */
-#define CLR_MMAP_TX_DEF		  2500	/* override using -t XX */
+#define CLR_MMAP_CNT_DEF     35000  /* override using -c XX */
+#define ITER_SIM_TX          10000  /* override using -i XX */
+#define MAX_MMAP_CNT_DEF    200000  /* override using -m XX */
 
 static int			optc = CLR_MMAP_CNT_DEF;
+static int			opti = ITER_SIM_TX;
 static int			optm = MAX_MMAP_CNT_DEF;
-static int			optt = CLR_MMAP_TX_DEF;
 
 static unsigned int	initial_map_count = 0;
 static unsigned int max_map_count = 0;
@@ -108,16 +109,16 @@ benchmark_init(void)
 {
 	lm_tsdsize = sizeof(tsd_t);
 
-	(void) snprintf(lm_optstr, sizeof(lm_optstr), "c:m:t:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "c:i:m:");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
             "\t[-c] number of maps to unmap to drop total below maximum (see -m) (default %d)]\n"
+            "\t[-i] number of maps to create before each run [default %d]\n"
             "\t[-m] maximum number of maps above which we force unmaps to cap memory usage (default %d)]\n"
-            "\t[-t] number of maps to unmap when creating holes between runs [default %d]\n"
             "notes: measures mmap() under high fragmentation conditions\n",
-            CLR_MMAP_CNT_DEF, MAX_MMAP_CNT_DEF, CLR_MMAP_TX_DEF);
+            CLR_MMAP_CNT_DEF, ITER_SIM_TX, MAX_MMAP_CNT_DEF);
 
-	(void) snprintf(lm_header, sizeof(lm_header), "%8s %8s %8s", "maxcnt", "clrcnt", "clrtx");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s %8s %8s", "maxcnt", "clrcnt", "itrcnt");
 
 	return 0;
 }
@@ -133,18 +134,18 @@ benchmark_optswitch(int opt, char *optarg)
             optc = CLR_MMAP_CNT_DEF;
         }
 		break;
+	case 'i':
+		opti = atoi(optarg);
+        if (opti < 0) {
+            fprintf(stderr, "Warning: invalid value for -i, %d, defaulting to %d\n", opti, ITER_SIM_TX);
+            opti = ITER_SIM_TX;
+        }
+		break;
 	case 'm':
 		optm = atoi(optarg);
         if (optm < 0) {
             fprintf(stderr, "Warning: invalid value for -m, %d, defaulting to %d\n", optm, MAX_MMAP_CNT_DEF);
             optm = MAX_MMAP_CNT_DEF;
-        }
-		break;
-	case 't':
-		optt = atoi(optarg);
-        if (optt < 0) {
-            fprintf(stderr, "Warning: invalid value for -t, %d, defaulting to %d\n", optt, CLR_MMAP_TX_DEF);
-            optt = CLR_MMAP_TX_DEF;
         }
 		break;
 	default:
@@ -207,12 +208,12 @@ benchmark_initbatch(void *tsd)
         ts->msize_cnt = 0;
         ts->loop_iter = 0;
         /*
-         * The benchmark() routine will invoke mmap() lm_optB times, so just
+         * The benchmark() routine will invoke mmap() opti times, so just
          * preallocate the mlist structures, link them all up, calculate the
          * sizes, etc. so that the benchmark can focus on just making those
          * calls.
          */
-        ts->mls = (mlist_p *)calloc(lm_optB, sizeof(mlist_p));
+        ts->mls = (mlist_p *)calloc(opti, sizeof(mlist_p));
         if (ts->mls == NULL) {
             fprintf(stderr, "mlist array of pointers allocation error: (%d) %s\n", errno, strerror(errno));
             exit(1);
@@ -220,7 +221,7 @@ benchmark_initbatch(void *tsd)
 	}
 
     int i;
-    for (i = 0; i < lm_optB; i++) { /* lm_optB === ITER_SIM_TX */
+    for (i = 0; i < opti; i++) {
         /*
          * Note that we always have one preallocated, so we always store the
          * last one allocated into the current slot.
@@ -254,6 +255,13 @@ benchmark_initbatch(void *tsd)
         assert(ts->ml->len == 0);
         ts->ml->len = ts->mseg_size;
         ts->ml->mmap_ptr = NULL; // mmap() call will occur in benchmark()
+        void *mmap_ptr = (void *)mmap(0, ts->ml->len, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+        if (mmap_ptr == MAP_FAILED) {
+            fprintf(stderr, "MMAP ERROR - %d:%s\n", errno, strerror(errno));
+            exit(1);
+        }
+        ts->ml->mmap_ptr = mmap_ptr;
+        ts->nmap++;
         /*
          * "Preallocate" the next structure
          */
@@ -268,39 +276,6 @@ benchmark_initbatch(void *tsd)
     }
 
 	return errors;
-}
-
-int
-benchmark(void *tsd, result_t *res)
-{
-	tsd_t	*ts = (tsd_t *)tsd;
-
-    int i;
-    for (i = 0; i < lm_optB; i++) { /* lm_optB === ITER_SIM_TX */
-        mlist_p ml = ts->mls[i];
-        void *mmap_ptr = (void *)mmap(0, ml->len, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-        if (mmap_ptr == MAP_FAILED) {
-            fprintf(stderr, "MMAP ERROR - %d:%s\n", errno, strerror(errno));
-            res->re_errors++;
-            break;
-        }
-        ml->mmap_ptr = mmap_ptr;
-        ts->nmap++;
-    }
-
-    /*
-     * Mimics what the original code did since the number of times this
-     * benchmark() routine is called is the loop_iter count from the original
-     * program. Used to skip an initial set of entries when making holes.
-     */
-    ts->loop_iter++;
-
-    /*
-     * Accounting for the libMicro framework, this is the count of mmap calls.
-     */
-	res->re_count = i;
-
-	return 0;
 }
 
 static int
@@ -354,18 +329,44 @@ mlist_dealloc(
 }
 
 int
+benchmark(void *tsd, result_t *res)
+{
+	tsd_t	*ts = (tsd_t *)tsd;
+
+    int		nmap = ts->nmap;
+    if (lm_optG >= 4) fprintf(stderr, "DEBUG4: benchmark: nmap = %d\n", nmap);
+
+    /*
+     * Create varying size holes in the address space. The value of lm_optB is
+     * equivalent to the value of CLR_MMAP_TX_DEF from the original program.
+     */
+    res->re_errors = mlist_dealloc(lm_optB, ts->unmap_gap, ts->ml_initial, &ts->nmap, ts->unmap_gap, ts->ml);
+    ts->unmap_gap = GAP_INCREMENT + ((ts->unmap_gap > GAP_MAXIMUM) ? 0 : ts->unmap_gap);
+
+    /*
+     * Mimics what the original code did since the number of times this
+     * benchmark() routine is called is the loop_iter count from the original
+     * program. Used to skip an initial set of entries when making holes.
+     */
+    ts->loop_iter++;
+
+    /*
+     * Accounting for the libMicro framework, this is the count of munmap
+     * calls. The number of munmap() calls might be less than the requested
+     * number when the gap size skips more than the number of existing maps.
+     */
+    int diff = nmap - ts->nmap;
+    assert(diff >= 0);
+	res->re_count = nmap - ts->nmap;
+
+	return 0;
+}
+
+int
 benchmark_finibatch(void *tsd)
 {
 	tsd_t	*ts = (tsd_t *)tsd;
 	int		errors = 0;
-
-    if (lm_optG >= 4) fprintf(stderr, "DEBUG4: finibatch: nmap = %d\n", ts->nmap);
-
-    /*
-     * Create varying size holes in the address space.
-     */
-    errors = mlist_dealloc(optt, ts->unmap_gap, ts->ml_initial, &ts->nmap, ts->unmap_gap, ts->ml);
-    ts->unmap_gap = GAP_INCREMENT + ((ts->unmap_gap > GAP_MAXIMUM) ? 0 : ts->unmap_gap);
 
     /*
      * Place a cap on the maximum number of maps to limit overall memory
@@ -390,7 +391,7 @@ benchmark_finibatch(void *tsd)
     }
 
     int i;
-    for (i = 0; i < lm_optB; i++) {
+    for (i = 0; i < opti; i++) {
         ts->mls[i] = NULL;
     }
 
@@ -410,7 +411,7 @@ benchmark_result(void)
 {
 	static char		result[256];
 
-	(void) snprintf(result, sizeof(result), "%8d %8d %8d", optm, optc, optt);
+	(void) snprintf(result, sizeof(result), "%8d %8d %8d", optm, optc, opti);
 
 	return result;
 }

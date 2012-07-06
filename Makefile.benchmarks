@@ -78,6 +78,7 @@ ALL=				\
 		mmap_frag	\
 		msync		\
 		munmap		\
+		munmap_frag	\
 		mutex		\
 		nanosleep	\
 		nop		\
