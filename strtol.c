@@ -36,11 +36,11 @@
 #include "libmicro.h"
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	(void) sprintf(lm_usage, "note: measures strtol()");
 	lm_tsdsize = 0;
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/
@@ -63,5 +63,5 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
