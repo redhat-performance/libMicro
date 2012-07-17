@@ -29,92 +29,92 @@
 #
 
 
-ALL=				\
-		atomic		\
-		bind		\
+ALL=					\
+		atomic			\
+		bind			\
 		cachetocache	\
 		cascade_mutex	\
 		cascade_cond	\
 		cascade_lockf	\
 		cascade_fcntl	\
 		cascade_flock	\
-		chdir		\
+		chdir			\
 		clock_gettime	\
 		clock_nanosleep	\
-		close		\
-		close_tcp	\
-		connection	\
-		dup		\
-		exec		\
-		execw		\
-		exit		\
-		exp		\
-		fcntl		\
+		close			\
+		close_tcp		\
+		connection		\
+		dup				\
+		exec			\
+		execw			\
+		exit			\
+		exp				\
+		fcntl			\
 		fcntl_ndelay	\
-		file_lock	\
-		fork		\
-		getcontext	\
-		getenv		\
+		file_lock		\
+		fork			\
+		getcontext		\
+		getenv			\
 		gettimeofday	\
-		getpeername	\
-		getpid		\
-		getrusage	\
-		getsockname	\
-		isatty		\
-		listen		\
-		localtime_r	\
-		log		\
-		longjmp		\
-		lrand48		\
-		lseek		\
-		malloc		\
-		memcpy		\
-		memmove		\
-		memrand		\
-		memset		\
-		mktime		\
-		mprotect	\
-		mmap		\
-		mmap_frag	\
-		msync		\
-		munmap		\
-		munmap_frag	\
-		mutex		\
-		nanosleep	\
-		nop		\
-		open		\
-		pipe		\
-		poll		\
-		posix_spawn	\
-		pread		\
+		getpeername		\
+		getpid			\
+		getrusage		\
+		getsockname		\
+		isatty			\
+		listen			\
+		localtime_r		\
+		log				\
+		longjmp			\
+		lrand48			\
+		lseek			\
+		malloc			\
+		memcpy			\
+		memmove			\
+		memrand			\
+		memset			\
+		mktime			\
+		mprotect		\
+		mmap			\
+		mmap_frag		\
+		msync			\
+		munmap			\
+		munmap_frag		\
+		mutex			\
+		nanosleep		\
+		nop				\
+		open			\
+		pipe			\
+		poll			\
+		posix_spawn		\
+		pread			\
 		pthread_create	\
-		pwrite		\
-		read		\
-		realpath	\
-		recurse		\
-		sched_yield	\
-		select		\
-		semop		\
-		setcontext	\
-		setsockopt	\
-		sigaction	\
-		siglongjmp	\
-		signal		\
-		sigprocmask	\
-		socket		\
-		socketpair	\
-		stat		\
-		strcasecmp	\
-		strchr		\
-		strcmp		\
-		strcpy		\
-		strftime	\
-		strlen		\
-		strtol		\
-		system		\
-		time		\
-		times		\
-		write		\
+		pwrite			\
+		read			\
+		realpath		\
+		recurse			\
+		sched_yield		\
+		select			\
+		semop			\
+		setcontext		\
+		setsockopt		\
+		sigaction		\
+		siglongjmp		\
+		signal			\
+		sigprocmask		\
+		socket			\
+		socketpair		\
+		stat			\
+		strcasecmp		\
+		strchr			\
+		strcmp			\
+		strcpy			\
+		strftime		\
+		strlen			\
+		strtol			\
+		system			\
+		time			\
+		times			\
+		write			\
 		writev
 
 
