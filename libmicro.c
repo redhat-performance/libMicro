@@ -66,7 +66,7 @@
  */
 
 int				lm_argc = 0;
-char **				lm_argv = NULL;
+char		  **lm_argv = NULL;
 
 int				lm_opt1;
 int				lm_optA;
@@ -79,7 +79,7 @@ int				lm_optH;
 int				lm_optI;
 int				lm_optL = 0;
 int				lm_optM = 0;
-char				*lm_optN;
+char		   *lm_optN;
 int				lm_optP;
 int				lm_optS;
 int				lm_optT;
@@ -90,7 +90,7 @@ int				lm_defB = 0; /* use lm_nsecs_per_op */
 int				lm_defC = 100;
 int				lm_defD = 10*1000;
 int				lm_defH = 0;
-char				*lm_defN = NULL;
+char		   *lm_defN = NULL;
 int				lm_defP = 1;
 
 int				lm_defS = 0;
@@ -103,27 +103,27 @@ int				lm_defT = 1;
 
 int				lm_nsecs_per_op = 5;
 
-char				*lm_procpath;
-char				lm_procname[STRSIZE];
-char				lm_usage[STRSIZE];
-char				lm_optstr[STRSIZE];
-char				lm_header[STRSIZE];
-size_t				lm_tsdsize = 0;
+char		   *lm_procpath;
+char			lm_procname[STRSIZE];
+char			lm_usage[STRSIZE];
+char			lm_optstr[STRSIZE];
+char			lm_header[STRSIZE];
+size_t			lm_tsdsize = 0;
 
 
 /*
  *	Globals we do not export to the user
  */
 
-static barrier_t		*lm_barrier;
-static pid_t			*pids = NULL;
-static pthread_t		*tids = NULL;
+static barrier_t   *lm_barrier;
+static pid_t	   *pids = NULL;
+static pthread_t   *tids = NULL;
 static int			pindex = -1;
-static void			*tsdseg = NULL;
-static size_t			tsdsize = 0;
+static void		   *tsdseg = NULL;
+static size_t		tsdsize = 0;
 
 #ifdef USE_RDTSC
-static long long		lm_hz = 0;
+static long long	lm_hz = 0;
 #endif
 
 
@@ -135,11 +135,11 @@ static void			worker_process();
 static void			usage();
 static void			print_stats(barrier_t *);
 static void			print_histo(barrier_t *);
-static int		remove_outliers(double *, int, stats_t *);
+static int			remove_outliers(double *, int, stats_t *);
 static long long	nsecs_overhead;
 static long long	nsecs_resolution;
 static long long	get_nsecs_overhead();
-static int		crunch_stats(double *, int, stats_t *);
+static int			crunch_stats(double *, int, stats_t *);
 static void			compute_stats(barrier_t *);
 /*
  * main routine; renamed in this file to allow linking with other
@@ -149,12 +149,12 @@ static void			compute_stats(barrier_t *);
 int
 actual_main(int argc, char *argv[])
 {
-	int			i;
-	int			opt;
-	extern char		*optarg;
-	char			*tmp;
+	int				i;
+	int				opt;
+	extern char	   *optarg;
+	char		   *tmp;
 	char			optstr[256];
-	barrier_t		*b;
+	barrier_t	   *b;
 	long long		startnsecs;
 
 #ifdef USE_RDTSC

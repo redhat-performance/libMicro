@@ -71,52 +71,52 @@ typedef struct stats {
  */
 
 typedef struct {
-	int			ba_hwm;		/* barrier setpoint	*/
-	int			ba_flag;	/* benchmark while true	*/
-	long long		ba_deadline;	/* when to stop		*/
-	int			ba_phase;	/* number of time used	*/
-	int 			ba_waiters;	/* how many are waiting	*/
+	int				ba_hwm;			/* barrier setpoint	*/
+	int				ba_flag;		/* benchmark while true	*/
+	long long		ba_deadline;	/* when to stop */
+	int				ba_phase;		/* number of time used */
+	int 			ba_waiters;		/* how many are waiting	*/
 
 #ifdef USE_SEMOP
-	int			ba_semid;
+	int				ba_semid;
 #else
-	pthread_mutex_t		ba_lock;
-	pthread_cond_t		ba_cv;
+	pthread_mutex_t	ba_lock;
+	pthread_cond_t	ba_cv;
 #endif
 
-	long long		ba_count;	/* how many ops		 */
-	long long		ba_errors;	/* how many errors	 */
+	long long		ba_count;		/* how many ops */
+	long long		ba_errors;		/* how many errors */
 
-	int			ba_quant;	/* how many quant errors */
-	int			ba_batches;	/* how many samples	 */
+	int				ba_quant;		/* how many quant errors */
+	int				ba_batches;		/* how many samples	*/
 
 	double			ba_starttime;	/* test time start */
-	double			ba_endtime;	/* test time end */
+	double			ba_endtime;		/* test time end */
 
 #ifdef NEVER
-	double			ba_tmin;	/* min time taken */
-	double			ba_tmax;	/* max time taken */
-	double			ba_ctmax;	/* max after outliers */
-	double			ba_mean;	/* average value */
-	double			ba_median;	/* median value */
+	double			ba_tmin;		/* min time taken */
+	double			ba_tmax;		/* max time taken */
+	double			ba_ctmax;		/* max after outliers */
+	double			ba_mean;		/* average value */
+	double			ba_median;		/* median value */
 	double			ba_rawmedian;	/* raw median value */
-	double			ba_stddev;	/* standard deviation */
-	double			ba_stderr;	/* standard error */
-	double			ba_skew; 	/* skew */
+	double			ba_stddev;		/* standard deviation */
+	double			ba_stderr;		/* standard error */
+	double			ba_skew; 		/* skew */
 	double			ba_kurtosis;	/* kurtosis */
 #endif
-	stats_t			ba_raw;		/* raw stats */
+	stats_t			ba_raw;			/* raw stats */
 	stats_t			ba_corrected;	/* corrected stats */
 
-	int			ba_outliers;	/* outlier count */
+	int				ba_outliers;	/* outlier count */
 
-	long long		ba_t0;		/* first thread/proc */
-	long long		ba_t1;		/* time of last thread */
+	long long		ba_t0;			/* first thread/proc */
+	long long		ba_t1;			/* time of last thread */
 	long long		ba_count0;
 	long long		ba_errors0;
 
-	int			ba_datasize;	/* possible #items data	*/
-	double			ba_data[1];	/* start of data ararry	*/
+	int				ba_datasize;	/* possible #items data	*/
+	double			ba_data[1];		/* start of data ararry	*/
 } barrier_t;
 
 
@@ -151,14 +151,14 @@ char	*benchmark_result(void);
  */
 
 extern int			lm_argc;
-extern char			**lm_argv;
+extern char		  **lm_argv;
 
 extern int			lm_optB;
 extern int			lm_optC;
 extern int			lm_optD;
 extern int			lm_optG;
 extern int			lm_optH;
-extern char			*lm_optN;
+extern char		   *lm_optN;
 extern int			lm_optP;
 extern int			lm_optS;
 extern int			lm_optT;
@@ -167,18 +167,18 @@ extern int			lm_defB;
 extern int			lm_defC;
 extern int			lm_defD;
 extern int			lm_defH;
-extern char			*lm_defN;
+extern char		   *lm_defN;
 extern int			lm_defP;
 extern int			lm_defS;
 extern int			lm_defT;
 extern int			lm_nsecs_per_op;
 
-extern char			*lm_procpath;
+extern char		   *lm_procpath;
 extern char			lm_procname[STRSIZE];
-extern char 			lm_usage[STRSIZE];
-extern char 			lm_optstr[STRSIZE];
-extern char 			lm_header[STRSIZE];
-extern size_t			lm_tsdsize;
+extern char 		lm_usage[STRSIZE];
+extern char 		lm_optstr[STRSIZE];
+extern char 		lm_header[STRSIZE];
+extern size_t		lm_tsdsize;
 
 
 /*
@@ -193,7 +193,7 @@ long long 	getnsecs(void);
 void 		setfdlimit(int);
 long long 	sizetoll(const char *);
 int 		sizetoint(const char *);
-int		fit_line(double *, double *, int, double *, double *);
+int			fit_line(double *, double *, int, double *, double *);
 long long	get_nsecs_resolution(void);
 
 #endif /* LIBMICRO_H */
