@@ -291,6 +291,7 @@ strcasecmp	$OPTS -N "scasecmp_10"	-s 10	-B 200
 strcasecmp	$OPTS -N "scasecmp_1k"	-s 1k
 
 strtol		$OPTS -N "strtol"	-B 200
+atoi		$OPTS -N "atoi"
 
 getcontext	$OPTS -N "getcontext"
 setcontext	$OPTS -N "setcontext"

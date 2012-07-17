@@ -30,6 +30,7 @@
 
 
 ALL=					\
+		atoi			\
 		atomic			\
 		bind			\
 		cachetocache	\
