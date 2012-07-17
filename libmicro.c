@@ -1060,13 +1060,13 @@ gettsd(int p, int t)
 
 #ifdef USE_GETHRTIME
 long long
-getnsecs()
+getnsecs(void)
 {
 	return (gethrtime());
 }
 
 long long
-getusecs()
+getusecs(void)
 {
 	return (gethrtime() / 1000);
 }
@@ -1082,13 +1082,13 @@ rdtsc(void)
 }
 
 long long
-getusecs()
+getusecs(void)
 {
 	return (rdtsc() * 1000000 / lm_hz);
 }
 
 long long
-getnsecs()
+getnsecs(void)
 {
 	return (rdtsc() * 1000000000 / lm_hz);
 }
@@ -1096,7 +1096,7 @@ getnsecs()
 #else /* USE_GETHRTIME */
 
 long long
-getusecs()
+getusecs(void)
 {
 	struct timeval		tv;
 
@@ -1106,7 +1106,7 @@ getusecs()
 }
 
 long long
-getnsecs()
+getnsecs(void)
 {
 	struct timeval		tv;
 
