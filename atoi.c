@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "libmicro.h"
 
@@ -50,16 +51,16 @@ benchmark(void *tsd, result_t *res)
 	int			i;
 
 	for (i = 0; i < lm_optB; i += 10) {
-		(void) atoi("1");
-		(void) atoi("11");
-		(void) atoi("123");
-		(void) atoi("1234");
-		(void) atoi("12345");
-		(void) atoi("123456");
-		(void) atoi("1234567");
-		(void) atoi("12345678");
-		(void) atoi("123456789");
-		(void) atoi("1234567890");
+		assert(1          == atoi("1"));
+		assert(12         == atoi("12"));
+		assert(123        == atoi("123"));
+		assert(1234       == atoi("1234"));
+		assert(12345      == atoi("12345"));
+		assert(123456     == atoi("123456"));
+		assert(1234567    == atoi("1234567"));
+		assert(12345678   == atoi("12345678"));
+		assert(123456789  == atoi("123456789"));
+		assert(1234567890 == atoi("1234567890"));
 	}
 	res->re_count = i;
 
