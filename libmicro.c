@@ -60,6 +60,8 @@
 
 #include "libmicro.h"
 
+#define DEF_SAMPLES 100
+#define DEF_TIME 10 /* seconds */
 
 /*
  * user visible globals
@@ -71,7 +73,7 @@ char		  **lm_argv = NULL;
 int				lm_opt1;
 int				lm_optA;
 int				lm_optB;
-int				lm_optC;
+int				lm_optC = 0;
 int				lm_optD;
 int				lm_optE;
 int				lm_optG = 0;
@@ -87,8 +89,8 @@ int				lm_optW;
 
 int				lm_def1 = 0;
 int				lm_defB = 0; /* use lm_nsecs_per_op */
-int				lm_defC = 100;
-int				lm_defD = 10*1000;
+int				lm_defC = DEF_SAMPLES;
+int				lm_defD = DEF_TIME*1000; /* DEF_TIME ms */
 int				lm_defH = 0;
 char		   *lm_defN = NULL;
 int				lm_defP = 1;
@@ -100,8 +102,7 @@ int				lm_defT = 1;
  * default on fast platform, should be overridden by individual
  * benchmarks if significantly wrong in either direction.
  */
-
-int				lm_nsecs_per_op = 5;
+int				lm_nsecs_per_op = 1000; /* 1,000 ns, or 1us */
 
 char		   *lm_procpath;
 char			lm_procname[STRSIZE];
@@ -149,12 +150,12 @@ static void			compute_stats(barrier_t *);
 int
 actual_main(int argc, char *argv[])
 {
-	int				i;
-	int				opt;
-	extern char	   *optarg;
-	char		   *tmp;
+	int			i;
+	int			opt;
+	extern char		*optarg;
+	char			*tmp;
 	char			optstr[256];
-	barrier_t	   *b;
+	barrier_t		*b;
 	long long		startnsecs;
 
 #ifdef USE_RDTSC
@@ -189,7 +190,6 @@ actual_main(int argc, char *argv[])
 
 	lm_opt1	= lm_def1;
 	lm_optB	= lm_defB;
-	lm_optC = lm_defC;
 	lm_optD	= lm_defD;
 	lm_optH	= lm_defH;
 	lm_optN	= lm_defN;
@@ -247,24 +247,18 @@ actual_main(int argc, char *argv[])
 			break;
 		case 'C':
 			lm_optC = sizetoint(optarg);
-			if (lm_optC > 0) {
-				lm_optD = 0;
-			}
-			else {
+			if (lm_optC <= 0) {
 				if (lm_optD <= 0) {
-					(void) printf("warning: -C <= 0 and -D <= 0, defaulting -D to %d\n", lm_defD);
+					(void) printf("warning: '-C' <= 0 and '-D' <= 0, defaulting '-D' to %d\n", lm_defD);
 					lm_optD = lm_defD;
 				}
 			}
 			break;
 		case 'D':
 			lm_optD = sizetoint(optarg);
-			if (lm_optD > 0) {
-				lm_optC = 0;
-			}
-			else {
+			if (lm_optD <= 0) {
 				if (lm_optC <= 0) {
-					(void) printf("warning: -D <= 0 and -C <= 0, defaulting -C to %d\n", lm_defC);
+					(void) printf("warning: '-D' <= 0 and '-C' <= 0, defaulting '-C' to %d\n", lm_defC);
 					lm_optC = lm_defC;
 				}
 			}
@@ -319,6 +313,13 @@ actual_main(int argc, char *argv[])
 		}
 	}
 
+	/*
+	 * We have to have at least one method of ending the test set, allowing
+	 * for both to allow for -C specifying the minimum number of Runs and -D
+	 * the minimum amount of time to run.
+	 */
+	assert((lm_optC > 0 && lm_optD >= 0) || (lm_optC >= 0 && lm_optD > 0));
+
 	/* deal with implicit and overriding options */
 	if (lm_opt1 && lm_optP > 1) {
 		lm_optP = 1;
@@ -326,28 +327,53 @@ actual_main(int argc, char *argv[])
 	}
 
 	if (lm_optE) {
-		(void) fprintf(stderr, "Running:%20s", lm_optN);
+		(void) fprintf(stderr, "Running:%30s", lm_optN);
 		(void) fflush(stderr);
 	}
 
 	if (lm_optB == 0) {
 		/*
-		 * neither benchmark or user has specified the number
-		 * of cnts/sample, so use computed value
+		 * Neither benchmark or user has specified the number of cnts/sample,
+		 * so use a computed value.
+		 *
+		 * In a DEF_TIME second period (see lm_optD above), we want to have
+		 * DEF_SAMPLES samples executed in that period. So each batch size
+		 * should run for about DEF_TIME/100 seconds.
 		 */
 		if (lm_optI)
 			lm_nsecs_per_op = lm_optI;
 
-		lm_optB = (nsecs_resolution * 100) / lm_nsecs_per_op;
+		long long sample_time;
+		if (lm_optC > 0) {
+			/*
+			 * We have a run limit set, so try to set the batch size to give
+			 * us a run of DEF_TIME seconds total.
+			 */
+			sample_time = (long long)round((DEF_TIME * 1000 * 1000 * 1000LL) / (double)lm_optC);
+		}
+		else {
+			assert(lm_optD > 0);
+			/*
+			 * We have a time limit, so divide it into DEF_SAMPLES samples,
+			 * and set the batch size appropriately to fit in the sample time
+			 * period.
+			 */
+			sample_time = (long long)round((lm_optD * 1000 * 1000LL) / (double)DEF_SAMPLES);
+		}
+		lm_optB = (int)(sample_time / lm_nsecs_per_op);
+
 		if (lm_optB == 0) {
-            if (lm_optG >= 1) fprintf(stderr, "DEBUG1 (%s): (nsecs_resolution (%d) * 100) / lm_nsecs_per_op (%d) == 0, defaulting lm_optB to one (1)\n", lm_optN, nsecs_resolution, lm_nsecs_per_op);
+			if (lm_optG >= 1) fprintf(stderr, "DEBUG1 (%s): (sample_time (%lld) / lm_nsecs_per_op (%d)) == 0, defaulting lm_optB to one (1)\n", lm_optN, sample_time, lm_nsecs_per_op);
 			lm_optB = 1;
-        }
+		}
+		else if (lm_optG >= 2) {
+			fprintf(stderr, "DEBUG2 (%s): defaulting lm_optB to %d\n", lm_optN, lm_optB);
+		}
 	}
 
-    if ((lm_optG >= 2) && (lm_optB < 20)) {
-        fprintf(stderr, "DEBUG2 (%s): lm_optB = %d\n", lm_optN, lm_optB);
-    }
+	if ((lm_optG >= 2) && (lm_optB < 20)) {
+		fprintf(stderr, "DEBUG2 (%s): lm_optB = %d\n", lm_optN, lm_optB);
+	}
 
 	/*
 	 * now that the options are set
@@ -457,7 +483,7 @@ actual_main(int argc, char *argv[])
 	(void) printf("%-*s %3d %3d %12.5f %12d %8lld %8d %s\n",
 			strlen(lm_optN), lm_optN, lm_optP, lm_optT,
 			(lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
-			b->ba_batches, b->ba_errors, lm_optB,
+			b->ba_batches_final, b->ba_errors, lm_optB,
 			benchmark_result());
 
 	/* print arguments benchmark was invoked with ? */
@@ -534,12 +560,17 @@ worker_thread(void *arg)
 
 		/* time to stop? */
 		if (lm_optC <= 0) {
+			/* No -C means stop at the computed deadline. */
 			if (r.re_t1 > lm_barrier->ba_deadline) {
 				lm_barrier->ba_flag = 0;
 			}
 		}
 		else {
-			if (lm_barrier->ba_batches >= lm_optC) {
+			/*
+			 * Stop when we have reached both the number of samples specified
+			 * and the deadline.
+			 */
+			if ((lm_barrier->ba_batches >= lm_optC) && (r.re_t1 > lm_barrier->ba_deadline)) {
 				lm_barrier->ba_flag = 0;
 			}
 		}
@@ -634,6 +665,52 @@ print_warnings(barrier_t *b)
 				lm_optB, increase);
 	}
 
+	long long per_batch = (long long)round((b->ba_count / (double)b->ba_batches));
+
+	if (lm_optG >= 2)
+		fprintf(stderr, "DEBUG2: print_warnings(): "
+				"lm_optB = %d, per_batch = %lld, "
+				"b->ba_count (%lld) / b->ba_batches (%d) = %.2lf\n",
+				lm_optB, per_batch, b->ba_count, b->ba_batches,
+				b->ba_count / (double)b->ba_batches);
+
+	if ((per_batch / (double)b->ba_batches) < 0.01618) {
+		/*
+		 * The ratio of 0.01618, or The Golden Ratio / 100, is just a way to
+		 * catch a test run with small number of runs in a batch with
+		 * potentially large numbers of batches.
+		 *
+		 * FIXME: There might be a more suitable ratio.
+		 */
+		if (!head++) {
+			(void) printf("#\n# WARNINGS\n");
+		}
+
+		/*
+		 * The number of batches is either really high, or the number of runs
+		 * per batch is really low. In either case, we should probably
+		 * re-balance the test run so that a sufficient count of operations is
+		 * timed per batch, lowering the number of over samples.
+		 */
+		increase = (long long)round(((double)b->ba_count / DEF_SAMPLES) / per_batch);
+		(void) printf("#     Low runs (%lld) per sample (%d samples) "
+				"consider increasing batch size (-B option, "
+				"currently %d) %lldX (to about %lld) to avoid.\n",
+				per_batch, b->ba_batches, lm_optB, increase,
+				(long long)round((double)b->ba_count / DEF_SAMPLES));
+	}
+
+	if (b->ba_batches < DEF_SAMPLES) {
+		if (!head++) {
+			(void) printf("#\n# WARNINGS\n");
+		}
+
+		(void) printf("#     Too few samples, %d < %d, "
+				"consider running test longer, "
+				"or for a least %d samples\n",
+				b->ba_batches, DEF_SAMPLES, DEF_SAMPLES);
+	}
+
 	/*
 	 * XXX should warn on median != mean by a lot
 	 */
@@ -650,7 +727,7 @@ void
 print_stats(barrier_t *b)
 {
 	(void) printf("#\n");
-	(void) printf("# STATISTICS         %12s          %12s\n",
+	(void) printf("# STATISTICS                 %12s           %12s\n",
 		"usecs/call (raw)",
 		"usecs/call (outliers removed)");
 
@@ -659,45 +736,49 @@ print_stats(barrier_t *b)
 		return;
 	}
 
-	(void) printf("#                    min %12.5f            %12.5f\n",
-		b->ba_raw.st_min,
-		b->ba_corrected.st_min);
-
-	(void) printf("#                    max %12.5f            %12.5f\n",
-		b->ba_raw.st_max,
-		b->ba_corrected.st_max);
-	(void) printf("#                   mean %12.5f            %12.5f\n",
-		b->ba_raw.st_mean,
-		b->ba_corrected.st_mean);
-	(void) printf("#                 median %12.5f            %12.5f\n",
-		b->ba_raw.st_median,
-		b->ba_corrected.st_median);
-	(void) printf("#                 stddev %12.5f            %12.5f\n",
-		b->ba_raw.st_stddev,
-		b->ba_corrected.st_stddev);
-	(void) printf("#         standard error %12.5f            %12.5f\n",
-		b->ba_raw.st_stderr,
-		b->ba_corrected.st_stderr);
-	(void) printf("#   99%% confidence level %12.5f            %12.5f\n",
-		b->ba_raw.st_99confidence,
-		b->ba_corrected.st_99confidence);
-	(void) printf("#                   skew %12.5f            %12.5f\n",
-		b->ba_raw.st_skew,
-		b->ba_corrected.st_skew);
-	(void) printf("#               kurtosis %12.5f            %12.5f\n",
-		b->ba_raw.st_kurtosis,
-		b->ba_corrected.st_kurtosis);
-
-	(void) printf("#       time correlation %12.5f            %12.5f\n",
-		b->ba_raw.st_timecorr,
-		b->ba_corrected.st_timecorr);
+	(void) printf("#                        min %12.5f            %12.5f\n",
+			b->ba_raw.st_min,
+			b->ba_corrected.st_min);
+	(void) printf("#                        max %12.5f            %12.5f\n",
+			b->ba_raw.st_max,
+			b->ba_corrected.st_max);
+	(void) printf("#                       mean %12.5f            %12.5f\n",
+			b->ba_raw.st_mean,
+			b->ba_corrected.st_mean);
+	(void) printf("#                     median %12.5f            %12.5f\n",
+			b->ba_raw.st_median,
+			b->ba_corrected.st_median);
+	(void) printf("#                     stddev %12.5f            %12.5f\n",
+			b->ba_raw.st_stddev,
+			b->ba_corrected.st_stddev);
+	(void) printf("#             standard error %12.5f            %12.5f\n",
+			b->ba_raw.st_stderr,
+			b->ba_corrected.st_stderr);
+	(void) printf("#       99%% confidence level %12.5f            %12.5f\n",
+			b->ba_raw.st_99confidence,
+			b->ba_corrected.st_99confidence);
+	(void) printf("#                       skew %12.5f            %12.5f\n",
+			b->ba_raw.st_skew,
+			b->ba_corrected.st_skew);
+	(void) printf("#                   kurtosis %12.5f            %12.5f\n",
+			b->ba_raw.st_kurtosis,
+			b->ba_corrected.st_kurtosis);
+	(void) printf("#           time correlation %12.5f            %12.5f\n",
+			b->ba_raw.st_timecorr,
+			b->ba_corrected.st_timecorr);
 	(void) printf("#\n");
 
-	(void) printf("#           elasped time %12.5f\n", (b->ba_endtime -
-		b->ba_starttime) / 1.0e9);
-	(void) printf("#      number of samples %12d\n",   b->ba_batches);
-	(void) printf("#     number of outliers %12d\n", b->ba_outliers);
-	(void) printf("#      getnsecs overhead %12d\n", (int)nsecs_overhead);
+	(void) printf("#               elasped time %12.5f\n",
+			(b->ba_endtime - b->ba_starttime) / 1.0e9);
+	(void) printf("#\n");
+
+	(void) printf("#          number of samples %12d\n", b->ba_batches);
+	if (b->ba_batches > b->ba_datasize)
+		(void) printf("# number of samples retained %12d (%d samples dropped)\n",
+				b->ba_datasize, b->ba_batches - b->ba_datasize);
+	(void) printf("#         number of outliers %12d\n", b->ba_outliers);
+	(void) printf("#    number of final samples %12d\n", b->ba_batches_final);
+	(void) printf("#          getnsecs overhead %12d\n", (int)nsecs_overhead);
 
 	(void) printf("#\n");
 	(void) printf("# DISTRIBUTION\n");
@@ -737,21 +818,25 @@ update_stats(barrier_t *b, result_t *r)
 	if (b->ba_waiters == b->ba_hwm - 1) {
 		/* last thread only */
 
-
 		time = (double)b->ba_t1 - (double)b->ba_t0 -
 			(double)nsecs_overhead;
 
-		if (time < 100 * nsecs_resolution)
+		if (time < (100 * nsecs_resolution))
 			b->ba_quant++;
 
 		/*
 		 * normalize by procs * threads if not -U
+		 *
+		 * FIXME: Should we not be getting the data from each thread in all
+		 * the processes and then averaging them all together?
 		 */
 
 		nsecs_per_call = time / (double)b->ba_count0 *
 			(double)(lm_optT * lm_optP);
 
+		long long orig_ba_count = b->ba_count;
 		b->ba_count	 += b->ba_count0;
+		if (lm_optG >= 8) fprintf(stderr, "DEBUG8: update_stats(): b->ba_count (%lld) + b->ba_count0 (%lld) = b->ba_count (%lld)\n", orig_ba_count, b->ba_count0, b->ba_count);
 		b->ba_errors += b->ba_errors0;
 
 		b->ba_data[b->ba_batches % b->ba_datasize] =
@@ -1338,7 +1423,7 @@ print_histo(barrier_t *b)
 				maxcount = histo[i].count;
 		}
 
-	(void) printf("#    %12s %12s %32s %12s\n", "counts", "usecs/call",
+	(void) printf("#       %12s %12s %32s %12s\n", "counts", "usecs/call",
 		"", "means");
 
 	/* print the buckets */
@@ -1374,33 +1459,29 @@ print_histo(barrier_t *b)
 	(void) printf("#\n");
 	(void) printf("#       %12s %12.5f\n", "mean of 95%", m95);
 	(void) printf("#       %12s %12.5f\n", "95th %ile", p95);
-
-	/* quantify any buffer overflow */
-	if (b->ba_batches > b->ba_datasize)
-		(void) printf("#       %12s %12d\n", "data dropped",
-			b->ba_batches - b->ba_datasize);
 }
 
 static void
 compute_stats(barrier_t *b)
 {
-	int i;
+	int i, batches;
 
-	if (b->ba_batches > b->ba_datasize)
-		b->ba_batches = b->ba_datasize;
+	batches = (b->ba_batches >= b->ba_datasize)
+		? b->ba_datasize
+		: b->ba_batches;
 
 	/*
 	 * convert to usecs/call
 	 */
 
-	for (i = 0; i < b->ba_batches; i++)
+	for (i = 0; i < batches; i++)
 		b->ba_data[i] /= 1000.0;
 
 	/*
 	 * do raw stats
 	 */
 
-	(void) crunch_stats(b->ba_data, b->ba_batches, &b->ba_raw);
+	(void) crunch_stats(b->ba_data, batches, &b->ba_raw);
 
 	/*
 	 * recursively apply 3 sigma rule to remove outliers
@@ -1409,19 +1490,19 @@ compute_stats(barrier_t *b)
 	b->ba_corrected = b->ba_raw;
 	b->ba_outliers = 0;
 
-	if (b->ba_batches > 40) { /* remove outliers */
+	if (batches > 40) { /* remove outliers */
 		int removed;
 
 		do {
-			removed = remove_outliers(b->ba_data, b->ba_batches,
+			removed = remove_outliers(b->ba_data, batches,
 				&b->ba_corrected);
 			b->ba_outliers += removed;
-			b->ba_batches -= removed;
-			(void) crunch_stats(b->ba_data, b->ba_batches,
+			batches -= removed;
+			(void) crunch_stats(b->ba_data, batches,
 				&b->ba_corrected);
-			} while (removed != 0 && b->ba_batches > 40);
+			} while (removed != 0 && batches > 40);
 	}
-
+	b->ba_batches_final = batches;
 }
 
 /*
@@ -1489,19 +1570,22 @@ crunch_stats(double *data, int count, stats_t *stats)
 			stats->st_min = data[i];
 
 		diff = data[i] - mean;
-		std	+= diff * diff;
-		sk	+= diff * diff * diff;
-		ku	+= diff * diff * diff * diff;
+		double diff2 = diff * diff;
+		std	+= diff2;
+		double diff3 = diff2 * diff;
+		sk	+= diff3;
+		ku	+= diff3 * diff;
 	}
 
-	stats->st_stddev   = std = sqrt(std/(double)(count - 1));
+	double cm1		   = (double)(count - 1);
+	stats->st_stddev   = std = sqrt(std/cm1);
 	stats->st_stderr   = std / sqrt(count);
 	stats->st_99confidence = stats->st_stderr * 2.326;
-	stats->st_skew	   = sk / (std * std * std) / (double)(count);
-	stats->st_kurtosis = ku / (std * std * std * std) /
-		(double)(count) - 3;
+	double std3		   = (std * std * std);
+	stats->st_skew	   = (sk / (cm1 * std3));
+	stats->st_kurtosis = (ku / (cm1 * (std3 * std))) - 3;
 
-	return (0);
+	return 0;
 }
 
 /*

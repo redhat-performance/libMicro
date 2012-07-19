@@ -30,7 +30,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.16"
+#define	LIBMICRO_VERSION	"0.4.1-rh.17"
 
 #define	STRSIZE			1024
 
@@ -89,6 +89,9 @@ typedef struct {
 
 	int				ba_quant;		/* how many quant errors */
 	int				ba_batches;		/* how many samples	*/
+	int				ba_batches_final;	/* how many samples that fit into the
+										 * data set size (see ba_datasize
+										 * below) and after removing outliers. */
 
 	double			ba_starttime;	/* test time start */
 	double			ba_endtime;		/* test time end */
