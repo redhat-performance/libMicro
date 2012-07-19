@@ -395,7 +395,6 @@ actual_main(int argc, char *argv[])
 	if (tids == NULL) {
 		perror("malloc(tids)");
 		exit(1);
-
 	}
 
 	/* round up tsdsize to nearest 128 to eliminate false sharing */
