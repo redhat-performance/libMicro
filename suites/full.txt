@@ -25,6 +25,10 @@ memrand	"memrand"	-s 512m	-B 2k
 memrand	"memrand"	-s 1g	-B 1k
 memrand	"memrand"	-s 2g	-B 500
 
+recurse	"recurse"	-B 200k
+recurse	"recurse"	-d 1k	-B 10k
+recurse	"recurse"	-d 10k	-B 5k
+
 getpid	"getpid"	-B 640000
 getpid	"getpid_s"	-B 32000	-s
 getpid	"getpidT4"	-B 640000	-T 4
@@ -343,10 +347,6 @@ posix_spawn	"posix_spawn_8192nt"	-B 500	-n 8192	-p 32	-t
 posix_spawn	"posix_spawn_8192nt1000r"	-B 500	-n 8192	-p 32	-t	-r 1000
 
 system	"system"	-B 100
-
-recurse	"recurse"	-B 200k
-recurse	"recurse"	-d 1k	-B 10k
-recurse	"recurse"	-d 10k	-B 5k
 
 read	"read_t1k"	-s 1k	-f $TFILE	-B 80k
 read	"read_t10k"	-s 10k	-f $TFILE	-B 40k
