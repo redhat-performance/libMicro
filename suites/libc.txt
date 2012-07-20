@@ -25,9 +25,6 @@ nanosleep	"nanosleep_d1000"	-B 1500	-d 1000
 nanosleep	"nanosleep_d10000"	-B 1000	-d 10000
 nanosleep	"nanosleep_d100000"	-B 1000	-d 100000
 
-log	"log"	-B 2000000
-exp	"exp"	-B 2000000
-
 lrand48	"lrand48"	-B 8000000
 
 memset	"memset_10"	-s 10	-B 10m
