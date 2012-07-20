@@ -1,0 +1,65 @@
+mmap	"mmap_z8k"	-l 8k	-f /dev/zero	-B 10k
+mmap	"mmap_z128k"	-l 128k	-f /dev/zero	-B 5k
+mmap	"mmap_t8k"	-l 8k	-f $TFILE	-B 10k
+mmap	"mmap_t128k"	-l 128k	-f $TFILE	-B 5k
+mmap	"mmap_u8k"	-l 8k	-f $VFILE	-B 10k
+mmap	"mmap_u128k"	-l 128k	-f $VFILE	-B 5k
+mmap	"mmap_a8k"	-l 8k	-f MAP_ANON	-B 10k
+mmap	"mmap_a128k"	-l 128k	-f MAP_ANON	-B 5k
+
+mmap	"mmap_rz8k"	-l 8k	-r	-f /dev/zero	-B 10k
+mmap	"mmap_rz128k"	-l 128k	-r	-f /dev/zero	-B 5k
+mmap	"mmap_rt8k"	-l 8k	-r	-f $TFILE	-B 10k
+mmap	"mmap_rt128k"	-l 128k	-r	-f $TFILE	-B 5k
+mmap	"mmap_ru8k"	-l 8k	-r	-f $VFILE	-B 10k
+mmap	"mmap_ru128k"	-l 128k	-r	-f $VFILE	-B 5k
+mmap	"mmap_ra8k"	-l 8k	-r	-f MAP_ANON	-B 10k
+mmap	"mmap_ra128k"	-l 128k	-r	-f MAP_ANON	-B 5k
+
+mmap	"mmap_wz8k"	-l 8k	-w	-f /dev/zero	-B 10k
+mmap	"mmap_wz128k"	-l 128k	-w	-f /dev/zero	-B 1k
+mmap	"mmap_wt8k"	-l 8k	-w	-f $TFILE	-B 10k
+mmap	"mmap_wt128k"	-l 128k	-w	-f $TFILE	-B 1k
+mmap	"mmap_wu8k"	-l 8k	-w	-f $VFILE	-B 10k
+mmap	"mmap_wu128k"	-l 128k	-w	-f $VFILE	-B 1k
+mmap	"mmap_wa8k"	-l 8k	-w	-f MAP_ANON	-B 10k
+mmap	"mmap_wa128k"	-l 128k	-w	-f MAP_ANON	-B 1k
+
+mmap_frag	"mmap_frag"	-B 10000	-C 1000
+
+munmap	"unmap_z8k"	-l 8k	-f /dev/zero	-B 10k
+munmap	"unmap_z128k"	-l 128k	-f /dev/zero	-B 5k
+munmap	"unmap_t8k"	-l 8k	-f $TFILE	-B 10k
+munmap	"unmap_t128k"	-l 128k	-f $TFILE	-B 5k
+munmap	"unmap_u8k"	-l 8k	-f $VFILE	-B 10k
+munmap	"unmap_u128k"	-l 128k	-f $VFILE	-B 5k
+munmap	"unmap_a8k"	-l 8k	-f MAP_ANON	-B 10k
+munmap	"unmap_a128k"	-l 128k	-f MAP_ANON	-B 5k
+
+munmap	"unmap_rz8k"	-l 8k	-r	-f /dev/zero	-B 10k
+munmap	"unmap_rz128k"	-l 128k	-r	-f /dev/zero	-B 15k
+munmap	"unmap_rt8k"	-l 8k	-r	-f $TFILE	-B 10k
+munmap	"unmap_rt128k"	-l 128k	-r	-f $TFILE	-B 5k
+munmap	"unmap_ru8k"	-l 8k	-r	-f $VFILE	-B 10k
+munmap	"unmap_ru128k"	-l 128k	-r	-f $VFILE	-B 5k
+munmap	"unmap_ra8k"	-l 8k	-r	-f MAP_ANON	-B 10k
+munmap	"unmap_ra128k"	-l 128k	-r	-f MAP_ANON	-B 5k
+
+munmap	"unmap_wz8k"	-l 8k	-w	-f /dev/zero	-B 10k
+munmap	"unmap_wz128k"	-l 128k	-w	-f /dev/zero	-B 1k
+munmap	"unmap_wt8k"	-l 8k	-w	-f $TFILE	-B 10k
+munmap	"unmap_wt128k"	-l 128k	-w	-f $TFILE	-B 1k
+munmap	"unmap_wu8k"	-l 8k	-w	-f $VFILE	-B 10k
+munmap	"unmap_wu128k"	-l 128k	-w	-f $VFILE	-B 1k
+munmap	"unmap_wa8k"	-l 8k	-w	-f MAP_ANON	-B 10k
+munmap	"unmap_wa128k"	-l 128k	-w	-f MAP_ANON	-B 1k
+
+munmap_frag	"munmap_frag"	-B 2500	-C 1000
+
+mprotect	"mprot_z8k"	-l 8k	-f /dev/zero	-B 10k
+mprotect	"mprot_z128k"	-l 128k	-f /dev/zero	-B 5k
+mprotect	"mprot_wz8k"	-l 8k	-w	-f /dev/zero	-B 10k
+mprotect	"mprot_wz128k"	-l 128k	-w	-f /dev/zero	-B 5k
+mprotect	"mprot_twz8k"	-l 8k	-w	-t	-f /dev/zero	-B 10k
+mprotect	"mprot_tw128k"	-l 128k	-w	-t	-f /dev/zero	-B 5k
+mprotect	"mprot_tw4m"	-l 4m	-w	-t	-f /dev/zero	-B 500

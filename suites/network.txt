@@ -1,0 +1,44 @@
+getsockname	"getsockname"
+getpeername	"getpeername"
+
+fcntl_ndelay	"fcntl_ndelay"
+
+socket	"socket_u"	-B 10k
+socket	"socket_i"	-B 10k	-f PF_INET
+
+socketpair	"socketpair"	-B 25000
+
+setsockopt	"setsockopt"	
+
+bind	"bind"	-B 200
+
+listen	"listen"	-B 50k
+
+connection	"connection"	-B 512
+connection	"conn_connect"	-B 512	-c
+connection	"conn_accept"	-B 512	-a
+
+close_tcp	"close_tcp"	-B 1k
+
+poll	"poll_10"	-n 10
+poll	"poll_100"	-n 100	-B 10k
+poll	"poll_1000"	-n 1000	-B 1k
+
+poll	"poll_w10"	-n 10	-w 1
+poll	"poll_w100"	-n 100	-w 10	-B 10k
+poll	"poll_w1000"	-n 1000	-w 100	-B 1k
+
+select	"select_10"	-n 10
+select	"select_100"	-n 100	-B 10k
+select	"select_1000"	-n 1000	-B 1k
+
+select	"select_w10"	-n 10	-w 1
+select	"select_w100"	-n 100	-w 10	-B 10k
+select	"select_w1000"	-n 1000	-w 100	-B 1k
+
+pipe	"pipe_tst1"	-s 1	-x tcp	-m st	-B 10k
+pipe	"pipe_tmt1"	-s 1	-x tcp	-m mt	-B 5k
+pipe	"pipe_tmp1"	-s 1	-x tcp	-m mp	-B 5k
+pipe	"pipe_tst4k"	-s 4k	-x tcp	-m st	-B 10k
+pipe	"pipe_tmt4k"	-s 4k	-x tcp	-m mt	-B 5k
+pipe	"pipe_tmp4k"	-s 4k	-x tcp	-m mp	-B 5k
