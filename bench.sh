@@ -32,7 +32,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.17
+bench_version=0.4.1-rh.18
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -74,7 +74,7 @@ mkdir -p $VDIR1 $VDIR2
 
 touch $IFILE
 
-OPTS="-C 100 -D 10000 -E -L -S -W"
+OPTS="-C 100 -D 10000 -X 600000 -E -L -S -W"
 
 ROOT_UID=0   # Only users with $UID 0 have root privileges.
 

@@ -63,6 +63,7 @@
 
 #define DEF_SAMPLES 100
 #define DEF_TIME 10 /* seconds */
+#define MAX_TIME 600 /* seconds, or 10 minutes */
 
 /*
  * user visible globals
@@ -87,6 +88,7 @@ int				lm_optP;
 int				lm_optS;
 int				lm_optT;
 int				lm_optW;
+int				lm_optX;
 
 int				lm_def1 = 0;
 int				lm_defB = 0; /* use lm_nsecs_per_op */
@@ -95,9 +97,9 @@ int				lm_defD = DEF_TIME*1000; /* DEF_TIME ms */
 int				lm_defH = 0;
 char		   *lm_defN = NULL;
 int				lm_defP = 1;
-
 int				lm_defS = 0;
 int				lm_defT = 1;
+int				lm_defX = MAX_TIME*1000; /* MAX_TIME ms */
 
 /*
  * default on fast platform, should be overridden by individual
@@ -195,6 +197,7 @@ actual_main(int argc, char *argv[])
 	lm_optH	= lm_defH;
 	lm_optN	= lm_defN;
 	lm_optP	= lm_defP;
+	lm_optX = lm_defX;
 
 	lm_optS	= lm_defS;
 	lm_optT	= lm_defT;
@@ -234,7 +237,7 @@ actual_main(int argc, char *argv[])
 	 * Parse command line arguments
 	 */
 
-	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:RST:VW?%s", lm_optstr);
+	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:RST:VWX:?%s", lm_optstr);
 	while ((opt = getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case '1':
@@ -250,7 +253,7 @@ actual_main(int argc, char *argv[])
 			lm_optC = sizetoint(optarg);
 			if (lm_optC <= 0) {
 				if (lm_optD <= 0) {
-					(void) printf("warning: '-C' <= 0 and '-D' <= 0, defaulting '-D' to %d\n", lm_defD);
+					(void) printf("warning: '-C %d' <= 0 and '-D %d' <= 0, defaulting '-D' to %d\n", lm_optC, lm_optD, lm_defD);
 					lm_optD = lm_defD;
 				}
 			}
@@ -259,7 +262,7 @@ actual_main(int argc, char *argv[])
 			lm_optD = sizetoint(optarg);
 			if (lm_optD <= 0) {
 				if (lm_optC <= 0) {
-					(void) printf("warning: '-D' <= 0 and '-C' <= 0, defaulting '-C' to %d\n", lm_defC);
+					(void) printf("warning: '-D %d' <= 0 and '-C %d' <= 0, defaulting '-C' to %d\n", lm_optD, lm_optC, lm_defC);
 					lm_optC = lm_defC;
 				}
 			}
@@ -302,6 +305,17 @@ actual_main(int argc, char *argv[])
 			lm_optW = 1;
 			lm_optS = 1;
 			break;
+		case 'X':
+			lm_optX = sizetoint(optarg);
+			if (lm_optX < 0) {
+				(void) printf("warning: '-X %d' < 0, defaulting to %dms\n", lm_optX, lm_defX);
+				lm_optX = lm_defX;
+			}
+			else if (lm_optX > 0 && lm_optX < lm_optD) {
+				(void) printf("warning: '-X %d' < '-D %d', ignoring -X value\n", lm_optX, lm_optD);
+				lm_optX = 0;
+			}
+			break;
 		case '?':
 			usage();
 			exit(0);
@@ -320,6 +334,7 @@ actual_main(int argc, char *argv[])
 	 * the minimum amount of time to run.
 	 */
 	assert((lm_optC > 0 && lm_optD >= 0) || (lm_optC >= 0 && lm_optD > 0));
+	assert(lm_optX == 0 || lm_optX > lm_optD);
 
 	/* deal with implicit and overriding options */
 	if (lm_opt1 && lm_optP > 1) {
@@ -426,7 +441,14 @@ actual_main(int argc, char *argv[])
 	/* when we started and when to stop */
 
 	b->ba_starttime = getnsecs();
-	b->ba_deadline = (long long) (b->ba_starttime + (lm_optD * 1000000LL));
+	b->ba_minruntime = (long long) (b->ba_starttime + (lm_optD * 1000000LL));
+
+	if (lm_optX > 0)
+		b->ba_deadline = (long long) (b->ba_starttime + (lm_optX * 1000000LL));
+	else if (lm_optC <= 0)
+		b->ba_deadline = b->ba_minruntime;
+	else
+		b->ba_deadline = 0;
 
 	/* do the work */
 	if (lm_opt1) {
@@ -562,20 +584,10 @@ worker_thread(void *arg)
 		(void) barrier_queue(lm_barrier, &r);
 
 		/* time to stop? */
-		if (lm_optC <= 0) {
-			/* No -C means stop at the computed deadline. */
-			if (r.re_t1 > lm_barrier->ba_deadline) {
-				lm_barrier->ba_flag = 0;
-			}
-		}
-		else {
-			/*
-			 * Stop when we have reached both the number of samples specified
-			 * and the deadline.
-			 */
-			if ((lm_barrier->ba_batches >= lm_optC) && (r.re_t1 > lm_barrier->ba_deadline)) {
-				lm_barrier->ba_flag = 0;
-			}
+		if ((r.re_t1 > lm_barrier->ba_deadline)
+				|| ((lm_barrier->ba_batches >= lm_optC)
+						&& (r.re_t1 > lm_barrier->ba_minruntime))) {
+			lm_barrier->ba_flag = 0;
 		}
 
 		/* errors from finishing this batch feed into the next batch */
@@ -626,8 +638,8 @@ usage(void)
 		"\t[-1] (single process; overrides -P > 1)\n"
 		"\t[-A] (align with clock)\n"
 		"\t[-B batch-size (default %d)]\n"
-		"\t[-C minimum number of samples (default 0)] (mutually exclusive with -D)\n"
-		"\t[-D duration in ms (default %dms)] (mutually exlusive with -C)\n"
+		"\t[-C minimum number of samples (default 0)]\n"
+		"\t[-D minimum duration in ms (default %dms)]\n"
 		"\t[-E (echo name to stderr)]\n"
 		"\t[-H] (suppress headers)\n"
 		"\t[-I] nsecs per op (used to compute batch size)"
@@ -638,10 +650,11 @@ usage(void)
 		"\t[-S] (print detailed stats)\n"
 		"\t[-T threads (default %d)]\n"
 		"\t[-V] (print the libMicro version and exit)\n"
+		"\t[-X] maximum duration in ms (default %dms)\n"
 		"\t[-W] (flag possible benchmark problems)\n"
 		"%s\n",
 		lm_procname,
-		lm_defB, lm_defD, lm_procname, lm_defP, lm_defT,
+		lm_defB, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
 		lm_usage);
 }
 
