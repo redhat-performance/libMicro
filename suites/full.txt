@@ -2,6 +2,29 @@
 # Obligatory null system call: use very short time
 # for default since SuSe implements this "syscall" in userland
 #
+memrand	"memrand"	-s 1k	-B 1g
+memrand	"memrand"	-s 2k	-B 512m
+memrand	"memrand"	-s 4k	-B 256m
+memrand	"memrand"	-s 8k	-B 128m
+memrand	"memrand"	-s 16k	-B 64m
+memrand	"memrand"	-s 32k	-B 32m
+memrand	"memrand"	-s 64k	-B 16m
+memrand	"memrand"	-s 128k	-B 8m
+memrand	"memrand"	-s 256k	-B 4m
+memrand	"memrand"	-s 512k	-B 2m
+memrand	"memrand"	-s 1m	-B 1m
+memrand	"memrand"	-s 2m	-B 640k
+memrand	"memrand"	-s 4m	-B 320k
+memrand	"memrand"	-s 8m	-B 160k
+memrand	"memrand"	-s 16m	-B 80k
+memrand	"memrand"	-s 32m	-B 40k
+memrand	"memrand"	-s 64m	-B 20k
+memrand	"memrand"	-s 128m	-B 10k
+memrand	"memrand"	-s 256m	-B 5k
+memrand	"memrand"	-s 512m	-B 2k
+memrand	"memrand"	-s 1g	-B 1k
+memrand	"memrand"	-s 2g	-B 500
+
 getpid	"getpid"	-B 640000
 getpid	"getpid_s"	-B 32000	-s
 getpid	"getpidT4"	-B 640000	-T 4
@@ -78,8 +101,17 @@ memset	"memset_1m"	-s 1m	-B 200
 memset	"memset_10m"	-s 10m	-B 100
 memset	"memsetP2_10m"	-s 10m	-B 100	-P 2
 
-memrand	"memrand"	-s 128m	-B 10000
-cachetocache	"cachetocache"	-s 100k	-T 2
+memcpy	"memcpy_10"	-s 10
+memcpy	"memcpy_1k"	-s 1k
+memcpy	"memcpy_10k"	-s 10k
+memcpy	"memcpy_1m"	-s 1m	-B 100
+memcpy	"memcpy_10m"	-s 10m	-B 50
+
+memmove	"memmove_10"	-s 10
+memmove	"memmove_1k"	-s 1k
+memmove	"memmove_10k"	-s 10k
+memmove	"memmove_1m"	-s 1m	-B 100
+memmove	"memmove_10m"	-s 10m	-B 50
 
 isatty	"isatty_yes"
 isatty	"isatty_no" 	-f $IFILE
@@ -100,12 +132,6 @@ close	"close_bad"	-B 1m	-b
 close	"close_tmp"	-B 640	-f $TFILE
 close	"close_usr"	-B 640	-f $VFILE
 close	"close_zero"	-B 640	-f /dev/zero
-
-memcpy	"memcpy_10"	-s 10
-memcpy	"memcpy_1k"	-s 1k
-memcpy	"memcpy_10k"	-s 10k
-memcpy	"memcpy_1m"	-s 1m	-B 100
-memcpy	"memcpy_10m"	-s 10m	-B 50
 
 strcpy	"strcpy_10"	-s 10	-B 10m
 strcpy	"strcpy_1k"	-s 1k	-B 1m
@@ -319,6 +345,8 @@ posix_spawn	"posix_spawn_8192nt1000r"	-B 500	-n 8192	-p 32	-t	-r 1000
 system	"system"	-B 100
 
 recurse	"recurse"	-B 200k
+recurse	"recurse"	-d 1k	-B 10k
+recurse	"recurse"	-d 10k	-B 5k
 
 read	"read_t1k"	-s 1k	-f $TFILE	-B 80k
 read	"read_t10k"	-s 10k	-f $TFILE	-B 40k
