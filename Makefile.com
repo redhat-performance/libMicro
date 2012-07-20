@@ -69,8 +69,6 @@ CPPFLAGS+= -D_REENTRANT
 
 bind_EXTRA_LIBS=$(NSLLIB) $(SOCKLIB)
 cascade_flock_EXTRA_LIBS=$(UCBLIB)
-clock_gettime_EXTRA_LIBS=-lrt
-clock_nanosleep_EXTRA_LIBS=-lrt
 close_tcp_EXTRA_LIBS=$(NSLLIB) $(SOCKLIB)
 connection_EXTRA_LIBS=$(NSLLIB) $(SOCKLIB)
 fcntl_ndelay_EXTRA_LIBS=$(SOCKLIB)
@@ -116,8 +114,8 @@ pm_qos:		../pm_qos.c
 $(ELIDED_BENCHMARKS):	../elided.c
 	$(CC) -o $(@) ../elided.c
 
-%: libmicro.a %.o 
-	$(CC) -o $(@) $(@).o $($(@)_EXTRA_DEPS) $(CFLAGS) libmicro.a $($(@)_EXTRA_LIBS) $(EXTRA_LIBS) -lpthread -lm
+%: %.o libmicro.a
+	$(CC) -o $(@) $(@).o $($(@)_EXTRA_DEPS) $(CFLAGS) libmicro.a $($(@)_EXTRA_LIBS) $(EXTRA_LIBS) -lpthread -lrt -lm
 
 exec:	exec_bin
 execw:	exec_bin

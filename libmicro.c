@@ -53,6 +53,7 @@
 #include <math.h>
 #include <limits.h>
 #include <assert.h>
+#include <time.h>
 
 #ifdef	__sun
 #include <sys/elf.h>
@@ -327,6 +328,7 @@ actual_main(int argc, char *argv[])
 	}
 
 	if (lm_optE) {
+		(void) fflush(stdout);
 		(void) fprintf(stderr, "Running:%30s", lm_optN);
 		(void) fflush(stderr);
 	}
@@ -469,6 +471,14 @@ actual_main(int argc, char *argv[])
 
 	compute_stats(b);
 
+	if (lm_optE) {
+		(void) fflush(stdout);
+		(void) fprintf(stderr, " for %12.5f seconds\n",
+			(double)(getnsecs() - startnsecs) /
+			1.e9);
+		(void) fflush(stderr);
+	}
+
 	/* print result header (unless suppressed) */
 	if (!lm_optH) {
 		(void) printf("%*s %3s %3s %12s %12s %8s %8s %s\n",
@@ -512,13 +522,7 @@ actual_main(int argc, char *argv[])
 	(void) benchmark_fini();
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): benchmark_fini() returned\n");
 
-	if (lm_optE) {
-		(void) fprintf(stderr, " for %12.5f seconds\n",
-			(double)(getnsecs() - startnsecs) /
-			1.e9);
-		(void) fflush(stderr);
-	}
-	return (0);
+	return 0;
 }
 
 void *
@@ -1177,7 +1181,7 @@ getnsecs(void)
 	return (rdtsc() * 1000000000 / lm_hz);
 }
 
-#else /* USE_GETHRTIME */
+#elif USE_GTOD /* USE_GETHRTIME */
 
 long long
 getusecs(void)
@@ -1198,6 +1202,28 @@ getnsecs(void)
 
 	return ((long long)tv.tv_sec * 1000000000LL +
 		(long long) tv.tv_usec * 1000LL);
+}
+
+#else /* USE_GETHRTIME */
+
+long long
+getusecs(void)
+{
+	struct timespec		ts;
+
+    (void) clock_gettime(CLOCK_MONOTONIC, &ts);
+
+	return ((long long)ts.tv_sec * 1000000LL + (long long) ts.tv_nsec) / 1000LL;
+}
+
+long long
+getnsecs(void)
+{
+	struct timespec		ts;
+
+    (void) clock_gettime(CLOCK_MONOTONIC, &ts);
+
+	return ((long long)ts.tv_sec * 1000000000LL + (long long) ts.tv_nsec);
 }
 
 #endif /* USE_GETHRTIME */
