@@ -159,6 +159,9 @@ do
 	"")
 		continue
 		;;
+	esac
+
+	case $B in
 	*$1*)
 		;;
 	*)
