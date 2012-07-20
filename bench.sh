@@ -43,6 +43,16 @@ $bench_version)
 	exit 1
 esac
 
+case $1 in
+	-s) suite=$2; shift 2;;
+	*) suite="full";;
+esac
+
+if [ ! -e "$DIRNAME/suites/$suite.txt" ]; then
+	echo "ERROR: $DIRNAME/suites/$suite.txt does not exist"
+	exit 1
+fi
+
 TMPROOT=/tmp/libmicro.$$
 VARROOT=/var/tmp/libmicro.$$
 mkdir -p $TMPROOT
@@ -121,6 +131,9 @@ numactl --hardware | awk -f $DIRNAME/numactl.awk
 mkdir -p $TMPROOT/bin
 cp $DIRNAME/bin-$ARCH/exec_bin $TMPROOT/bin/
 
+mkdir -p $TMPROOT/suites
+cp $DIRNAME/suites/$suite.txt $TMPROOT/suites/
+
 while read A B C
 do
 	# If we encounter a problem where the "trap" runs above, we will have lost
@@ -165,7 +178,7 @@ do
 	fi
 
 	(cd $TMPROOT && eval "bin/$A -N $B $OPTS $C")
-done < $DIRNAME/suites/full.txt
+done < $TMPROOT/suites/$suite.txt
 
 # Clean up background processes
 if [ -n "$PM_QOS_PID" ]; then

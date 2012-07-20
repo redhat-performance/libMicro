@@ -1,0 +1,26 @@
+memrand	"memrand"	-s 1k	-B 1g
+memrand	"memrand"	-s 2k	-B 512m
+memrand	"memrand"	-s 4k	-B 256m
+memrand	"memrand"	-s 8k	-B 128m
+memrand	"memrand"	-s 16k	-B 64m
+memrand	"memrand"	-s 32k	-B 32m
+memrand	"memrand"	-s 64k	-B 16m
+memrand	"memrand"	-s 128k	-B 8m
+memrand	"memrand"	-s 256k	-B 4m
+memrand	"memrand"	-s 512k	-B 2m
+memrand	"memrand"	-s 1m	-B 1m
+memrand	"memrand"	-s 2m	-B 640k
+memrand	"memrand"	-s 4m	-B 320k
+memrand	"memrand"	-s 8m	-B 160k
+memrand	"memrand"	-s 16m	-B 80k
+memrand	"memrand"	-s 32m	-B 40k
+memrand	"memrand"	-s 64m	-B 20k
+memrand	"memrand"	-s 128m	-B 10k
+memrand	"memrand"	-s 256m	-B 5k
+memrand	"memrand"	-s 512m	-B 2k
+memrand	"memrand"	-s 1g	-B 1k
+memrand	"memrand"	-s 2g	-B 500
+
+recurse	"recurse"	-B 200k
+recurse	"recurse"	-d 1k	-B 10k
+recurse	"recurse"	-d 10k	-B 5k
