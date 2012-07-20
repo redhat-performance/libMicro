@@ -24,7 +24,14 @@ if [ ! -d "$results" ]; then
     echo "Could not find results dir: $results"
     exit 1
 fi
-template_base="$results/$1-$HN"
+
+if [ -z "$2" ]; then
+	suite="full"
+else
+	suite=$2
+fi
+
+template_base="$results/$1-$HN-$suite"
 template_nonuma="$template_base-nonuma-lm.$VER"
 template_numa="$template_base-numa.N1m1-lm.$VER"
 template_nonuma_chrt="$template_base-nonuma-chrt.f1-lm.$VER"
@@ -39,14 +46,14 @@ function checkit {
 }
 
 function checkem {
-    checkit $template_nonuma.run-$1.results.txt || return 1;
-    checkit $template_nonuma.run-$1.timings.txt || return 1;
-    checkit $template_numa.run-$1.results.txt || return 1;
-    checkit $template_numa.run-$1.timings.txt || return 1;
-    checkit $template_nonuma_chrt.run-$1.results.txt || return 1;
-    checkit $template_nonuma_chrt.run-$1.timings.txt || return 1;
-    checkit $template_numa_chrt.run-$1.results.txt || return 1;
-    checkit $template_numa_chrt.run-$1.timings.txt || return 1;
+    checkit $template_nonuma-run.$1-results.txt || return 1;
+    checkit $template_nonuma-run.$1-timings.txt || return 1;
+    checkit $template_numa-run.$1-results.txt || return 1;
+    checkit $template_numa-run.$1-timings.txt || return 1;
+    checkit $template_nonuma_chrt-run.$1-results.txt || return 1;
+    checkit $template_nonuma_chrt-run.$1-timings.txt || return 1;
+    checkit $template_numa_chrt-run.$1-results.txt || return 1;
+    checkit $template_numa_chrt-run.$1-timings.txt || return 1;
     return 0;
 }
 
@@ -54,18 +61,18 @@ for (( i = 0; ; i++ )); do
     printf -v idx "%04d" $i
     checkem $idx && break;
 done
-run="run-$idx"
+run="run.$idx"
 
 nodes=$(numactl --hardware | grep available | awk '{print $2}')
 
-echo "!Runit-command: $DN/bench" >                             $template_nonuma.$run.results.txt
-                      $DN/bench >>                             $template_nonuma.$run.results.txt    2> $template_nonuma.$run.timings.txt
+echo "!Runit-command: $DN/bench -s $suite" >                             $template_nonuma-$run-results.txt
+                      $DN/bench -s $suite >>                             $template_nonuma-$run-results.txt    2> $template_nonuma-$run-timings.txt
 if [ "$nodes" == "1" ]; then
-    echo "!Runit-command: numactl chrt -f 1 $DN/bench" > $template_nonuma_chrt.$run.results.txt
-                          numactl chrt -f 1 $DN/bench >> $template_nonuma_chrt.$run.results.txt 2> $template_nonuma_chrt.$run.timings.txt
+    echo "!Runit-command: numactl chrt -f 1 $DN/bench -s $suite" > $template_nonuma_chrt-$run-results.txt
+                          numactl chrt -f 1 $DN/bench -s $suite >> $template_nonuma_chrt-$run-results.txt 2> $template_nonuma_chrt-$run-timings.txt
 else
-    echo "!Runit-command: numactl -N 1 -m 1 $DN/bench" >           $template_numa.$run.results.txt
-                          numactl -N 1 -m 1 $DN/bench >>           $template_numa.$run.results.txt      2> $template_numa.$run.timings.txt
-    echo "!Runit-command: numactl -N 1 -m 1 chrt -f 1 $DN/bench" > $template_numa_chrt.$run.results.txt
-                          numactl -N 1 -m 1 chrt -f 1 $DN/bench >> $template_numa_chrt.$run.results.txt 2> $template_numa_chrt.$run.timings.txt
+    echo "!Runit-command: numactl -N 1 -m 1 $DN/bench -s $suite" >           $template_numa-$run-results.txt
+                          numactl -N 1 -m 1 $DN/bench -s $suite >>           $template_numa-$run-results.txt      2> $template_numa-$run-timings.txt
+    echo "!Runit-command: numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite" > $template_numa_chrt-$run-results.txt
+                          numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite >> $template_numa_chrt-$run-results.txt 2> $template_numa_chrt-$run-timings.txt
 fi
