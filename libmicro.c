@@ -54,6 +54,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <time.h>
+#include <sys/signalfd.h>
 
 #ifdef	__sun
 #include <sys/elf.h>
@@ -456,6 +457,27 @@ actual_main(int argc, char *argv[])
 		pindex = 0;
 		worker_process();
 	} else {
+		sigset_t mask;
+
+		sigemptyset(&mask);
+		sigaddset(&mask, SIGALRM);
+		sigaddset(&mask, SIGCHLD);
+		sigaddset(&mask, SIGINT);
+		sigaddset(&mask, SIGHUP);
+		sigaddset(&mask, SIGTERM);
+		sigaddset(&mask, SIGQUIT);
+		int ret = sigprocmask(SIG_BLOCK, &mask, NULL);
+		if (ret < 0) {
+			perror("sigprocmask");
+			exit(1);
+		}
+
+		int sigfd = signalfd(-1, &mask, SFD_CLOEXEC);
+		if (sigfd == -1) {
+			perror("signalfd");
+			exit(1);
+		}
+
 		/* create worker processes */
 		for (i = 0; i < lm_optP; i++) {
 			pids[i] = fork();
@@ -475,14 +497,87 @@ actual_main(int argc, char *argv[])
 			}
 		}
 
-		/* wait for worker processes */
-		for (i = 0; i < lm_optP; i++) {
-			if (pids[i] > 0) {
-				int ret = waitpid(pids[i], NULL, 0);
-				if (ret < 0) {
-					perror("waitpid()");
-					exit(1);
+		timer_t host_timer = 0;
+		struct itimerspec timeout = { 0 };
+		if (b->ba_deadline > 0) {
+			ret = timer_create(CLOCK_MONOTONIC, NULL, &host_timer);
+			if (ret < 0) {
+				perror("timer_create");
+				exit(1);
+			}
+
+			/* Kill the test if it goes one minute over the deadline */
+			timeout.it_value.tv_sec = (b->ba_deadline / 1000000000LL) + 60;
+			ret = timer_settime(host_timer, TIMER_ABSTIME, &timeout, NULL);
+			if (ret < 0) {
+				perror("timer_settime");
+				exit(1);
+			}
+		}
+
+		int done = 0;
+		while (!done) {
+			struct signalfd_siginfo fdsi;
+			memset(&fdsi, 0, sizeof(struct signalfd_siginfo));
+			ssize_t s = read(sigfd, &fdsi, sizeof(struct signalfd_siginfo));
+			if (s != sizeof(struct signalfd_siginfo)) {
+				perror("read(signalfd)");
+				exit(1);
+			}
+
+			if (fdsi.ssi_signo == SIGALRM
+					|| fdsi.ssi_signo == SIGINT) {
+				if (fdsi.ssi_signo == SIGALRM) {
+					printf("Ran too long, killing the run ...\n");
 				}
+				else {
+					printf("Interrupted, killing the run ...\n");
+				}
+
+				/* kill the worker processes */
+				for (i = 0; i < lm_optP; i++) {
+					if (pids[i] > 0) {
+						int ret = kill(pids[i], SIGKILL);
+						if (ret < 0) {
+							if (errno != ESRCH) {
+								perror("kill");
+								exit(1);
+							}
+						}
+					}
+				}
+
+				done = 1;
+			}
+			else if (fdsi.ssi_signo == SIGCHLD) {
+				/* wait for worker processes */
+				int status;
+				int waiting = 0;
+				for (i = 0; i < lm_optP; i++) {
+					if (pids[i] > 0) {
+						int ret = waitpid(pids[i], &status, WNOHANG);
+						if (ret < 0) {
+							perror("waitpid");
+							exit(1);
+						}
+						if (WIFEXITED(status) || WIFSIGNALED(status)) {
+							pids[i] = 0;
+						}
+						else {
+							waiting++;
+						}
+					}
+				}
+				if (!waiting) {
+					done = 1;
+				}
+			}
+		}
+
+		if (host_timer > 0) {
+			ret = timer_delete(host_timer);
+			if (ret < 0) {
+				perror("timer_delete");
 			}
 		}
 	}
@@ -584,13 +679,14 @@ worker_thread(void *arg)
 		(void) barrier_queue(lm_barrier, &r);
 
 		/* time to stop? */
-		if ((r.re_t1 > lm_barrier->ba_deadline)
+		if (((lm_barrier->ba_deadline > 0))
+					&& (r.re_t1 > lm_barrier->ba_deadline))
 				|| ((lm_barrier->ba_batches >= lm_optC)
 						&& (r.re_t1 > lm_barrier->ba_minruntime))) {
 			lm_barrier->ba_flag = 0;
 		}
 
-		/* errors from finishing this batch feed into the next batch */
+		/* Errors from finishing this batch feed into the next batch */
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finibatch()\n");
 		r.re_errors = benchmark_finibatch(arg);
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finibatch() returned\n");
