@@ -679,7 +679,7 @@ worker_thread(void *arg)
 		(void) barrier_queue(lm_barrier, &r);
 
 		/* time to stop? */
-		if (((lm_barrier->ba_deadline > 0))
+		if (((lm_barrier->ba_deadline > 0)
 					&& (r.re_t1 > lm_barrier->ba_deadline))
 				|| ((lm_barrier->ba_batches >= lm_optC)
 						&& (r.re_t1 > lm_barrier->ba_minruntime))) {
