@@ -36,19 +36,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "libmicro.h"
 
-#define	DEFF			"/dev/tty"
-static char			*optf = DEFF;
-static int			optb = 0;
+#define	DEFF	"/dev/tty"
+static char	   *optf = DEFF;
+static int		optb = 0;
 
 typedef struct {
 	int			ts_fd;
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
@@ -83,12 +84,17 @@ benchmark_optswitch(int opt, char *optarg)
 int
 benchmark_initworker(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t		*ts = (tsd_t *)tsd;
 
 	ts->ts_fd = ((optb == 0) ?
 		open(optf, O_RDONLY) : 1024);
 	if (ts->ts_fd == -1) {
-		perror("open()");
+		if (errno == ENXIO) {
+			printf("Unable to run benchmark, process is not connected to a tty\n");
+		}
+		else {
+			perror("open");
+		}
 		return 1;
 	}
 	return 0;
@@ -97,7 +103,7 @@ benchmark_initworker(void *tsd)
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t	   *ts = (tsd_t *)tsd;
 	int			i;
 
 	for (i = 0; i < lm_optB; i++) {
