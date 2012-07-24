@@ -25,10 +25,10 @@ recurse	"recurse"	-B 200k
 recurse	"recurse_1k"	-d 1k	-B 10k
 recurse	"recurse_10k"	-d 10k	-B 1k
 
-#
-# Obligatory null system call: use very short time
-# for default since SuSe implements this "syscall" in userland
-#
+//
+// Obligatory null system call: use very short time
+// for default since SuSe implements this "syscall" in userland
+//
 getpid	"getpid"	-B 640000
 getpid	"getpid_s"	-B 32000	-s
 getpid	"getpidT4"	-B 640000	-T 4

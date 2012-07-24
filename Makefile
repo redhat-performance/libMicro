@@ -71,9 +71,13 @@ TARBALL_CONTENTS = 	\
 default $(ALL) run cstyle lint tattle pm_qos: $(BINS) bench multiview wrapper
 	@mkdir -p bin-`uname -m`; cd bin-`uname -m`; MACH=`uname -m` $(MAKE) -f ../Makefile.`uname -s` UNAME_RELEASE=`uname -r | sed 's/\./_/g'` $@
 
-bench: bench.sh
+bench: bench.sh suites
 	cp bench.sh bench
 	chmod +x bench
+
+.PHONY:	suites
+suites:
+	$(MAKE) -C suites
 
 multiview: multiview.sh
 	cp multiview.sh multiview
@@ -84,6 +88,7 @@ wrapper: wrapper.sh
 	chmod +x wrapper
 
 clean:
+	$(MAKE) -C suites clean
 	rm -rf bin bin-* wrapper multiview bench *~ cscope.*
 
 bin:	

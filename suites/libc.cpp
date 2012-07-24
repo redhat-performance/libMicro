@@ -1,7 +1,7 @@
-#
-# Obligatory null system call: use very short time
-# for default since SuSe implements this "syscall" in userland
-#
+//
+// Obligatory null system call: use very short time
+// for default since SuSe implements this "syscall" in userland
+//
 getpid	"getpid"	-B 640000
 getpid	"getpidT4"	-B 640000	-T 4
 
