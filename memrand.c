@@ -37,32 +37,35 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
+#include <assert.h>
 
 #include "libmicro.h"
 
-static long	opts = 1024*1024;
+static long long	opts = 1024*1024;
+static long long	len = 0;
+static long long	loopend = 0;
 
 typedef struct {
-	long			**ts_data;
-	long			ts_result;
+	long long  **ts_data;
+	long long	ts_result;
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
-	lm_tsdsize = sizeof (tsd_t);
+	lm_tsdsize = sizeof(tsd_t);
 
-	(void) sprintf(lm_optstr, "s:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s:");
 
-	(void) sprintf(lm_usage,
-	    "       [-s size] number of bytes to "
-	    " access (default %ld)\n"
-	    "notes: measures \"random\" memory access times\n",
-	    opts);
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"       [-s size] number of bytes to"
+		" access (default %ld)\n"
+		"notes: measures \"random\" memory access times\n",
+		opts);
 
-	(void) sprintf(lm_header, "%8s", "size");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "size");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -70,77 +73,81 @@ benchmark_optswitch(int opt, char *optarg)
 {
 	switch (opt) {
 	case 's':
-		opts = sizetoint(optarg);
+		opts = sizetoll(optarg);
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initworker(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int i, j;
+	tsd_t	   *ts = (tsd_t *)tsd;
+	long long	i, j;
 
 	ts->ts_data = malloc(opts);
-
 	if (ts->ts_data == NULL) {
-		return (1);
+		return 1;
 	}
+
+	len = opts / sizeof(long long *);
+	long long	split = len / 3;
 
 	/*
 	 * use lmbench style backwards stride
 	 */
 
-	for (i = 0; i < opts / sizeof (long); i++) {
-		j = i - 128;
+	for (i = 0; i < len; i++) {
+		j = i - split;
 		if (j < 0)
-			j = j + opts / sizeof (long);
-		ts->ts_data[i] = (long *)&(ts->ts_data[j]);
+			j = j + len;
+		ts->ts_data[i] = (long long *)&(ts->ts_data[j]);
 	}
-	return (0);
+
+	/* Ensure that we go through the data at least twice */
+	loopend = (lm_optB > (2 * len)) ? lm_optB : 2 * len;
+
+	if (loopend > lm_optB) printf("*** using -B of %lld instead of %d\n", loopend, lm_optB);
+
+	return 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t		   *ts = (tsd_t *)tsd;
+	long long	  **ptr = ts->ts_data;
+	int				i;
 
-	long **ptr = ts->ts_data;
-
-
-
-	for (i = 0; i < lm_optB; i += 10) {
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
-		ptr = (long **)*ptr;
+	for (i = 0; i < loopend; i += 10) {
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
+		ptr = (long long **)*ptr;
 	}
 
-	ts->ts_result = (long)*ptr;
+	ts->ts_result = (long long)*ptr;
 
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 char *
 benchmark_result()
 {
-	static char  result[256];
+	static char	 result[256];
 
-	(void) sprintf(result, "%8ld ", opts);
+	(void) snprintf(result, sizeof(result), "%8ld ", opts);
 
-
-	return (result);
+	return result;
 }

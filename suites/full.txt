@@ -2,32 +2,33 @@
 # Obligatory null system call: use very short time
 # for default since SuSe implements this "syscall" in userland
 #
-memrand	"memrand"	-s 1k	-B 1g
-memrand	"memrand"	-s 2k	-B 512m
-memrand	"memrand"	-s 4k	-B 256m
-memrand	"memrand"	-s 8k	-B 128m
-memrand	"memrand"	-s 16k	-B 64m
-memrand	"memrand"	-s 32k	-B 32m
-memrand	"memrand"	-s 64k	-B 16m
-memrand	"memrand"	-s 128k	-B 8m
-memrand	"memrand"	-s 256k	-B 4m
-memrand	"memrand"	-s 512k	-B 2m
-memrand	"memrand"	-s 1m	-B 1m
-memrand	"memrand"	-s 2m	-B 640k
-memrand	"memrand"	-s 4m	-B 320k
-memrand	"memrand"	-s 8m	-B 160k
-memrand	"memrand"	-s 16m	-B 80k
-memrand	"memrand"	-s 32m	-B 40k
-memrand	"memrand"	-s 64m	-B 20k
-memrand	"memrand"	-s 128m	-B 10k
-memrand	"memrand"	-s 256m	-B 5k
-memrand	"memrand"	-s 512m	-B 2k
-memrand	"memrand"	-s 1g	-B 1k
-memrand	"memrand"	-s 2g	-B 500
+
+memrand	"memrand_1k"	-s 1k	-B 32m
+memrand	"memrand_2k"	-s 2k	-B 32m
+memrand	"memrand_4k"	-s 4k	-B 32m
+memrand	"memrand_8k"	-s 8k	-B 32m
+memrand	"memrand_16k"	-s 16k	-B 32m
+memrand	"memrand_32k"	-s 32k	-B 32m
+memrand	"memrand_64k"	-s 64k	-B 24m
+memrand	"memrand_128k"	-s 128k	-B 24m
+memrand	"memrand_256k"	-s 256k	-B 24m
+memrand	"memrand_512k"	-s 512k	-B 24m
+memrand	"memrand_1m"	-s 1m	-B 24m
+memrand	"memrand_2m"	-s 2m	-B 24m
+memrand	"memrand_4m"	-s 4m	-B 24m
+memrand	"memrand_8m"	-s 8m	-B 24m
+memrand	"memrand_16m"	-s 16m	-B 24m
+memrand	"memrand_32m"	-s 32m	-B 24m
+memrand	"memrand_64m"	-s 64m	-B 16m
+memrand	"memrand"	-s 128m	-B 32m
+memrand	"memrand_256m"	-s 256m	-B 64m
+memrand	"memrand_512m"	-s 512m	-B 128m
+memrand	"memrand_1g"	-s 1g	-B 256m
+memrand	"memrand_2g"	-s 2g	-B 512m
 
 recurse	"recurse"	-B 200k
-recurse	"recurse"	-d 1k	-B 10k
-recurse	"recurse"	-d 10k	-B 5k
+recurse	"recurse_1k"	-d 1k	-B 10k
+recurse	"recurse_10k"	-d 10k	-B 1k
 
 getpid	"getpid"	-B 640000
 getpid	"getpid_s"	-B 32000	-s

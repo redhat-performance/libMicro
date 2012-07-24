@@ -30,7 +30,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.18"
+#define	LIBMICRO_VERSION	"0.4.1-rh.19"
 
 #define	STRSIZE			1024
 
@@ -66,6 +66,9 @@ typedef struct stats {
 	double	st_timecorr;	/* correlation with respect to time */
 } stats_t;
 
+#define KILLED_INT	1		/* Killed by INT, TERM, QUIT, etc. */
+#define KILLED_LONG	2		/* Ran too long */
+
 /*
  * Barrier stuff
  */
@@ -74,7 +77,9 @@ typedef struct {
 	int				ba_hwm;			/* barrier setpoint	*/
 	int				ba_flag;		/* benchmark while true	*/
 	long long		ba_deadline;	/* when to hard stop */
-	long long		ba_minruntime;	/* when to stop once sample count was reached */
+	long long		ba_minruntime;	/* when to stop once sample count was
+									 * reached */
+	int				ba_killed;		/* why was run killed */
 	int				ba_phase;		/* number of time used */
 	int				ba_waiters;		/* how many are waiting	*/
 

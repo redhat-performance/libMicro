@@ -32,7 +32,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.18
+bench_version=0.4.1-rh.19
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in

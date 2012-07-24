@@ -75,7 +75,7 @@ benchmark_optswitch(int opt, char *optarg)
 {
 	switch (opt) {
 	case 'd':
-		optd = atoi(optarg);
+		optd = sizetoint(optarg);
 		break;
 	default:
 		return (-1);

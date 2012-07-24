@@ -528,10 +528,10 @@ actual_main(int argc, char *argv[])
 			if (fdsi.ssi_signo == SIGALRM
 					|| fdsi.ssi_signo == SIGINT) {
 				if (fdsi.ssi_signo == SIGALRM) {
-					printf("Ran too long, killing the run ...\n");
+					b->ba_killed = KILLED_LONG;
 				}
 				else {
-					printf("Interrupted, killing the run ...\n");
+					b->ba_killed = KILLED_INT;
 				}
 
 				/* kill the worker processes */
@@ -827,26 +827,39 @@ print_warnings(barrier_t *b)
 	 * XXX should warn on median != mean by a lot
 	 */
 
+	if (b->ba_killed) {
+		if (!head++) {
+			(void) printf("#\n# WARNINGS\n");
+		}
+
+		if (b->ba_killed == KILLED_LONG) {
+			printf("#	  Ran too long\n");
+		}
+		else {
+			assert(b->ba_killed == KILLED_INT);
+			printf("#	  Interrupted\n");
+		}
+	}
+
 	if (b->ba_errors) {
 		if (!head++) {
 			(void) printf("#\n# WARNINGS\n");
 		}
-		(void) printf("#     Errors occured during benchmark.\n");
+		(void) printf("#	 Errors occured during benchmark.\n");
 	}
 }
 
 void
 print_stats(barrier_t *b)
 {
+	if (b->ba_count == 0) {
+		return;
+	}
+
 	(void) printf("#\n");
 	(void) printf("# STATISTICS                 %12s           %12s\n",
 		"usecs/call (raw)",
 		"usecs/call (outliers removed)");
-
-	if (b->ba_count == 0) {
-		(void) printf("zero samples\n");
-		return;
-	}
 
 	(void) printf("#                        min %12.5f            %12.5f\n",
 			b->ba_raw.st_min,
@@ -1637,6 +1650,10 @@ compute_stats(barrier_t *b)
 			} while (removed != 0 && batches > 40);
 	}
 	b->ba_batches_final = batches;
+
+	if (b->ba_count == 0) {
+		b->ba_errors++;
+	}
 }
 
 /*
