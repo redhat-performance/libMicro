@@ -186,7 +186,7 @@ extern size_t		lm_tsdsize;
 
 int 		getpindex(void);
 int 		gettindex(void);
-void 		*gettsd(int, int);
+void 	   *gettsd(int, int);
 long long 	getusecs(void);
 long long 	getnsecs(void);
 void 		setfdlimit(int);
