@@ -42,15 +42,15 @@ typedef volatile char		vchar_t;
 
 typedef struct {
 	int			ts_once;
-	vchar_t **		ts_map;
-	vchar_t 		ts_foo;
+	vchar_t	  **ts_map;
+	vchar_t		ts_foo;
 } tsd_t;
 
-#define	DEFF			"/dev/zero"
-#define	DEFL			8192
+#define	DEFF		"/dev/zero"
+#define	DEFL		8192
 
-static char			*optf = DEFF;
-static long long		optl = DEFL;
+static char		   *optf = DEFF;
+static long long	optl = DEFL;
 static int			optr = 0;
 static int			opts = 0;
 static int			optw = 0;
@@ -60,23 +60,23 @@ static int			anon = 0;
 static int			pagesize = 0;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof(tsd_t);
-    pagesize = sysconf(_SC_PAGESIZE);
+	pagesize = sysconf(_SC_PAGESIZE);
 
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:l:rsw");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-	    "       [-f file-to-map (default %s)]\n"
-	    "       [-l mapping-length (default %d)]\n"
-	    "       [-r] (read a byte from each page)\n"
-	    "       [-w] (write a byte on each page)\n"
-	    "       [-s] (use MAP_SHARED)\n"
-	    "notes: measures mmap()\n",
-	    DEFF, DEFL);
+		"\t[-f file-to-map (default %s)]\n"
+		"\t[-l mapping-length (default %d)]\n"
+		"\t[-r] (read a byte from each page)\n"
+		"\t[-w] (write a byte to each page)\n"
+		"\t[-s] (use MAP_SHARED instead of MAP_PRIVATE)\n"
+		"notes: measures mmap()\n",
+		DEFF, DEFL);
 
-	(void) snprintf(lm_header, sizeof(lm_header), "%8s %5s", "length", "flags");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s %6s", "length", "flags");
 
 	return 0;
 }
@@ -110,14 +110,14 @@ benchmark_optswitch(int opt, char *optarg)
 int
 benchmark_initrun(void)
 {
-    int errors = 0;
+	int errors = 0;
 
 	if (!anon) {
 		fd = open(optf, O_RDWR);
-        if (fd < 0) {
-            errors++;
-        }
-    }
+		if (fd < 0) {
+			errors++;
+		}
+	}
 
 	return errors;
 }
@@ -125,8 +125,8 @@ benchmark_initrun(void)
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			errors = 0;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		errors = 0;
 
 	if (ts->ts_once++ == 0) {
 		ts->ts_map = (vchar_t **)malloc(lm_optB * sizeof (void *));
@@ -141,20 +141,20 @@ benchmark_initbatch(void *tsd)
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i, j;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i, j;
 
 	for (i = 0; i < lm_optB; i++) {
 		if (anon) {
 			ts->ts_map[i] = (vchar_t *)mmap(NULL, optl,
-			    PROT_READ | PROT_WRITE,
-			    MAP_ANONYMOUS | (opts ? MAP_SHARED : MAP_PRIVATE),
-			    -1, 0L);
+				PROT_READ | PROT_WRITE,
+				MAP_ANONYMOUS | (opts ? MAP_SHARED : MAP_PRIVATE),
+				-1, 0L);
 		} else {
 			ts->ts_map[i] = (vchar_t *)mmap(NULL, optl,
-			    PROT_READ | PROT_WRITE,
-			    opts ? MAP_SHARED : MAP_PRIVATE,
-			    fd, 0L);
+				PROT_READ | PROT_WRITE,
+				opts ? MAP_SHARED : MAP_PRIVATE,
+				fd, 0L);
 		}
 
 		if (ts->ts_map[i] == MAP_FAILED) {
@@ -181,14 +181,14 @@ benchmark(void *tsd, result_t *res)
 int
 benchmark_finibatch(void *tsd)
 {
-	tsd_t	*ts = (tsd_t *)tsd;
+	tsd_t  *ts = (tsd_t *)tsd;
 	int		i, errors = 0, ret;
 
 	for (i = 0; i < lm_optB; i++) {
 		ret = munmap((void *)ts->ts_map[i], optl);
-        if (ret != 0) {
-            errors++;
-        }
+		if (ret != 0) {
+			errors++;
+		}
 	}
 	return errors;
 }
@@ -205,7 +205,7 @@ benchmark_result(void)
 	flags[3] = opts ? 's' : '-';
 	flags[4] = 0;
 
-	(void) snprintf(result, sizeof(result), "%8lld %5s", optl, flags);
+	(void) snprintf(result, sizeof(result), "%8lld %6s", optl, flags);
 
 	return result;
 }

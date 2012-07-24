@@ -38,44 +38,46 @@
 #include "libmicro.h"
 
 typedef struct {
-	char 			*ts_map;
+	char	   *ts_map;
 	int			ts_foo; /* defeat optimizers */
 } tsd_t;
 
-#define	DEFF			"/dev/zero"
-#define	DEFL			8192
+#define	DEFF		"/dev/zero"
+#define	DEFL		8192
 
-static char			*optf = DEFF;
-static long long		optl = DEFL;
+static int			opta = MS_SYNC;
+static char		   *optf = DEFF;
+static int			opti = 0;
+static long long	optl = DEFL;
 static int			optr = 0;
 static int			opts = 0;
 static int			optw = 0;
-static int			opta = MS_SYNC;
-static int			opti = 0;
-static int			anon = 0;
-static int			pagesize;
+static int			fd = -1;
+
+static int			pagesize = 0;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
-	lm_tsdsize = sizeof (tsd_t);
+	lm_tsdsize = sizeof(tsd_t);
+	pagesize = sysconf(_SC_PAGESIZE);
 
-	(void) sprintf(lm_optstr, "af:il:rsw");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "af:il:rsw");
 
-	(void) sprintf(lm_usage,
-	    "       [-f file-to-map (default %s)]\n"
-	    "       [-l mapping-length (default %d)]\n"
-	    "       [-r] (read a byte from each page between msyncs)\n"
-	    "       [-w] (write a byte to each page between msyncs)\n"
-	    "       [-s] (use MAP_SHARED instead of MAP_PRIVATE)\n"
-	    "       [-a (specify MS_ASYNC rather than default MS_SYNC)\n"
-	    "       [-i (specify MS_INVALIDATE)\n"
-	    "notes: measures msync()\n",
-	    DEFF, DEFL);
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"\t[-a (specify MS_ASYNC rather than default MS_SYNC)\n"
+		"\t[-f file-to-map (default %s)]\n"
+		"\t[-i (specify MS_INVALIDATE)\n"
+		"\t[-l mapping-length (default %d)]\n"
+		"\t[-r] (read a byte from each page between msyncs)\n"
+		"\t[-w] (write a byte to each page between msyncs)\n"
+		"\t[-s] (use MAP_SHARED instead of MAP_PRIVATE)\n"
+		"notes: measures msync()\n",
+		DEFF, DEFL);
 
-	(void) sprintf(lm_header, "%8s %6s", "length", "flags");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s %6s", "length", "flags");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -85,15 +87,12 @@ benchmark_optswitch(int opt, char *optarg)
 	case 'a':
 		opta = MS_ASYNC;
 		break;
-
 	case 'f':
 		optf = optarg;
 		break;
-
 	case 'i':
 		opti = MS_INVALIDATE;
 		break;
-
 	case 'l':
 		optl = sizetoll(optarg);
 		break;
@@ -107,49 +106,44 @@ benchmark_optswitch(int opt, char *optarg)
 		optw = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-
-	pagesize = getpagesize();
-
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initworker(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-
-	int fd;
+	tsd_t  *ts = (tsd_t *)tsd;
 
 	if ((fd = open(optf, O_RDWR)) < 0) {
-		perror("open:");
-		return (1);
+		perror("open");
+		return 1;
 	}
 
 	(void) ftruncate(fd, optl);
 
 	if ((ts->ts_map = (char *)mmap(NULL, optl,
-	    PROT_READ | PROT_WRITE, opts ? MAP_SHARED : MAP_PRIVATE,
-	    fd, 0L)) == MAP_FAILED) {
-		perror("mmap:");
+			PROT_READ | PROT_WRITE, opts ? MAP_SHARED : MAP_PRIVATE,
+			fd, 0L)) == MAP_FAILED) {
+		perror("mmap");
 		(void) close(fd);
-		return (1);
+		return 1;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i, j;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i, j;
 
 	for (i = 0; i < lm_optB; i++) {
 
 		if (msync(ts->ts_map, optl, opta | opti) < 0) {
-			perror("msync:");
+			perror("msync");
 			res->re_errors++;
 			break;
 		}
@@ -168,23 +162,23 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 	char			flags[6];
 
-	flags[0] = anon ? 'a' : '-';
-	flags[1] = optr ? 'r' : '-';
-	flags[2] = optw ? 'w' : '-';
-	flags[3] = opts ? 's' : '-';
-	flags[4] = opti ? 'i' : '-';
+	flags[0] = opta ? 'a' : '-';
+	flags[1] = opti ? 'i' : '-';
+	flags[2] = optr ? 'r' : '-';
+	flags[3] = optw ? 'w' : '-';
+	flags[4] = opts ? 's' : '-';
 	flags[5] = 0;
 
-	(void) sprintf(result, "%8lld %6s", optl, flags);
+	(void) snprintf(result, sizeof(result), "%8lld %6s", optl, flags);
 
-	return (result);
+	return result;
 }
