@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in *.txt
+do
+    diff -cw gold/$i $i
+done

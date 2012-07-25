@@ -1,3 +1,6 @@
+#ifndef _MEMORY_
+#define _MEMORY_
+
 mmap	"mmap_z8k"	-l 8k	-f /dev/zero	-B 10k
 mmap	"mmap_z128k"	-l 128k	-f /dev/zero	-B 5k
 mmap	"mmap_t8k"	-l 8k	-f $TFILE	-B 10k
@@ -114,3 +117,5 @@ msync	"msync_wait8k"	-l 8k	-w	-f $TFILE	-a	-i	-B 10k
 msync	"msync_wait128k"	-l 128k	-w	-f $TFILE	-a	-i	-B 1k
 msync	"msync_waiu8k"	-l 8k	-w	-f $VFILE	-a	-i	-B 10k
 msync	"msync_waiu128k"	-l 128k	-w	-f $VFILE	-a	-i	-B 1k
+
+#endif /* _MEMORY_ */

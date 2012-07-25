@@ -1,3 +1,6 @@
+#ifndef _READWRITE_
+#define _READWRITE_
+
 read	"read_t1k"	-s 1k	-f $TFILE	-B 80k
 read	"read_t10k"	-s 10k	-f $TFILE	-B 40k
 read	"read_t100k"	-s 100k	-f $TFILE	-B 5k
@@ -59,3 +62,5 @@ pwrite	"pwrite_u100k"	-s 100k	-f $VFILE	-B 8k
 pwrite	"pwrite_n1k"	-s 1k	-f /dev/null	-B 500k
 pwrite	"pwrite_n10k"	-s 10k	-f /dev/null	-B 500k
 pwrite	"pwrite_n100k"	-s 100k	-f /dev/null	-B 500k
+
+#endif /* _READWRITE_ */

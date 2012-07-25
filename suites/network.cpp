@@ -1,3 +1,6 @@
+#ifndef _NETWORK_
+#define _NETWORK_
+
 getsockname	"getsockname"
 getpeername	"getpeername"
 
@@ -36,9 +39,6 @@ select	"select_w10"	-n 10	-w 1
 select	"select_w100"	-n 100	-w 10	-B 10k
 select	"select_w1000"	-n 1000	-w 100	-B 1k
 
-pipe	"pipe_tst1"	-s 1	-x tcp	-m st	-B 10k
-pipe	"pipe_tmt1"	-s 1	-x tcp	-m mt	-B 5k
-pipe	"pipe_tmp1"	-s 1	-x tcp	-m mp	-B 5k
-pipe	"pipe_tst4k"	-s 4k	-x tcp	-m st	-B 10k
-pipe	"pipe_tmt4k"	-s 4k	-x tcp	-m mt	-B 5k
-pipe	"pipe_tmp4k"	-s 4k	-x tcp	-m mp	-B 5k
+#include "localtcp.cpp"
+
+#endif /* _NETWORK_ */

@@ -5,17 +5,30 @@ SUITE_NAMES =	filesystem \
 				libc \
 				libm \
 				librt \
+				localtcp \
 				memcpy \
 				memory \
 				network \
 				pipe \
 				readwrite \
+				syscalls \
 				threading
 
 default: $(SUITE_NAMES:%=%.txt)
+	./check
 
 %.txt:	%.cpp
-	$(CPP) -P $< -o $@
+	$(CPP) -P $< | sort | uniq > $@
+
+full.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp
+
+filesystem.txt: readwrite.cpp
+
+libc.txt: memcpy.cpp
+
+network.txt: localtcp.cpp
+
+pipe.txt: localtcp.cpp
 
 clean:
 	rm -f *~ *.txt

@@ -1,3 +1,6 @@
+#ifndef _FORKEXEC_
+#define _FORKEXEC_
+
 fork	"fork_100"	-B 100
 fork	"fork_1000"	-B 1000
 
@@ -75,3 +78,5 @@ posix_spawn	"posix_spawn_8192nt"	-B 500	-n 8192	-p 32	-t
 posix_spawn	"posix_spawn_8192nt1000r"	-B 500	-n 8192	-p 32	-t	-r 1000
 
 system	"system"	-B 100
+
+#endif /* _FORKEXEC_ */

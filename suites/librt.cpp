@@ -1,3 +1,6 @@
+#ifndef _LIBRT_
+#define _LIBRT_
+
 clock_gettime	"clock_gettime"	-B 400000
 
 clock_nanosleep	"clock_nanosleep"	-B 1500
@@ -25,3 +28,5 @@ clock_nanosleep	"clock_nanosleep_d100"	-B 1500	-d 100
 clock_nanosleep	"clock_nanosleep_d1000"	-B 1500	-d 1000
 clock_nanosleep	"clock_nanosleep_d10000"	-B 1000	-d 10000
 clock_nanosleep	"clock_nanosleep_d100000"	-B 1000	-d 100000
+
+#endif /* _LIBRT_ */

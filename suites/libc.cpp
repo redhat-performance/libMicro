@@ -1,12 +1,12 @@
+#ifndef _LIBC_
+#define _LIBC_
+
 //
 // Obligatory null system call: use very short time
 // for default since SuSe implements this "syscall" in userland
 //
 getpid	"getpid"	-B 640000
 getpid	"getpidT4"	-B 640000	-T 4
-
-sched_yield	"sched_yield"	-B 32000
-sched_yield	"sched_yieldT4"	-B 32000	-T 4
 
 getenv	"getenv"	-B 90000	-s 100
 getenv	"getenvT2"	-B 90000	-T 2	-s 100
@@ -39,11 +39,7 @@ memset	"memset_1m"	-s 1m	-B 200
 memset	"memset_10m"	-s 10m	-B 100
 memset	"memsetP2_10m"	-s 10m	-B 100	-P 2
 
-memcpy	"memcpy_10"	-s 10
-memcpy	"memcpy_1k"	-s 1k
-memcpy	"memcpy_10k"	-s 10k
-memcpy	"memcpy_1m"	-s 1m	-B 100
-memcpy	"memcpy_10m"	-s 10m	-B 50
+#include "memcpy.cpp"
 
 memmove	"memmove_10"	-s 10
 memmove	"memmove_1k"	-s 1k
@@ -94,3 +90,14 @@ strftime	"strftime"
 
 mktime	"mktime"	-B 10k	
 mktime	"mktimeT2"	-T 2	-B 10k
+
+longjmp	"longjmp"	-B 5m
+siglongjmp	"siglongjmp"	-B 800k
+
+getrusage	"getrusage"
+
+sigaction	"sigaction"
+signal	"signal"
+sigprocmask	"sigprocmask"
+
+#endif /* _LIBC_ */

@@ -1,3 +1,6 @@
+#ifndef _HARDWARE_
+#define _HARDWARE_
+
 memrand	"memrand_1k"	-s 1k	-B 32m
 memrand	"memrand_2k"	-s 2k	-B 32m
 memrand	"memrand_4k"	-s 4k	-B 32m
@@ -24,3 +27,5 @@ memrand	"memrand_2g"	-s 2g	-B 512m
 recurse	"recurse"	-B 200k
 recurse	"recurse_1k"	-d 1k	-B 10k
 recurse	"recurse_10k"	-d 10k	-B 1k
+
+#endif /* _HARDWARE_ */
