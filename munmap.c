@@ -133,6 +133,7 @@ benchmark_initbatch(void *tsd)
 	if (ts->ts_once++ == 0) {
 		ts->ts_map = (vchar_t **)malloc(lm_optB * sizeof (void *));
 		if (ts->ts_map == NULL) {
+			perror("benchmark_initbatch(): malloc");
 			errors++;
 		}
 	}
@@ -151,6 +152,7 @@ benchmark_initbatch(void *tsd)
 		}
 
 		if (ts->ts_map[i] == MAP_FAILED) {
+			perror("benchmark_initbatch(): mmap");
 			errors++;
 			continue;
 		}
@@ -178,6 +180,7 @@ benchmark(void *tsd, result_t *res)
 	for (i = 0; i < lm_optB; i++) {
 		ret = munmap((void *)ts->ts_map[i], optl);
 		if (ret != 0) {
+			perror("benchmark(): munmap");
 			res->re_errors++;
 		}
 	}
