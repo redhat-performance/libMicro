@@ -117,16 +117,14 @@ benchmark_initworker(void *tsd)
 	tsd_t  *ts = (tsd_t *)tsd;
 
 	if ((fd = open(optf, O_RDWR)) < 0) {
-		perror("open");
+		perror("benchmark_initworker(): open");
 		return 1;
 	}
-
-	(void) ftruncate(fd, optl);
 
 	if ((ts->ts_map = (char *)mmap(NULL, optl,
 			PROT_READ | PROT_WRITE, opts ? MAP_SHARED : MAP_PRIVATE,
 			fd, 0L)) == MAP_FAILED) {
-		perror("mmap");
+		perror("benchmark_initworker(): mmap");
 		(void) close(fd);
 		return 1;
 	}
@@ -143,7 +141,7 @@ benchmark(void *tsd, result_t *res)
 	for (i = 0; i < lm_optB; i++) {
 
 		if (msync(ts->ts_map, optl, opta | opti) < 0) {
-			perror("msync");
+			perror("benchmark(): msync");
 			res->re_errors++;
 			break;
 		}
