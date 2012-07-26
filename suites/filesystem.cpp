@@ -6,12 +6,12 @@ close	"close_tmp"	-B 640	-f $TFILE
 close	"close_usr"	-B 640	-f $VFILE
 close	"close_zero"	-B 640	-f /dev/zero
 
-cascade_lockf	"c_lockf_1"
-cascade_lockf	"c_lockf_10"	-P 10	-B 100
+cascade_lockf	"c_lockf_1"	-B 10k
+cascade_lockf	"c_lockf_10"	-P 10	-B 1k
 cascade_lockf	"c_lockf_200"	-P 200	-B 100
 
 cascade_flock	"c_flock"
-cascade_flock	"c_flock_10"	-P 10	-B 100
+cascade_flock	"c_flock_10"	-P 10	-B 1k
 cascade_flock	"c_flock_200"	-P 200	-B 100
 
 file_lock	"file_lock"

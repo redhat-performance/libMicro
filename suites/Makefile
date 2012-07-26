@@ -17,8 +17,9 @@ SUITE_NAMES =	filesystem \
 default: $(SUITE_NAMES:%=%.txt)
 	./check
 
+export LC_ALL=C 
 %.txt:	%.cpp
-	LC_ALL=C $(CPP) -P $< | sort -k 2 | uniq > $@
+	$(CPP) -P $< | sort -k 2 | uniq > $@
 
 full.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp
 

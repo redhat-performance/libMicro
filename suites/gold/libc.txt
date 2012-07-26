@@ -32,7 +32,7 @@ memmove "memmove_10k" -s 10k
 memmove "memmove_10m" -s 10m -B 50
 memmove "memmove_1k" -s 1k
 memmove "memmove_1m" -s 1m -B 100
-memset "memsetP2_10m" -s 10m -B 100 -P 2
+memset "memsetP2_10m" -s 10m -B 50 -P 2
 memset "memset_10" -s 10 -B 10m
 memset "memset_10k" -s 10k
 memset "memset_10m" -s 10m -B 100

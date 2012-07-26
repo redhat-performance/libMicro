@@ -37,7 +37,7 @@ memset	"memset_4k_uc"	-s 4k	-u	-B 100k
 memset	"memset_10k"	-s 10k
 memset	"memset_1m"	-s 1m	-B 200
 memset	"memset_10m"	-s 10m	-B 100
-memset	"memsetP2_10m"	-s 10m	-B 100	-P 2
+memset	"memsetP2_10m"	-s 10m	-B 50	-P 2
 
 #include "memcpy.cpp"
 

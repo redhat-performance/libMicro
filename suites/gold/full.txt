@@ -2,19 +2,19 @@
 atoi "atoi" -B 1m
 bind "bind" -B 200
 cascade_cond "c_cond_1"
-cascade_cond "c_cond_10" -T 10 -B 100
+cascade_cond "c_cond_10" -T 10 -B 1k
 cascade_cond "c_cond_200" -T 200 -B 100
-cascade_fcntl "c_fcntl_1"
-cascade_fcntl "c_fcntl_10" -P 10 -B 100
-cascade_fcntl "c_fcntl_200" -P 200 -B 10
+cascade_fcntl "c_fcntl_1" -B 10k
+cascade_fcntl "c_fcntl_10" -P 10 -B 1k
+cascade_fcntl "c_fcntl_200" -P 200 -B 20
 cascade_flock "c_flock"
-cascade_flock "c_flock_10" -P 10 -B 100
+cascade_flock "c_flock_10" -P 10 -B 1k
 cascade_flock "c_flock_200" -P 200 -B 100
-cascade_lockf "c_lockf_1"
-cascade_lockf "c_lockf_10" -P 10 -B 100
+cascade_lockf "c_lockf_1" -B 10k
+cascade_lockf "c_lockf_10" -P 10 -B 1k
 cascade_lockf "c_lockf_200" -P 200 -B 100
 cascade_mutex "c_mutex_1"
-cascade_mutex "c_mutex_10" -T 10 -B 100
+cascade_mutex "c_mutex_10" -T 10 -B 1k
 cascade_mutex "c_mutex_200" -T 200 -B 100
 chdir "chdir_tmp" -B 10k $TDIR1 $TDIR2
 chdir "chdir_usr" -B 10k $VDIR1 $VDIR2
@@ -153,7 +153,7 @@ memrand "memrand_64k" -s 64k -B 24m
 memrand "memrand_64m" -s 64m -B 16m
 memrand "memrand_8k" -s 8k -B 32m
 memrand "memrand_8m" -s 8m -B 24m
-memset "memsetP2_10m" -s 10m -B 100 -P 2
+memset "memsetP2_10m" -s 10m -B 50 -P 2
 memset "memset_10" -s 10 -B 10m
 memset "memset_10k" -s 10k
 memset "memset_10m" -s 10m -B 100

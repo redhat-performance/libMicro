@@ -1,9 +1,9 @@
 
 cascade_flock "c_flock"
-cascade_flock "c_flock_10" -P 10 -B 100
+cascade_flock "c_flock_10" -P 10 -B 1k
 cascade_flock "c_flock_200" -P 200 -B 100
-cascade_lockf "c_lockf_1"
-cascade_lockf "c_lockf_10" -P 10 -B 100
+cascade_lockf "c_lockf_1" -B 10k
+cascade_lockf "c_lockf_10" -P 10 -B 1k
 cascade_lockf "c_lockf_200" -P 200 -B 100
 chdir "chdir_tmp" -B 10k $TDIR1 $TDIR2
 chdir "chdir_usr" -B 10k $VDIR1 $VDIR2
