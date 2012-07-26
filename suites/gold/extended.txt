@@ -47,10 +47,13 @@ close_tcp "close_tcp" -B 1k
 close "close_tmp" -B 640 -f $TFILE
 close "close_usr" -B 640 -f $VFILE
 close "close_zero" -B 640 -f /dev/zero
+connection "conn_accept" -B 512 -a
 connection "conn_connect" -B 512 -c
+connection "connection" -B 512
 dup "dup" -B 400k
 exec "exec" -B 100
 execw "execw" -B 250
+execw "execw_1000r" -B 25 -r 1000
 execw "execw_100r" -B 125 -r 100
 execw "execw_1024n" -B 150 -n 1024 -p 256
 execw "execw_1024ntv" -B 500 -n 1024 -p 256 -t -v
@@ -59,21 +62,27 @@ execw "execw_128n" -B 250 -n 128 -p 2048
 execw "execw_128nt" -B 25 -n 128 -p 2048 -t
 execw "execw_128ntv" -B 500 -n 128 -p 2048 -t -v
 execw "execw_1r" -B 250 -r 1
+execw "execw_2048n" -B 150 -n 2048 -p 128
 execw "execw_2048ntv" -B 500 -n 2048 -p 128 -t -v
 execw "execw_256n" -B 250 -n 256 -p 1024
 execw "execw_256ntv" -B 500 -n 256 -p 1024 -t -v
 execw "execw_32n" -B 250 -n 32 -p 8192
 execw "execw_32nt" -B 25 -n 32 -p 8192 -t
 execw "execw_32ntv" -B 500 -n 32 -p 8192 -t -v
+execw "execw_4096n" -B 150 -n 4096 -p 64
 execw "execw_4096ntv" -B 500 -n 4096 -p 64 -t -v
 execw "execw_512n" -B 150 -n 512 -p 512
 execw "execw_512ntv" -B 500 -n 512 -p 512 -t -v
 execw "execw_64n" -B 250 -n 64 -p 4096
 execw "execw_64nt" -B 25 -n 64 -p 4096 -t
 execw "execw_64ntv" -B 500 -n 64 -p 4096 -t -v
+execw "execw_8192n" -B 150 -n 8192 -p 32
+execw "execw_8192n1000r" -B 25 -n 8192 -p 32 -r 1000
 execw "execw_8192ntv" -B 500 -n 8192 -p 32 -t -v
 execw "execw_8192ntv1000r" -B 500 -n 8192 -p 32 -t -v -r 1000
 exit "exit_100" -B 100
+exit "exit_1000" -B 1000
+exit "exit_1000_nolibc" -e -B 1000
 exit "exit_100_nolibc" -e -B 100
 exp "exp" -B 2000000
 fcntl_ndelay "fcntl_ndelay"
@@ -81,6 +90,7 @@ fcntl "fcntl_tmp" -f $TFILE
 fcntl "fcntl_usr" -f $VFILE
 file_lock "file_lock"
 fork "fork_100" -B 100
+fork "fork_1000" -B 1000
 getcontext "getcontext"
 getenv "getenv" -B 90000 -s 100
 getenv "getenvT2" -B 90000 -T 2 -s 100
@@ -125,9 +135,12 @@ memrand "memrand" -s 128m -B 32m
 memrand "memrand_128k" -s 128k -B 24m
 memrand "memrand_16k" -s 16k -B 32m
 memrand "memrand_16m" -s 16m -B 24m
+memrand "memrand_1g" -s 1g -B 256m
 memrand "memrand_1k" -s 1k -B 32m
 memrand "memrand_1m" -s 1m -B 24m
 memrand "memrand_256k" -s 256k -B 24m
+memrand "memrand_256m" -s 256m -B 64m
+memrand "memrand_2g" -s 2g -B 512m
 memrand "memrand_2k" -s 2k -B 32m
 memrand "memrand_2m" -s 2m -B 24m
 memrand "memrand_32k" -s 32k -B 32m
@@ -135,6 +148,7 @@ memrand "memrand_32m" -s 32m -B 24m
 memrand "memrand_4k" -s 4k -B 32m
 memrand "memrand_4m" -s 4m -B 24m
 memrand "memrand_512k" -s 512k -B 24m
+memrand "memrand_512m" -s 512m -B 128m
 memrand "memrand_64k" -s 64k -B 24m
 memrand "memrand_64m" -s 64m -B 16m
 memrand "memrand_8k" -s 8k -B 32m
@@ -153,6 +167,7 @@ mktime "mktime" -B 10k
 mktime "mktimeT2" -T 2 -B 10k
 mmap "mmap_a128k" -l 128k -f MAP_ANON -B 5k
 mmap "mmap_a8k" -l 8k -f MAP_ANON -B 10k
+mmap_frag "mmap_frag" -B 10000 -C 1000
 mmap "mmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 mmap "mmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 mmap "mmap_rt128k" -l 128k -r -f $TFILE -B 5k
@@ -376,6 +391,7 @@ time "time" -B 2m
 times "times" -B 800k
 munmap "unmap_a128k" -l 128k -f MAP_ANON -B 5k
 munmap "unmap_a8k" -l 8k -f MAP_ANON -B 10k
+munmap_frag "unmap_frag" -B 2500 -C 1000
 munmap "unmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 munmap "unmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 munmap "unmap_rt128k" -l 128k -r -f $TFILE -B 5k

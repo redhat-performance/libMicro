@@ -28,7 +28,9 @@ mmap	"mmap_wu128k"	-l 128k	-w	-f $VFILE	-B 1k
 mmap	"mmap_wa8k"	-l 8k	-w	-f MAP_ANON	-B 10k
 mmap	"mmap_wa128k"	-l 128k	-w	-f MAP_ANON	-B 1k
 
+#ifdef EXTENDED
 mmap_frag	"mmap_frag"	-B 10000	-C 1000
+#endif
 
 munmap	"unmap_z8k"	-l 8k	-f /dev/zero	-B 10k
 munmap	"unmap_z128k"	-l 128k	-f /dev/zero	-B 5k
@@ -40,7 +42,7 @@ munmap	"unmap_a8k"	-l 8k	-f MAP_ANON	-B 10k
 munmap	"unmap_a128k"	-l 128k	-f MAP_ANON	-B 5k
 
 munmap	"unmap_rz8k"	-l 8k	-r	-f /dev/zero	-B 10k
-munmap	"unmap_rz128k"	-l 128k	-r	-f /dev/zero	-B 15k
+munmap	"unmap_rz128k"	-l 128k	-r	-f /dev/zero	-B 5k
 munmap	"unmap_rt8k"	-l 8k	-r	-f $TFILE	-B 10k
 munmap	"unmap_rt128k"	-l 128k	-r	-f $TFILE	-B 5k
 munmap	"unmap_ru8k"	-l 8k	-r	-f $VFILE	-B 10k
@@ -57,7 +59,9 @@ munmap	"unmap_wu128k"	-l 128k	-w	-f $VFILE	-B 1k
 munmap	"unmap_wa8k"	-l 8k	-w	-f MAP_ANON	-B 10k
 munmap	"unmap_wa128k"	-l 128k	-w	-f MAP_ANON	-B 1k
 
+# ifdef EXTENDED
 munmap_frag	"unmap_frag"	-B 2500	-C 1000
+# endif
 
 mprotect	"mprot_z8k"	-l 8k	-f /dev/zero	-B 10k
 mprotect	"mprot_z128k"	-l 128k	-f /dev/zero	-B 5k

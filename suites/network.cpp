@@ -17,9 +17,13 @@ bind	"bind"	-B 200
 
 listen	"listen"	-B 50k
 
+# ifdef EXTENDED
 connection	"connection"	-B 512
+# endif
 connection	"conn_connect"	-B 512	-c
+# ifdef EXTENDED
 connection	"conn_accept"	-B 512	-a
+# endif
 
 close_tcp	"close_tcp"	-B 1k
 

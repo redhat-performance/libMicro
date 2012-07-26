@@ -19,10 +19,12 @@ memrand	"memrand_16m"	-s 16m	-B 24m
 memrand	"memrand_32m"	-s 32m	-B 24m
 memrand	"memrand_64m"	-s 64m	-B 16m
 memrand	"memrand"	-s 128m	-B 32m
+# ifdef EXTENDED
 memrand	"memrand_256m"	-s 256m	-B 64m
 memrand	"memrand_512m"	-s 512m	-B 128m
 memrand	"memrand_1g"	-s 1g	-B 256m
 memrand	"memrand_2g"	-s 2g	-B 512m
+# endif
 
 recurse	"recurse"	-B 200k
 recurse	"recurse_1k"	-d 1k	-B 10k

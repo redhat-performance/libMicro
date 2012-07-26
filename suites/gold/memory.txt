@@ -1,7 +1,6 @@
 
 mmap "mmap_a128k" -l 128k -f MAP_ANON -B 5k
 mmap "mmap_a8k" -l 8k -f MAP_ANON -B 10k
-mmap_frag "mmap_frag" -B 10000 -C 1000
 mmap "mmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 mmap "mmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 mmap "mmap_rt128k" -l 128k -r -f $TFILE -B 5k
@@ -81,14 +80,13 @@ msync "msync_wu128k" -l 128k -w -f $VFILE -B 1k
 msync "msync_wu8k" -l 8k -w -f $VFILE -B 10k
 munmap "unmap_a128k" -l 128k -f MAP_ANON -B 5k
 munmap "unmap_a8k" -l 8k -f MAP_ANON -B 10k
-munmap_frag "unmap_frag" -B 2500 -C 1000
 munmap "unmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 munmap "unmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 munmap "unmap_rt128k" -l 128k -r -f $TFILE -B 5k
 munmap "unmap_rt8k" -l 8k -r -f $TFILE -B 10k
 munmap "unmap_ru128k" -l 128k -r -f $VFILE -B 5k
 munmap "unmap_ru8k" -l 8k -r -f $VFILE -B 10k
-munmap "unmap_rz128k" -l 128k -r -f /dev/zero -B 15k
+munmap "unmap_rz128k" -l 128k -r -f /dev/zero -B 5k
 munmap "unmap_rz8k" -l 8k -r -f /dev/zero -B 10k
 munmap "unmap_t128k" -l 128k -f $TFILE -B 5k
 munmap "unmap_t8k" -l 8k -f $TFILE -B 10k
