@@ -1,5 +1,6 @@
 
 exec "exec" -B 100
+execw "execw" -B 250
 execw "execw_1000r" -B 25 -r 1000
 execw "execw_100r" -B 125 -r 100
 execw "execw_1024n" -B 250 -n 1024 -p 256
@@ -23,17 +24,17 @@ execw "execw_512ntv" -B 500 -n 512 -p 512 -t -v
 execw "execw_64n" -B 250 -n 64 -p 4096
 execw "execw_64nt" -B 50 -n 64 -p 4096 -t
 execw "execw_64ntv" -B 500 -n 64 -p 4096 -t -v
-execw "execw_8192n1000r" -B 25 -n 8192 -p 32 -r 1000
 execw "execw_8192n" -B 250 -n 8192 -p 32
-execw "execw_8192ntv1000r" -B 500 -n 8192 -p 32 -t -v -r 1000
+execw "execw_8192n1000r" -B 25 -n 8192 -p 32 -r 1000
 execw "execw_8192ntv" -B 500 -n 8192 -p 32 -t -v
-execw "execw" -B 250
+execw "execw_8192ntv1000r" -B 500 -n 8192 -p 32 -t -v -r 1000
+exit "exit_100" -B 100
 exit "exit_1000" -B 1000
 exit "exit_1000_nolibc" -e -B 1000
-exit "exit_100" -B 100
 exit "exit_100_nolibc" -e -B 100
-fork "fork_1000" -B 1000
 fork "fork_100" -B 100
+fork "fork_1000" -B 1000
+posix_spawn "posix_spawn" -B 500
 posix_spawn "posix_spawn_1000r" -B 500 -r 1000
 posix_spawn "posix_spawn_100r" -B 500 -r 100
 posix_spawn "posix_spawn_1024n" -B 500 -n 1024 -p 256
@@ -54,9 +55,8 @@ posix_spawn "posix_spawn_512n" -B 500 -n 512 -p 512
 posix_spawn "posix_spawn_512nt" -B 500 -n 512 -p 512 -t
 posix_spawn "posix_spawn_64n" -B 500 -n 64 -p 4096
 posix_spawn "posix_spawn_64nt" -B 500 -n 64 -p 4096 -t
-posix_spawn "posix_spawn_8192n1000r" -B 500 -n 8192 -p 32 -r 1000
 posix_spawn "posix_spawn_8192n" -B 500 -n 8192 -p 32
-posix_spawn "posix_spawn_8192nt1000r" -B 500 -n 8192 -p 32 -t -r 1000
+posix_spawn "posix_spawn_8192n1000r" -B 500 -n 8192 -p 32 -r 1000
 posix_spawn "posix_spawn_8192nt" -B 500 -n 8192 -p 32 -t
-posix_spawn "posix_spawn" -B 500
+posix_spawn "posix_spawn_8192nt1000r" -B 500 -n 8192 -p 32 -t -r 1000
 system "system" -B 100

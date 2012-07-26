@@ -8,16 +8,16 @@ cascade_fcntl "c_fcntl_200" -P 200 -B 10
 cascade_mutex "c_mutex_1"
 cascade_mutex "c_mutex_10" -T 10 -B 100
 cascade_mutex "c_mutex_200" -T 200 -B 100
+mutex "mutex_T2" -T 2 -B 1m
 mutex "mutex_mt" -t -B 5m
 mutex "mutex_st" -B 5m
-mutex "mutex_T2" -T 2 -B 1m
 pthread_create "pthread_128" -B 128
 pthread_create "pthread_256" -B 256
 pthread_create "pthread_32" -B 32
 pthread_create "pthread_512" -B 512
 pthread_create "pthread_64" -B 64
 sched_yield "sched_yield" -B 32000
-sched_yield "sched_yield_s" -B 32000 -s
 sched_yield "sched_yieldT4" -B 32000 -T 4
 sched_yield "sched_yieldT4_s" -B 32000 -T 4 -s
+sched_yield "sched_yield_s" -B 32000 -s
 semop "semop"

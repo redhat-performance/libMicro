@@ -1,4 +1,5 @@
 
+memrand "memrand" -s 128m -B 32m
 memrand "memrand_128k" -s 128k -B 24m
 memrand "memrand_16k" -s 16k -B 32m
 memrand "memrand_16m" -s 16m -B 24m
@@ -20,7 +21,6 @@ memrand "memrand_64k" -s 64k -B 24m
 memrand "memrand_64m" -s 64m -B 16m
 memrand "memrand_8k" -s 8k -B 32m
 memrand "memrand_8m" -s 8m -B 24m
-memrand "memrand" -s 128m -B 32m
+recurse "recurse" -B 200k
 recurse "recurse_10k" -d 10k -B 1k
 recurse "recurse_1k" -d 1k -B 10k
-recurse "recurse" -B 200k
