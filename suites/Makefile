@@ -17,6 +17,7 @@ SUITE_NAMES =	extended \
 				threading
 
 default: $(SUITE_NAMES:%=%.txt)
+	./verify_names.py extended.txt
 	./check
 
 export LC_ALL=C
