@@ -17,4 +17,6 @@ pipe	"pipe_smp4k"	-s 4k	-x sock	-m mp	-B 10k
 
 #include "localtcp.cpp"
 
+#include "fifo.cpp"
+
 #endif /* _PIPE_ */

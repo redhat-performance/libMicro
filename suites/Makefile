@@ -1,4 +1,5 @@
 SUITE_NAMES =	extended \
+				fifo \
 				filesystem \
 				forkexec \
 				full \
@@ -22,17 +23,17 @@ export LC_ALL=C
 %.txt:	%.cpp
 	$(CPP) -P $< | sort -k 2 | uniq > $@
 
-full.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp
+full.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
 
-extended.txt: full.cpp hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp
+extended.txt: full.cpp hardware.cpp syscalls.cpp libc.cpp memcpy.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
 
-filesystem.txt: readwrite.cpp
+filesystem.txt: readwrite.cpp fifo.cpp
 
 libc.txt: memcpy.cpp
 
 network.txt: localtcp.cpp
 
-pipe.txt: localtcp.cpp
+pipe.txt: localtcp.cpp fifo.cpp
 
 clean:
 	rm -f *~ *.txt

@@ -49,8 +49,8 @@
 
 typedef struct {
 	int			ts_once;
-	pid_t			ts_child;
-	pthread_t		ts_thread;
+	pid_t		ts_child;
+	pthread_t	ts_thread;
 	int			ts_in;
 	int			ts_out;
 	int			ts_in2;
@@ -63,14 +63,13 @@ typedef struct {
 
 static char			*modes[] = {"st", "mt", "mp", NULL};
 #define	MD_SINGLE		0
-#define	MD_MULTITHREAD		1
-#define	MD_MULTIPROCESS		2
+#define	MD_MULTITHREAD	1
+#define	MD_MULTIPROCESS	2
 
-static char			*xports[] = {"pipe", "fifo", "sock", "tcp",
-				    NULL};
+static char			*xports[] = {"pipe", "fifo", "sock", "tcp", NULL};
 #define	XP_PIPES		0
 #define	XP_FIFOS		1
-#define	XP_SOCKETPAIR		2
+#define	XP_SOCKETPAIR	2
 #define	XP_LOCALTCP		3
 
 #define	DEFM			MD_SINGLE
@@ -78,39 +77,39 @@ static char			*xports[] = {"pipe", "fifo", "sock", "tcp",
 #define	DEFX			XP_PIPES
 
 static int			optm = DEFM;
-static size_t			opts = DEFS;
+static size_t		opts = DEFS;
 static int			optx = DEFX;
-static void			*rbuf = NULL;
-static void			*wbuf = NULL;
+static void		   *rbuf = NULL;
+static void		   *wbuf = NULL;
 
-int readall(int s, void *buf, size_t len);
-void *loopback(void *arg);
-int prepare_pipes(tsd_t *tsd);
-int prepare_fifos(tsd_t *tsd);
-int cleanup_fifos(tsd_t *tsd);
-int prepare_socketpair(tsd_t *tsd);
-int prepare_localtcp(tsd_t *tsd);
-int prepare_localtcp_once(tsd_t *tsd);
-char *lookupa(int x, char *names[]);
-int lookup(char *x, char *names[]);
+static int readall(int, void *, size_t);
+static void *loopback(void *);
+static int prepare_pipes(tsd_t *);
+static int prepare_fifos(tsd_t *);
+static int cleanup_fifos(void);
+static int prepare_socketpair(tsd_t *);
+static int prepare_localtcp(tsd_t *);
+static int prepare_localtcp_once(tsd_t *);
+static char *lookupa(int, char *[]);
+static int lookup(char *, char *[]);
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "m:s:x:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "m:s:x:");
 
-	(void) sprintf(lm_usage,
-	    "       [-m mode (st|mt|mp, default %s)]\n"
-	    "       [-s buffer-size (default %d)]\n"
-	    "       [-x transport (pipe|fifo|sock|tcp, default %s)]\n"
-	    "notes: measures write()/read() across various transports\n",
-	    lookupa(DEFM, modes), DEFS, lookupa(DEFX, xports));
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"\t[-m mode (st|mt|mp, default %s)]\n"
+		"\t[-s buffer-size (default %d)]\n"
+		"\t[-x transport (pipe|fifo|sock|tcp, default %s)]\n"
+		"notes: measures write()/read() across various transports\n",
+		lookupa(DEFM, modes), DEFS, lookupa(DEFX, xports));
 
-	(void) sprintf(lm_header, "%2s %4s", "md", "xprt");
+	(void) snprintf(lm_header, sizeof(lm_header), "%2s %4s", "md", "xprt");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -122,7 +121,7 @@ benchmark_optswitch(int opt, char *optarg)
 	case 'm':
 		x = lookup(optarg, modes);
 		if (x == -1)
-			return (-1);
+			return -1;
 		optm = x;
 		break;
 	case 's':
@@ -131,29 +130,30 @@ benchmark_optswitch(int opt, char *optarg)
 	case 'x':
 		x = lookup(optarg, xports);
 		if (x == -1)
-			return (-1);
+			return -1;
 		optx = x;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initrun(void)
 {
-	if (optx == XP_FIFOS) {
-		if (geteuid() != 0) {
-			(void) printf("sorry, must be root to create fifos\n");
-			exit(1);
-		}
-	}
-
 	setfdlimit(4 * lm_optT + 10);
 
 	rbuf = malloc(opts);
+	if (rbuf == NULL) {
+		perror("malloc");
+		return -1;
+	}
 	wbuf = malloc(opts);
+	if (wbuf == NULL) {
+		perror("malloc");
+		return -1;
+	}
 
 	return 0;
 }
@@ -161,10 +161,10 @@ benchmark_initrun(void)
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			result;
-	pid_t			pid;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		result;
+	pid_t	pid;
+	int		i;
 
 	switch (optx) {
 	case XP_SOCKETPAIR:
@@ -182,14 +182,14 @@ benchmark_initbatch(void *tsd)
 		break;
 	}
 	if (result == -1) {
-		return (1);
+		return 1;
 	}
 
 	switch (optm) {
 	case MD_MULTITHREAD:
 		result = pthread_create(&ts->ts_thread, NULL, loopback, tsd);
-		if (result == -1) {
-			return (1);
+		if (result != 0) {
+			return 1;
 		}
 		break;
 	case MD_MULTIPROCESS:
@@ -200,7 +200,8 @@ benchmark_initbatch(void *tsd)
 			exit(0);
 			break;
 		case -1:
-			return (-1);
+			perror("fork");
+			return 1;
 		default:
 			ts->ts_child = pid;
 			break;
@@ -213,24 +214,27 @@ benchmark_initbatch(void *tsd)
 
 	/* Prime the loopback */
 	if (write(ts->ts_out, wbuf, opts) != opts) {
-		return (1);
+		return 1;
 	}
 	if (readall(ts->ts_in, rbuf, opts) != opts) {
-		return (1);
+		return 1;
 	}
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
-	int			n;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i, n, ret;
 
 	for (i = 0; i < lm_optB; i++) {
-		if (write(ts->ts_out, wbuf, opts) != opts) {
+		ret = write(ts->ts_out, wbuf, opts);
+		if (ret != opts) {
+			if (ret < 0) {
+				perror("write");
+			}
 			res->re_errors++;
 			continue;
 		}
@@ -243,13 +247,13 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark_finibatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
+	tsd_t  *ts = (tsd_t *)tsd;
 
 	/* Terminate the loopback */
 	(void) write(ts->ts_out, wbuf, opts);
@@ -275,46 +279,49 @@ benchmark_finibatch(void *tsd)
 	(void) close(ts->ts_out);
 
 	if (optx == XP_FIFOS) {
-		(void) cleanup_fifos(ts);
+		(void) cleanup_fifos();
 	}
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 
-	(void) sprintf(result, "%2s %4s",
-	    lookupa(optm, modes), lookupa(optx, xports));
+	(void) snprintf(result, sizeof(result), "%2s %4s",
+		lookupa(optm, modes), lookupa(optx, xports));
 
-	return (result);
+	return result;
 }
 
-int
+static int
 readall(int s, void *buf, size_t len)
 {
-	size_t			n;
-	size_t			total = 0;
+	size_t	n;
+	size_t	total = 0;
 
 	for (;;) {
 		n = read(s, (void *)((long)buf + total), len - total);
 		if (n < 1) {
-			return (-1);
+			if (n < 0) {
+				perror("read");
+			}
+			return -1;
 		}
 		total += n;
 		if (total >= len) {
-			return (total);
+			return total;
 		}
 	}
 }
 
-void *
+static void *
 loopback(void *arg)
 {
-	tsd_t			*ts = (tsd_t *)arg;
-	int			i, n, m;
+	tsd_t  *ts = (tsd_t *)arg;
+	int		i, n, m;
 
 	/* Include priming and termination */
 	m = lm_optB + 2;
@@ -329,106 +336,118 @@ loopback(void *arg)
 		}
 	}
 
-	return (NULL);
+	return NULL;
 }
 
-int
+static int
 prepare_localtcp_once(tsd_t *ts)
 {
-	int			j;
-	int			opt = 1;
-	struct hostent	*host;
+	int				j;
+	int				opt = 1;
+	struct hostent *host;
 
 	j = FIRSTPORT;
 
 	ts->ts_lsn = socket(AF_INET, SOCK_STREAM, 0);
 	if (ts->ts_lsn == -1) {
-		return (-1);
+		perror("socket");
+		return -1;
 	}
 
 	if (setsockopt(ts->ts_lsn, SOL_SOCKET, SO_REUSEADDR,
-	    &opt, sizeof (int)) == -1) {
-		return (-1);
+			&opt, sizeof (int)) == -1) {
+		perror("setsockopt");
+		return -1;
 	}
 
 	if ((host = gethostbyname("localhost")) == NULL) {
-		return (-1);
+		perror("gethostbyname");
+		return -1;
 	}
 
 	for (;;) {
 		(void) memset(&ts->ts_add, 0,
-		    sizeof (struct sockaddr_in));
+				sizeof (struct sockaddr_in));
 		ts->ts_add.sin_family = AF_INET;
 		ts->ts_add.sin_port = htons(j++);
 		(void) memcpy(&ts->ts_add.sin_addr.s_addr,
-		    host->h_addr_list[0], sizeof (struct in_addr));
+				host->h_addr_list[0], sizeof (struct in_addr));
 
 		if (bind(ts->ts_lsn,
-		    (struct sockaddr *)&ts->ts_add,
-		    sizeof (struct sockaddr_in)) == 0) {
+				(struct sockaddr *)&ts->ts_add,
+				sizeof (struct sockaddr_in)) == 0) {
 			break;
 		}
 
 		if (errno != EADDRINUSE) {
-			return (-1);
+			perror("bind");
+			return -1;
 		}
 	}
 
 	if (listen(ts->ts_lsn, 5) == -1) {
-		return (-1);
+		perror("listen");
+		return -1;
 	}
 
-	return (0);
+	return 0;
 }
 
-int
+static int
 prepare_localtcp(tsd_t *ts)
 {
-	int			result;
+	int					result;
 	struct sockaddr_in	addr;
-	int			opt = 1;
-	socklen_t		size;
+	int					opt = 1;
+	socklen_t			size;
 
 	if (ts->ts_once++ == 0) {
 		if (prepare_localtcp_once(ts) == -1) {
-			return (-1);
+			return -1;
 		}
 	}
 
 	ts->ts_out = socket(AF_INET, SOCK_STREAM, 0);
 	if (ts->ts_out == -1) {
-		return (-1);
+		perror("socket");
+		return -1;
 	}
 
 	if (fcntl(ts->ts_out, F_SETFL, O_NDELAY) == -1) {
-		return (-1);
+		perror("fcntl");
+		return -1;
 	}
 
 	result = connect(ts->ts_out, (struct sockaddr *)&ts->ts_add,
-	    sizeof (struct sockaddr_in));
+			sizeof (struct sockaddr_in));
 	if ((result == -1) && (errno != EINPROGRESS)) {
-		return (-1);
+		perror("connect");
+		return -1;
 	}
 
 	if (fcntl(ts->ts_out, F_SETFL, 0) == -1) {
-		return (-1);
+		perror("fcntl");
+		return -1;
 	}
 
 	size = sizeof (struct sockaddr);
 	result = accept(ts->ts_lsn, (struct sockaddr *)&addr, &size);
 	if (result == -1) {
-		return (-1);
+		perror("accept");
+		return -1;
 	}
 	ts->ts_out2 = result;
 
 	if (setsockopt(ts->ts_out, IPPROTO_TCP, TCP_NODELAY,
-	    &opt, sizeof (int)) == -1) {
-		return (-1);
+			&opt, sizeof (int)) == -1) {
+		perror("setsockopt");
+		return -1;
 	}
 
 	if (setsockopt(ts->ts_out2, IPPROTO_TCP, TCP_NODELAY,
-	    &opt, sizeof (int)) == -1) {
-		return (-1);
+			&opt, sizeof (int)) == -1) {
+		perror("setsockopt");
+		return -1;
 	}
 
 	if (optm == MD_SINGLE) {
@@ -438,16 +457,17 @@ prepare_localtcp(tsd_t *ts)
 		ts->ts_in2 = ts->ts_out2;
 	}
 
-	return (0);
+	return 0;
 }
 
-int
+static int
 prepare_socketpair(tsd_t *ts)
 {
 	int			s[2];
 
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, s) == -1) {
-		return (-1);
+		perror("socketpair");
+		return -1;
 	}
 
 	if (optm == MD_SINGLE) {
@@ -460,107 +480,157 @@ prepare_socketpair(tsd_t *ts)
 		ts->ts_out2 = s[1];
 	}
 
-	return (0);
+	return 0;
 }
 
-int
+static int
 prepare_fifos(tsd_t *ts)
 {
-	char			path[64];
+	char	pathA[64];
+	char	pathB[64], *pathBp = NULL;
 
-	(void) sprintf(path, "/tmp/pipe_%ld.%dA",
-	    getpid(), pthread_self());
-	if (mknod(path, 0600, S_IFIFO) == -1) {
-		return (-1);
+	(void) snprintf(pathA, sizeof(pathA), "/tmp/pipe_%ld_0x%lx_A",
+			getpid(), pthread_self());
+	if (mkfifo(pathA, 0600) == -1) {
+		perror("mkfifo");
+		return -1;
+	}
+
+	ts->ts_in = open(pathA, O_RDONLY|O_NONBLOCK);
+	if (ts->ts_in == -1) {
+		perror("prepare_fifos(): open");
+		goto error;
+	}
+
+	int out = open(pathA, O_WRONLY|O_NONBLOCK);
+	if (out == -1) {
+		perror("prepare_fifos(): open");
+		goto error;
 	}
 
 	if (optm == MD_SINGLE) {
-		ts->ts_in = open(path, O_RDONLY);
-		ts->ts_out = open(path, O_WRONLY);
+		ts->ts_out = out;
 	} else {
-		ts->ts_in = open(path, O_RDONLY);
-		ts->ts_out2 = open(path, O_WRONLY);
+		ts->ts_out2 = out;
 
-		(void) sprintf(path, "/tmp/pipe_%ld.%dB",
-		    getpid(), pthread_self());
-		if (mknod(path, 0600, S_IFIFO) == -1) {
-			return (-1);
+		(void) snprintf(pathB, sizeof(pathB), "/tmp/pipe_%ld_0x%lx_B",
+				getpid(), pthread_self());
+		pathBp = pathB;
+		if (mkfifo(pathBp, 0600) == -1) {
+			perror("mkfifo");
+			goto error;
 		}
 
-		ts->ts_in2 = open(path, O_RDONLY);
-		ts->ts_out = open(path, O_WRONLY);
+		ts->ts_in2 = open(pathBp, O_RDONLY|O_NONBLOCK);
+		if (ts->ts_in2 == -1) {
+			perror("prepare_fifos(): open");
+			goto error;
+		}
+		ts->ts_out = open(pathBp, O_WRONLY|O_NONBLOCK);
+		if (ts->ts_in2 == -1) {
+			perror("prepare_fifos(): open");
+			goto error;
+		}
 	}
 
-	return (0);
+	if (fcntl(ts->ts_out2, F_SETFL, 0) == -1) {
+		perror("fcntl");
+		goto error;
+	}
+	if (fcntl(ts->ts_in2, F_SETFL, 0) == -1) {
+		perror("fcntl");
+		goto error;
+	}
+	if (fcntl(ts->ts_out, F_SETFL, 0) == -1) {
+		perror("fcntl");
+		goto error;
+	}
+	if (fcntl(ts->ts_in, F_SETFL, 0) == -1) {
+		perror("fcntl");
+		goto error;
+	}
+
+	return 0;
+
+error:
+	if (ts->ts_out2 > 0) (void) close(ts->ts_out2), ts->ts_out2 = 0;
+	if (ts->ts_in2 > 0) (void) close(ts->ts_in2), ts->ts_in2 = 0;
+	if (ts->ts_out > 0) (void) close(ts->ts_out), ts->ts_out = 0;
+	if (ts->ts_in > 0) (void) close(ts->ts_in), ts->ts_in = 0;
+	if (pathBp) (void) unlink(pathBp);
+	(void) unlink(pathA);
+	return -1;
 }
 
-/*ARGSUSED*/
-int
-cleanup_fifos(tsd_t *ts)
+static int
+cleanup_fifos(void)
 {
-	char			path[64];
+	char	path[64];
 
-	(void) sprintf(path, "/tmp/pipe_%ld.%dA", getpid(), pthread_self());
+	(void) snprintf(path, sizeof(path), "/tmp/pipe_%ld_0x%lx_A", getpid(), pthread_self());
 	(void) unlink(path);
-	(void) sprintf(path, "/tmp/pipe_%ld.%dB", getpid(), pthread_self());
+	(void) snprintf(path, sizeof(path), "/tmp/pipe_%ld_0x%lx_B", getpid(), pthread_self());
 	(void) unlink(path);
 
-	return (0);
+	return 0;
 }
 
-int
+static int
 prepare_pipes(tsd_t *ts)
 {
-	int			p[2];
+	int		p[2];
 
 	if (optm == MD_SINGLE) {
 		if (pipe(p) == -1) {
-			return (-1);
+			perror("pipe");
+			return -1;
 		}
 		ts->ts_in = p[0];
 		ts->ts_out = p[1];
 
 	} else {
 		if (pipe(p) == -1) {
-			return (-1);
+			perror("pipe");
+			return -1;
 		}
 		ts->ts_in = p[0];
 		ts->ts_out2 = p[1];
 
 		if (pipe(p) == -1) {
-			return (-1);
+			perror("pipe");
+			return -1;
 		}
 		ts->ts_in2 = p[0];
 		ts->ts_out = p[1];
 	}
 
-	return (0);
+	return 0;
 }
 
-char *
+static char *
 lookupa(int x, char *names[])
 {
-	int			i = 0;
+	int		i = 0;
 
 	while (names[i] != NULL) {
 		if (x == i) {
-			return (names[i]);
+			return names[i];
 		}
 		i++;
 	}
-	return (NULL);
+	return NULL;
 }
 
-int
+static int
 lookup(char *x, char *names[])
 {
-	int			i = 0;
+	int		i = 0;
 
 	while (names[i] != NULL) {
 		if (strcmp(names[i], x) == 0) {
-			return (i);
+			return i;
 		}
 		i++;
 	}
-	return (-1);
+	return -1;
 }

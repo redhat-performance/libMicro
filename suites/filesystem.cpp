@@ -40,6 +40,8 @@ open	"open_zero"	-B 25000	-f /dev/zero
 
 dup	"dup"	-B 400k
 
+#include "fifo.cpp"
+
 #include "readwrite.cpp"
 
 #endif /* _FILESYSTEM_ */
