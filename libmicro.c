@@ -154,8 +154,8 @@ static void			compute_stats(barrier_t *);
 int
 actual_main(int argc, char *argv[])
 {
-	int			i;
-	int			opt;
+	int				i, ret;
+	int				opt;
 	extern char		*optarg;
 	char			*tmp;
 	char			optstr[256];
@@ -398,10 +398,11 @@ actual_main(int argc, char *argv[])
 	 */
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main() calling benchmark_initrun()\n");
-	if (benchmark_initrun() == -1) {
+    ret = benchmark_initrun();
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main() benchmark_initrun() returned %d\n", ret);
+	if (ret == -1) {
 		exit(1);
 	}
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main() benchmark_initrun() returned\n");
 
 	/* allocate dynamic data */
 	pids = (pid_t *)malloc(lm_optP * sizeof (pid_t));
@@ -632,12 +633,12 @@ actual_main(int argc, char *argv[])
 
 	/* cleanup by stages */
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): calling benchmark_finirun()\n");
-	(void) benchmark_finirun();
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): benchmark_finirun() returned\n");
+	ret = benchmark_finirun();
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): benchmark_finirun() returned %d\n", ret);
 	(void) barrier_destroy(b);
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): calling benchmark_fini()\n");
-	(void) benchmark_fini();
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): benchmark_fini() returned\n");
+	ret = benchmark_fini();
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main(): benchmark_fini() returned %d\n", ret);
 
 	return 0;
 }
@@ -645,19 +646,20 @@ actual_main(int argc, char *argv[])
 void *
 worker_thread(void *arg)
 {
-	result_t		r;
-	long long		last_sleep = 0;
-	long long		t;
+	result_t	r;
+	long long	last_sleep = 0;
+	long long	t;
+    int         ret;
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initworker()\n");
-	r.re_errors = benchmark_initworker(arg);
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initworker() returned\n");
+	r.re_errors = ret = benchmark_initworker(arg);
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initworker() returned %d\n", ret);
 
 	while (lm_barrier->ba_flag) {
 		r.re_count = 0;
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initbatch()\n");
-		r.re_errors += benchmark_initbatch(arg);
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initbatch() returned\n");
+		r.re_errors += ret = benchmark_initbatch(arg);
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initbatch() returned %d\n", ret);
 
 		/* sync to clock */
 
@@ -671,9 +673,9 @@ worker_thread(void *arg)
 		/* time the test */
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
 		r.re_t0 = getnsecs();
-		(void) benchmark(arg, &r);
+		ret = benchmark(arg, &r);
 		r.re_t1 = getnsecs();
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned\n");
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
 
 		/* record results and sync */
 		(void) barrier_queue(lm_barrier, &r);
@@ -688,13 +690,13 @@ worker_thread(void *arg)
 
 		/* Errors from finishing this batch feed into the next batch */
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finibatch()\n");
-		r.re_errors = benchmark_finibatch(arg);
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finibatch() returned\n");
+		r.re_errors = ret = benchmark_finibatch(arg);
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finibatch() returned %d\n", ret);
 	}
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finiworker()\n");
-	(void) benchmark_finiworker(arg);
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finiworker() returned\n");
+	ret = benchmark_finiworker(arg);
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finiworker() returned %d\n", ret);
 
 	return 0;
 }
