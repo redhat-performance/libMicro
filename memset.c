@@ -29,7 +29,11 @@
  */
 
 /*
- * memset
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * memset()
  */
 
 #include <unistd.h>

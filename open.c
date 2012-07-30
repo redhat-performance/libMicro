@@ -29,9 +29,12 @@
  */
 
 /*
- * benchmark open
+ * Modifications by Red Hat, Inc.
  */
 
+/*
+ * open()
+ */
 
 #include <unistd.h>
 #include <stdlib.h>

@@ -29,7 +29,11 @@
  */
 
 /*
- * gettimeofday test
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * gettimeofday()
  */
 
 #include <unistd.h>

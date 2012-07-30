@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * kill()
+ */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -54,7 +62,7 @@ benchmark_init()
 {
 	lm_tsdsize = 0;
 
-	(void) sprintf(lm_usage, "notes: measures signal()\n");
+	(void) sprintf(lm_usage, "notes: measures kill()\n");
 
 	return (0);
 }

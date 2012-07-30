@@ -29,7 +29,11 @@
  */
 
 /*
- * isatty test
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * isatty()
  */
 
 #include <unistd.h>

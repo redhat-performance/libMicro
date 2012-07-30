@@ -28,6 +28,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
+
 include ../Makefile.benchmarks
 
 EXTRA_CFILES= \

@@ -24,8 +24,12 @@
  */
 
 /*
- * Copyright 2012 Red Hat, Inc.  All rights reserved.
+ * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ */
+
+/*
+ * Modifications by Red Hat, Inc. Adapted from gettimeofday.c.
  */
 
 /*

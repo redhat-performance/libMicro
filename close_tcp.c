@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * benchmark to measure time to close a local tcp connection
  */
 

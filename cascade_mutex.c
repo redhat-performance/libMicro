@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * The "cascade" test case is a multiprocess/multithread batten-passing model
  * using lock primitives alone for synchronisation. Threads are arranged in a
  * ring. Each thread has two locks of its own on which it blocks, and is able

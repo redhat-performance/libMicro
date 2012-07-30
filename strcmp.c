@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * strcmp()
+ */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

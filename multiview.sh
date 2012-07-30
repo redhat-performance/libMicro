@@ -29,6 +29,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
+
 DIRNAME=`dirname $0`
 
 /bin/awk -f $DIRNAME/multiview.awk "$@"

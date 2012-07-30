@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * system()
+ */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

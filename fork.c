@@ -29,7 +29,11 @@
  */
 
 /*
- * benchmark fork
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * fork()
  */
 
 #include <sys/types.h>

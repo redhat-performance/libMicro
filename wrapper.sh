@@ -29,6 +29,9 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
 
 BASENAME=`basename $0`
 DIRNAME=`dirname $0`

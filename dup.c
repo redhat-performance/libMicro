@@ -29,7 +29,11 @@
  */
 
 /*
- * time dup
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * dup()
  */
 
 #include <unistd.h>

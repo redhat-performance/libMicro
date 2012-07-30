@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * sigprocmask()
+ */
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * benchmark for bind... keep in mind tcp hash chain effects
  */
 

@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * memory access time check
  */
 

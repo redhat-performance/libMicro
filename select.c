@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * select()
+ */
+
 #define	MAX(x, y)		((x) > (y) ? (x) : (y))
 #define	MIN(x, y)		((x) > (y) ? (y) : (x))
 

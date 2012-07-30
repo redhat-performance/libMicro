@@ -29,7 +29,11 @@
  */
 
 /*
- * measures  O_NDELAY on socket
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * measures O_NDELAY on socket
  */
 
 #include <sys/types.h>

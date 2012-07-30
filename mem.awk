@@ -1,3 +1,15 @@
+#
+# Copyright 2012 Red Hat, Inc.
+#
+# The contents of this file are subject to the terms
+# of the Common Development and Distribution License
+# (the "License").  You may not use this file except
+# in compliance with the License.
+#
+# See the License for the specific language governing
+# permissions and limitations under the License.
+#
+
 # Simple awk script to parse the output of "dmidecode --type 17" (run as
 # root) to figure out the count, size and speed of the installed DIMMs.
 #

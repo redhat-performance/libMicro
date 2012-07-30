@@ -29,7 +29,11 @@
  */
 
 /*
- * benchmark for close
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * close()
  */
 
 #include <unistd.h>

@@ -28,6 +28,13 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * Test recursive function calls to a given depth.
+ */
 
 #include <unistd.h>
 #include <stdio.h>

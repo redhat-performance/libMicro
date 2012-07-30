@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * munmap()
+ */
+
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdlib.h>

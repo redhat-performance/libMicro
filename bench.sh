@@ -30,6 +30,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
+
 DIRNAME=$(dirname $0)
 
 bench_version=0.4.1-rh.19

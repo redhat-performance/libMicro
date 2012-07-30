@@ -29,9 +29,12 @@
  */
 
 /*
- * getpid
+ * Modifications by Red Hat, Inc.
  */
 
+/*
+ * getpid()
+ */
 
 #include <unistd.h>
 #include <stdio.h>

@@ -29,7 +29,11 @@
  */
 
 /*
- * mktime
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * mktime()
  */
 
 #include <unistd.h>

@@ -25,6 +25,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
 #ifndef LIBMICRO_H
 #define	LIBMICRO_H
 

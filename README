@@ -28,6 +28,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
+
 Building the tarball
 --------------------
 As long as cc is in your path, (gcc on Linux),
@@ -63,23 +67,27 @@ libmicro runs.
 The compare.html file will allow quick comparisons to be drawn,
 allowing a variety of experiments to be quickly analyzed.
 
-All benchmarks support the following options:
+All benchmarks support the following options (uppercase letters
+reserved for framework options):
 
        [-1] (single process; overrides -P > 1)
        [-A] (align with clock)
-       [-B batch-size (default 10)]
-       [-C minimum number of samples (default 0)]
-       [-D duration in msecs (default 10s)]
-       [-E (echo name to stderr)]
+       [-B batch-size (default 0)]
+       [-C minimum number of samples (default 100)]
+       [-D minimum duration in ms (default 10000ms)]
+       [-E] (echo name to stderr)
+       [-G framework debugging level]
        [-H] (suppress headers)
-       [-I] specify approx. time per op in nsecs
+       [-I nsecs per op] (used to compute batch size)
        [-L] (print argument line)
        [-M] (reports mean rather than median)
-       [-N test-name ]
+       [-N test-name (each benchmark provides default)]
        [-P processes (default 1)]
        [-S] (print detailed stats)
        [-T threads (default 1)]
        [-V] (print the libMicro version and exit)
        [-W] (flag possible benchmark problems)
+       [-X maximum duration in ms (default 600000ms)]
 
-
+Each benchmark also supports its own set of options (using lowercase
+letters).

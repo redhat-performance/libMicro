@@ -29,7 +29,11 @@
  */
 
 /*
- * benchmarking routines
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * benchmarking framework
  */
 
 #include <sys/types.h>
@@ -238,7 +242,7 @@ actual_main(int argc, char *argv[])
 	 * Parse command line arguments
 	 */
 
-	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:RST:VWX:?%s", lm_optstr);
+	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:ST:VWX:?%s", lm_optstr);
 	while ((opt = getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case '1':
@@ -736,11 +740,12 @@ usage(void)
 		"\t[-1] (single process; overrides -P > 1)\n"
 		"\t[-A] (align with clock)\n"
 		"\t[-B batch-size (default %d)]\n"
-		"\t[-C minimum number of samples (default 0)]\n"
+		"\t[-C minimum number of samples (default %d)]\n"
 		"\t[-D minimum duration in ms (default %dms)]\n"
-		"\t[-E (echo name to stderr)]\n"
+		"\t[-E] (echo name to stderr)\n"
+		"\t[-G framework debugging level]\n"
 		"\t[-H] (suppress headers)\n"
-		"\t[-I] nsecs per op (used to compute batch size)"
+		"\t[-I nsecs per op] (used to compute batch size)\n"
 		"\t[-L] (print argument line)\n"
 		"\t[-M] (reports mean rather than median)\n"
 		"\t[-N test-name (default '%s')]\n"
@@ -748,11 +753,11 @@ usage(void)
 		"\t[-S] (print detailed stats)\n"
 		"\t[-T threads (default %d)]\n"
 		"\t[-V] (print the libMicro version and exit)\n"
-		"\t[-X] maximum duration in ms (default %dms)\n"
 		"\t[-W] (flag possible benchmark problems)\n"
+		"\t[-X maximum duration in ms (default %dms)]\n"
 		"%s\n",
 		lm_procname,
-		lm_defB, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
+		lm_defB, lm_defC, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
 		lm_usage);
 }
 

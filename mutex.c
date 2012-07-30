@@ -29,7 +29,11 @@
  */
 
 /*
- * mutex
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * pthread_mutex_lock()/pthread_mutex_unlock()
  */
 
 #include <unistd.h>

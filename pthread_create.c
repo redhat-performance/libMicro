@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * pthread_create()
+ */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -28,6 +28,14 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * pipe()
+ */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
