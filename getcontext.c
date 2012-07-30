@@ -29,7 +29,7 @@
  */
 
 /*
- * getcontext
+ * getcontext()
  */
 
 #include <stdio.h>
