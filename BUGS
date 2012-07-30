@@ -9,6 +9,8 @@ CPU_NAME is wrong on earlier (than 10) and later (than 10) versions of Solaris
 TimerRes detection on some Solaris 8 SPARC systems is wrong and falsely
     detects resolution as 1nsec
 
+Depending on the configuration of a given system, the connection tests can hang.
+
 TODO:
 
 .o files should probably be separated from generated binaries (obj-sun4u?)
@@ -27,3 +29,18 @@ FreeBSD ports collection has patches to make libmicro work on FreeBSD.
     Fold those in (or reimplement)
     http://portsmon.freebsd.org/portoverview.py?category=benchmarks&portname=libmicro
 
+Add a summary suite runs
+
+Add ability to compare various tests within a suite?
+    e.g.:
+        pipe_fmp1   pipe_pmp1   pipe_smp1   pipe_tmp1 
+        pipe_fmp4k  pipe_pmp4k  pipe_smp4k  pipe_tmp4k
+        pipe_fmt1   pipe_pmt1   pipe_smt1   pipe_tmt1 
+        pipe_fmt4k  pipe_pmt4k  pipe_smt4k  pipe_tmt4k
+        pipe_fst1   pipe_pst1   pipe_sst1   pipe_tst1 
+        pipe_fst4k  pipe_pst4k  pipe_sst4k  pipe_tst4k
+	There are others ...
+
+Add shared vs. private mmap/munmap/mprotect/msync tests?
+
+Consider testing alternative malloc implementations?
