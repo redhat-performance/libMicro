@@ -29,7 +29,7 @@
  */
 
 /*
- * benchmark longjmp
+ * longjmp()
  */
 
 #include <unistd.h>
