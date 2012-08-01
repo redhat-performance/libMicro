@@ -27,6 +27,7 @@ if [ -z "$1" ]; then
     echo "Please provide the version of RHEL (e.g. 'rhel6.3')"
     exit 1
 fi
+ROOT_UID=0   # Only users with $UID 0 have root privileges.
 HN=`hostname -s`
 DN=`dirname $0`
 VER=`$DN/bin/tattle -V`
@@ -80,11 +81,21 @@ nodes=$(numactl --hardware | grep available | awk '{print $2}')
 echo "!Runit-command: $DN/bench -s $suite" >                             $template_nonuma-$run-results.txt
                       $DN/bench -s $suite >>                             $template_nonuma-$run-results.txt    2> $template_nonuma-$run-timings.txt
 if [ "$nodes" == "1" ]; then
-    echo "!Runit-command: numactl chrt -f 1 $DN/bench -s $suite" > $template_nonuma_chrt-$run-results.txt
-                          numactl chrt -f 1 $DN/bench -s $suite >> $template_nonuma_chrt-$run-results.txt 2> $template_nonuma_chrt-$run-timings.txt
+    if [ "$UID" -eq "$ROOT_UID" ]; then
+        echo "!Runit-command: numactl chrt -f 1 $DN/bench -s $suite" > $template_nonuma_chrt-$run-results.txt
+                              numactl chrt -f 1 $DN/bench -s $suite >> $template_nonuma_chrt-$run-results.txt 2> $template_nonuma_chrt-$run-timings.txt
+	    $DN/multiview $template_nonuma-$run-results.txt $template_nonuma_chrt-$run-results.txt > $template_base-$run-results.html
+    else
+	    $DN/multiview $template_nonuma-$run-results.txt > $template_base-$run-results.html
+    fi
 else
     echo "!Runit-command: numactl -N 1 -m 1 $DN/bench -s $suite" >           $template_numa-$run-results.txt
                           numactl -N 1 -m 1 $DN/bench -s $suite >>           $template_numa-$run-results.txt      2> $template_numa-$run-timings.txt
-    echo "!Runit-command: numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite" > $template_numa_chrt-$run-results.txt
-                          numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite >> $template_numa_chrt-$run-results.txt 2> $template_numa_chrt-$run-timings.txt
+    if [ "$UID" -eq "$ROOT_UID" ]; then
+        echo "!Runit-command: numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite" > $template_numa_chrt-$run-results.txt
+                              numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite >> $template_numa_chrt-$run-results.txt 2> $template_numa_chrt-$run-timings.txt
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_numa_chrt-$run-results.txt > $template_base-$run-results.html
+    else
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt > $template_base-$run-results.html
+    fi
 fi
