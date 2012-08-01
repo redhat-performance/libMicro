@@ -28,10 +28,19 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
 
-CPPFLAGS=		-DUSE_GETHRTIME -D_REENTRANT
+CPPFLAGS=	-DUSE_GETHRTIME -D_REENTRANT
 
 CFLAGS = -O $(extra_CFLAGS)
+
+NSLLIB=	-lnsl
+SOCKLIB=	-lsocket
+UCBLIB=		-lc -L/usr/ucblib -lucb -R/usr/ucblib
+MATHLIB=	-lm
+PTHREAD_LIBS=	-lpthread -lrt
 
 #
 # These defines allow libmicro to be compiled against older Solaris
@@ -52,10 +61,5 @@ ELIDED_BENCHMARKS_CMN=cascade_flock
 ELIDED_BENCHMARKS=$(ELIDED_BENCHMARKS_CMN) $(ELIDED_BENCHMARKS_$(UNAME_RELEASE))
 
 include ../Makefile.com
-
-NSLLIB=		-lnsl
-SOCKLIB=	-lsocket
-UCBLIB=		-lc -L/usr/ucblib -lucb -R/usr/ucblib
-MATHLIB=	-lm
 
 .KEEP_STATE:

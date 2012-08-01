@@ -63,34 +63,33 @@ typedef struct {
 	int			ts_them1;
 } tsd_t;
 
-static int			nthreads;
-
 /*
  * API-specific code BEGINS here
  */
 
-static int			opto = 0;
-static int			opts = 0;
-static int			nlocks;
-static pthread_mutex_t	*mxs;
-static pthread_cond_t		*cvs;
-static int			*conds;
+static int				opto = 0;
+static int				opts = 0;
+static int				nlocks;
+static int				nthreads;
+static pthread_mutex_t *mxs;
+static pthread_cond_t  *cvs;
+static int			   *conds;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_optstr, "os");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "os");
 
 	lm_defN = "cscd_cond";
 
-	(void) sprintf(lm_usage,
+	(void) snprintf(lm_usage, sizeof(lm_usage),
 	    "       [-o] (do signal outside mutex)\n"
 	    "       [-s] (force PTHREAD_PROCESS_SHARED)\n"
-	    "notes: thread cascade using pthread_conds\n");
+	    "notes: thread cascade using pthread_cond_wait()/pthread_cond_signal()\n");
 
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/
@@ -105,18 +104,50 @@ benchmark_optswitch(int opt, char *optarg)
 		opts = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
-	int			i;
-	int			e = 0;
+	int					i, ret;
+	int					e = 0;
 	pthread_mutexattr_t	ma;
 	pthread_condattr_t	ca;
+
+	ret = pthread_mutexattr_init(&ma);
+    if (ret != 0) {
+        return 1;
+    }
+	ret = pthread_condattr_init(&ca);
+    if (ret != 0) {
+        return 1;
+    }
+	if (lm_optP > 1 || opts) {
+		ret = pthread_mutexattr_setpshared(&ma,
+		    PTHREAD_PROCESS_SHARED);
+        if (ret != 0) {
+            return 1;
+        }
+		ret = pthread_condattr_setpshared(&ca,
+		    PTHREAD_PROCESS_SHARED);
+        if (ret != 0) {
+            return 1;
+        }
+	} else {
+		ret = pthread_mutexattr_setpshared(&ma,
+		    PTHREAD_PROCESS_PRIVATE);
+        if (ret != 0) {
+            return 1;
+        }
+		ret = pthread_condattr_setpshared(&ca,
+		    PTHREAD_PROCESS_PRIVATE);
+        if (ret != 0) {
+            return 1;
+        }
+	}
 
 	nthreads = lm_optP * lm_optT;
 	nlocks = nthreads * 2;
@@ -127,7 +158,7 @@ benchmark_initrun()
 	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (mxs == MAP_FAILED) {
-		return (1);
+		return 1;
 	}
 
 	/*LINTED*/
@@ -137,68 +168,90 @@ benchmark_initrun()
 	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (cvs == MAP_FAILED) {
-		return (1);
+		return 1;
 	}
 
 	/*LINTED*/
 	conds = (int *)mmap(NULL,
-	    nlocks * sizeof (pthread_cond_t),
+	    nlocks * sizeof (int),
 	    PROT_READ | PROT_WRITE,
 	    MAP_ANONYMOUS | MAP_SHARED,
 	    -1, 0L);
 	if (conds == MAP_FAILED) {
-		return (1);
-	}
-
-	(void) pthread_mutexattr_init(&ma);
-	(void) pthread_condattr_init(&ca);
-	if (lm_optP > 1 || opts) {
-		(void) pthread_mutexattr_setpshared(&ma,
-		    PTHREAD_PROCESS_SHARED);
-		(void) pthread_condattr_setpshared(&ca,
-		    PTHREAD_PROCESS_SHARED);
-	} else {
-		(void) pthread_mutexattr_setpshared(&ma,
-		    PTHREAD_PROCESS_PRIVATE);
-		(void) pthread_condattr_setpshared(&ca,
-		    PTHREAD_PROCESS_PRIVATE);
+		return 1;
 	}
 
 	for (i = 0; i < nlocks; i++) {
-		(void) pthread_mutex_init(&mxs[i], &ma);
-		(void) pthread_cond_init(&cvs[i], &ca);
+		ret = pthread_mutex_init(&mxs[i], &ma);
+        if (ret != 0) {
+            e++;
+        }
+		ret = pthread_cond_init(&cvs[i], &ca);
+        if (ret != 0) {
+            e++;
+        }
 		conds[i] = 0;
 	}
 
-	return (e);
+	return e;
 }
 
-int
+static int
 block(int index)
 {
-	(void) pthread_mutex_lock(&mxs[index]);
+    int ret;
+
+	ret = pthread_mutex_lock(&mxs[index]);
+    if (ret != 0) {
+        return 1;
+    }
 	while (conds[index] != 0) {
-		(void) pthread_cond_wait(&cvs[index], &mxs[index]);
+		ret = pthread_cond_wait(&cvs[index], &mxs[index]);
+        if (ret != 0) {
+            (void) pthread_mutex_unlock(&mxs[index]);
+            return 1;
+        }
 	}
 	conds[index] = 1;
-	(void) pthread_mutex_unlock(&mxs[index]);
+	ret = pthread_mutex_unlock(&mxs[index]);
+    if (ret != 0) {
+        return 1;
+    }
 
-	return (0);
+	return 0;
 }
 
-int
+static int
 unblock(int index)
 {
-	(void) pthread_mutex_lock(&mxs[index]);
+    int ret;
+
+	ret = pthread_mutex_lock(&mxs[index]);
+    if (ret != 0) {
+        return 1;
+    }
 	conds[index] = 0;
 	if (opto) {
-		(void) pthread_mutex_unlock(&mxs[index]);
-		(void) pthread_cond_signal(&cvs[index]);
+		ret = pthread_mutex_unlock(&mxs[index]);
+        if (ret != 0) {
+            return 1;
+        }
+		ret = pthread_cond_signal(&cvs[index]);
+        if (ret != 0) {
+            return 1;
+        }
 	} else {
-		(void) pthread_cond_signal(&cvs[index]);
-		(void) pthread_mutex_unlock(&mxs[index]);
+		ret = pthread_cond_signal(&cvs[index]);
+        if (ret != 0) {
+            (void) pthread_mutex_unlock(&mxs[index]);
+            return 1;
+        }
+		ret = pthread_mutex_unlock(&mxs[index]);
+        if (ret != 0) {
+            return 1;
+        }
 	}
-	return (0);
+	return 0;
 }
 
 /*
@@ -208,14 +261,14 @@ unblock(int index)
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			e = 0;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		e = 0;
 
 	if (ts->ts_once == 0) {
 		int		us, them;
 
 		us = (getpindex() * lm_optT) + gettindex();
-		them = (us + 1) % (lm_optP * lm_optT);
+		them = (us + 1) % nthreads;
 
 		ts->ts_id = us;
 
@@ -238,15 +291,15 @@ benchmark_initbatch(void *tsd)
 	/* block their first move */
 	e += block(ts->ts_them0);
 
-	return (e);
+	return e;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
-	int			e = 0;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
+	int		e = 0;
 
 	/* wait to be unblocked (id == 0 will not block) */
 	e += block(ts->ts_us0);
@@ -278,5 +331,5 @@ benchmark(void *tsd, result_t *res)
 	res->re_count = i;
 	res->re_errors = e;
 
-	return (0);
+	return 0;
 }

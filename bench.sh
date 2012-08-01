@@ -90,19 +90,11 @@ then
     PM_QOS_PID=$!
 fi
 
-ARCH=`uname -m`
+ARCH=`uname -p`
 
 # produce benchmark header for easier comparisons
 
 hostname=`uname -n`
-
-if [ -f /usr/sbin/psrinfo ]; then
-	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'`
-fi
-
-if [ -f /proc/cpuinfo ]; then
-	p_type=`awk -F: '/model name/{print $2; exit}' /proc/cpuinfo`
-fi
 
 printf "!Libmicro_#:          %45s\n" $libmicro_version
 printf "!Options:             %45s\n" "$OPTS"
@@ -122,15 +114,42 @@ printf "!sizeof(long):        %45s\n" `$DIRNAME/bin/tattle -s`
 printf "!extra_CFLAGS:        %45s\n" "`$DIRNAME/bin/tattle -f`"
 printf "!TimerRes:            %45s\n" "`$DIRNAME/bin/tattle -r`"
 
+if [ -f /usr/sbin/psrinfo ]; then
+	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'`
+elif [ -f /proc/cpuinfo ]; then
+	p_type=`awk -F: '/model name/{print $2; exit}' /proc/cpuinfo`
+elif [ F"`uname -s`" = F"FreeBSD" ]; then
+	p_type=`sysctl -n hw.model`
+else
+	p_type='Unknown'
+fi
 printf "!CPU_NAME:            %45s\n" "$p_type"
 
-lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | sed 's/CPU_sockets/Sockets/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
+if [ L"`uname -s`" = L"Linux" ]; then
+    lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | sed 's/CPU_sockets/Sockets/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
 
-dmidecode --type 17 2> /dev/null | awk -f $DIRNAME/mem.awk | awk '{printf("!%-40s %25s\n", "Memory:", $1 "," $2 "," $3)}'
+    dmidecode --type 17 2> /dev/null | awk -f $DIRNAME/mem.awk | awk '{printf("!%-40s %25s\n", "Memory:", $1 "," $2 "," $3)}'
 
-sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s %25s\n", $1 ":", $3)}'
+    sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s %25s\n", $1 ":", $3)}'
 
-numactl --hardware | awk -f $DIRNAME/numactl.awk
+    numactl --hardware | awk -f $DIRNAME/numactl.awk
+else
+    if [ -f /usr/sbin/psrinfo ]; then
+    	p_count=`psrinfo|wc -l`
+    	p_mhz=`psrinfo -v | awk '/operates/{print $6 "MHz"; exit }'`
+    elif [ -f /proc/cpuinfo ]; then
+    	p_count=`egrep processor /proc/cpuinfo | wc -l`
+    	p_mhz=`awk -F: '/cpu MHz/{printf("%5.0f00Mhz\n",$2/100); exit}' /proc/cpuinfo`
+    elif [ F"`uname -s`" = F"FreeBSD" ] ; then
+    	p_count=`sysctl -n hw.ncpu`
+    	p_mhz=`sysctl -n hw.clockrate`
+    else
+    	p_count='Unknown'
+    	p_mhz='Unknown'
+    fi  
+    printf "!#CPUs:        %30s\n" $p_count
+    printf "!CPU_MHz:      %30s\n" $p_mhz
+fi
 
 mkdir -p $TMPROOT/bin
 cp $DIRNAME/bin-$ARCH/exec_bin $TMPROOT/bin/

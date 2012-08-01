@@ -28,12 +28,25 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * writev()
+ */
+
+#include <sys/types.h>
 #include <sys/uio.h>
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+
+#ifndef UIO_MAXIOV
+#define UIO_MAXIOV 1024
+#endif
 
 #ifndef IOV_MAX
 #define	IOV_MAX			UIO_MAXIOV

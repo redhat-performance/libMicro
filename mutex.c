@@ -125,9 +125,12 @@ benchmark_initrun()
 		errors++;
 	} else {
 		(void) pthread_mutexattr_init(&attr);
-		if (optp)
-			(void) pthread_mutexattr_setpshared(&attr,
+		if (optp) {
+			int ret = pthread_mutexattr_setpshared(&attr,
 			    PTHREAD_PROCESS_SHARED);
+            if (ret != 0)
+                errors++;
+        }
 
 		if (pthread_mutex_init(lock, &attr) != 0)
 			errors++;

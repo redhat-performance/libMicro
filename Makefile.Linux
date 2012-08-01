@@ -32,15 +32,17 @@
 # Modifications by Red Hat, Inc.
 #
 
-CC=		gcc
+CC=	gcc
 
 CFLAGS=	-O0 -g -std=c99 -D_ISOC99_SOURCE -D_SVID_SOURCE -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200112L
 
+NSLLIB=
+SOCKLIB=
 MATHLIB=	-lm
+PTHREAD_LIBS=	-lpthread -lrt
 
 ELIDED_BENCHMARKS=	\
 	cachetocache	\
 	atomic
-
 
 include ../Makefile.com

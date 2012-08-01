@@ -40,18 +40,18 @@
 #include "libmicro.h"
 
 int
-benchmark_init()
+benchmark_init(void)
 {
-	(void) sprintf(lm_usage, "notes: measures longjmp()\n");
+	(void) snprintf(lm_usage, sizeof(lm_usage), "notes: measures longjmp()\n");
 	lm_tsdsize = 0;
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/
 int
 benchmark(void *tsd, result_t *res)
 {
-	int			i = 0;
+	volatile int	i = 0;
 	jmp_buf			env;
 
 	(void) setjmp(env);
@@ -61,5 +61,5 @@ benchmark(void *tsd, result_t *res)
 
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }

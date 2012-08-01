@@ -29,13 +29,17 @@
  */
 
 /*
- * getrusage
+ * Modifications by Red Hat, Inc.
  */
 
+/*
+ * getrusage
+ */
 
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include <sys/resource.h>
 
 #include "libmicro.h"

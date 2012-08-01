@@ -48,23 +48,22 @@ typedef struct {
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
 	lm_tsdsize = 0;
 
-	(void) sprintf(lm_usage, "notes: measures siglongjmp()\n");
+	(void) snprintf(lm_usage, sizeof(lm_usage), "notes: measures siglongjmp()\n");
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-
-	int i = 0;
+	tsd_t		   *ts = (tsd_t *)tsd;
+	volatile int	i = 0;
 
 	(void) sigsetjmp(ts->ts_env, 1);
 
@@ -73,5 +72,5 @@ benchmark(void *tsd, result_t *res)
 
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }

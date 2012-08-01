@@ -54,14 +54,13 @@ cstyle:
 	do cstyle -p $$file ;\
 	done
 
-
 lint:	libmicro.ln $(ALL:%=%.lint) $(EXTRA_CFILES:%.c=%.lint)
 
 $(EXTRA_CFILES:%.c=%.lint):
-	$(LINT) ../$(@:%.lint=%.c) -I. -mu -lc libmicro.ln -lm
+	$(LINT) ../$(@:%.lint=%.c) -I. -mu -lc libmicro.ln $(MATHLIB) $(PTHREAD_LIBS)
 
 %.lint:	../%.c	libmicro.ln
-	$(LINT) -mu $(CPPFLAGS) $< libmicro.ln -lpthread -lsocket -lnsl -lm
+	$(LINT) -mu $(CPPFLAGS) $< libmicro.ln $(MATHLIB) $(PTHREAD_LIBS) $(SOCKLIB) $(NSLLIB)
 
 %.o:	../%.c	../libmicro.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
@@ -104,13 +103,13 @@ recurse_EXTRA_DEPS=recurse2.o
 recurse:	$(recurse_EXTRA_DEPS)
 
 libmicro.a:	libmicro.o libmicro_main.o $(BENCHMARK_FUNCS)
-		$(AR) -cr libmicro.a libmicro.o libmicro_main.o $(BENCHMARK_FUNCS)
+	$(AR) -cr libmicro.a libmicro.o libmicro_main.o $(BENCHMARK_FUNCS)
 
 tattle:		../tattle.c	libmicro.a	../libmicro.h
 	echo "char * compiler_version = \""`$(COMPILER_VERSION_CMD)`"\";" > tattle.h
 	echo "char * CC = \""$(CC)"\";" >> tattle.h
 	echo "char * extra_compiler_flags = \""$(extra_CFLAGS)"\";" >> tattle.h
-	$(CC) -o tattle $(CFLAGS) -I. ../tattle.c libmicro.a -lpthread -lrt -lm
+	$(CC) -o tattle $(CFLAGS) -I. ../tattle.c libmicro.a $(MATHLIB) $(PTHREAD_LIBS)
 
 pm_qos:		../pm_qos.c
 	$(CC) -o pm_qos $(CFLAGS) ../pm_qos.c
@@ -119,7 +118,7 @@ $(ELIDED_BENCHMARKS):	../elided.c
 	$(CC) -o $(@) ../elided.c
 
 %: %.o libmicro.a
-	$(CC) -o $(@) $(@).o $($(@)_EXTRA_DEPS) $(CFLAGS) libmicro.a $($(@)_EXTRA_LIBS) $(EXTRA_LIBS) -lpthread -lrt -lm
+	$(CC) -o $(@) $(@).o $($(@)_EXTRA_DEPS) $(CFLAGS) libmicro.a $($(@)_EXTRA_LIBS) $(EXTRA_LIBS) $(MATHLIB) $(PTHREAD_LIBS)
 
 exec:	exec_bin
 execw:	exec_bin
@@ -132,4 +131,3 @@ FORCE:
 
 
 ._KEEP_STATE:
-

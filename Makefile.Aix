@@ -28,14 +28,19 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
 
-CFLAGS=		-O3
+CPPFLAGS=	-D_REENTRANT
 
-CPPFLAGS = -D_REENTRANT
+CFLAGS=	-O3
+
+NSLLIB=	-lnsl
+SOCKLIB=
+MATHLIB=	-lm
+PTHREAD_LIBS=	-lpthread -lrt
 
 include ../Makefile.com
-
-NSLLIB=		-lnsl
-SOCKLIB=
 
 .KEEP_STATE:

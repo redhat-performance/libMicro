@@ -978,6 +978,10 @@ update_stats(barrier_t *b, result_t *r)
 	}
 }
 
+#if defined(__FreeBSD__) && !defined(USE_SEMOP)
+# error "Use of SEMOP barriers required on FreeBSD"
+#endif
+
 #ifdef USE_SEMOP
 barrier_t *
 barrier_create(int hwm, int datasize)
