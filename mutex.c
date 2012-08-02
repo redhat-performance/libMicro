@@ -41,37 +41,38 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <sys/mman.h>
+#include <string.h>
 
 #include "libmicro.h"
 
-static int			optt = 0;
-static int			optp = 0;
-static int			opth = 0;
-static int			opto = 0;
+static int				opth = 0;
+static int				opto = 0;
+static int				opts = 0;
+static int				optt = 0;
 
-pthread_mutex_t			*lock;
+static pthread_mutex_t *lock;
 
 typedef struct {
-	int			ts_once;
-	pthread_mutex_t		*ts_lock;
+	int					ts_once;
+	pthread_mutex_t	   *ts_lock;
 } tsd_t;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
-	(void) sprintf(lm_usage,
-	    "       [-t] (create dummy thread so we are multithreaded)\n"
-	    "       [-p] (use inter-process mutex (not support everywhere))\n"
-	    "       [-h usecs] (specify mutex hold time (default 0)\n"
-	    "notes: measures uncontended pthread_mutex_[un,]lock\n");
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+		"\t[-t] (create dummy thread so we are multithreaded)\n"
+		"\t[-s] (use inter-process mutex (not support everywhere))\n"
+		"\t[-h usecs] (specify mutex hold time (default 0)\n"
+		"notes: measures uncontended pthread_mutex_[un,]lock\n");
 
-	(void) sprintf(lm_optstr, "tph:o:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "h:o:st");
 
-	(void) sprintf(lm_header, "%8s", "holdtime");
+	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "holdtime");
 
-	return (0);
+	return 0;
 }
 
 /*ARGSUSED*/
@@ -79,14 +80,6 @@ int
 benchmark_optswitch(int opt, char *optarg)
 {
 	switch (opt) {
-	case 'p':
-		optp = 1;
-		break;
-
-	case 't':
-		optt = 1;
-		break;
-
 	case 'h':
 		opth = sizetoint(optarg);
 		break;
@@ -95,73 +88,91 @@ benchmark_optswitch(int opt, char *optarg)
 		opto = sizetoint(optarg);
 		break;
 
+	case 's':
+		opts = 1;
+		break;
+
+	case 't':
+		optt = 1;
+		break;
+
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
-void *
+static void *
 dummy(void *arg)
 {
 	(void) pause();
-	return (arg);
+	return arg;
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
 	pthread_mutexattr_t	attr;
-	int errors = 0;
+	int					errors = 0;
 
 	/*LINTED*/
-	lock = (pthread_mutex_t *)mmap(NULL,
-	    getpagesize(),
-	    PROT_READ | PROT_WRITE,
-            optp?(MAP_ANONYMOUS | MAP_SHARED):(MAP_ANONYMOUS|MAP_PRIVATE),
-	    -1, 0L) + opto;
-
+	lock = (pthread_mutex_t *)mmap(NULL, getpagesize(),
+			PROT_READ | PROT_WRITE,
+			opts?(MAP_ANONYMOUS | MAP_SHARED):(MAP_ANONYMOUS|MAP_PRIVATE),
+			-1, 0L);
 	if (lock == MAP_FAILED) {
+		perror("mmap");
 		errors++;
 	} else {
-		(void) pthread_mutexattr_init(&attr);
-		if (optp) {
-			int ret = pthread_mutexattr_setpshared(&attr,
-			    PTHREAD_PROCESS_SHARED);
-            if (ret != 0)
-                errors++;
-        }
-
-		if (pthread_mutex_init(lock, &attr) != 0)
+		lock += opto;
+		int ret = pthread_mutexattr_init(&attr);
+		if (ret != 0) {
+			fprintf(stderr, "pthread_mutexattr_init: %s (%d)\n", strerror(ret), ret);
 			errors++;
+		}
+		else {
+			if (opts) {
+				ret = pthread_mutexattr_setpshared(&attr,
+					PTHREAD_PROCESS_SHARED);
+				if (ret != 0) {
+					fprintf(stderr, "pthread_mutexattr_setpshared: %s (%d)\n", strerror(ret), ret);
+					errors++;
+				}
+			}
+
+			if (pthread_mutex_init(lock, &attr) != 0) {
+				fprintf(stderr, "pthread_mutex_init: %s (%d)\n", strerror(ret), ret);
+				errors++;
+			}
+		}
 	}
 
-	return (errors);
+	return errors;
 }
 
 int
 benchmark_initworker(void *tsd)
 {
-	int errors = 0;
-	tsd_t			*ts = (tsd_t *)tsd;
-
+	int		errors = 0;
+	tsd_t  *ts = (tsd_t *)tsd;
 
 	if (optt) {
-		pthread_t		tid;
+		pthread_t	tid;
+		int			ret;
 
-
-
-		if (pthread_create(&tid, NULL, dummy, NULL) != 0) {
+		ret = pthread_create(&tid, NULL, dummy, NULL);
+		if (ret != 0) {
+			fprintf(stderr, "pthread_create: %s (%d)\n", strerror(ret), ret);
 			errors++;
 		}
 	}
 
 	ts->ts_lock = lock;
 
-	return (errors);
+	return errors;
 }
 
-void
+static void
 spinme(int usecs)
 {
 	long long s = getusecs();
@@ -173,29 +184,27 @@ spinme(int usecs)
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
 	for (i = 0; i < lm_optB; i ++) {
-
 		(void) pthread_mutex_lock(ts->ts_lock);
 		if (opth)
 			spinme(opth);
 		(void) pthread_mutex_unlock(ts->ts_lock);
-
 	}
 
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char		result[256];
 
-	(void) sprintf(result, "%8d", opth);
+	(void) snprintf(result, sizeof(result), "%8d", opth);
 
-	return (result);
+	return result;
 }

@@ -1,7 +1,8 @@
 
 BUGS:
 
-    Mutex benchmark -o switch hide MAP_FAILED return value from mmap().
+    Depending on the configuration of a given system, the connection tests can
+    hang.
 
     Tests spin on 32 bit x86 compile with gcc-- longjmp test spins forever.
 
@@ -11,8 +12,7 @@ BUGS:
     TimerRes detection on some Solaris 8 SPARC systems is wrong and falsely
         detects resolution as 1nsec
 
-    Depending on the configuration of a given system, the connection tests can
-    hang.
+	Check that the number of samples is reasonable
 
 TODO:
 
@@ -40,10 +40,8 @@ TODO:
             pipe_fst4k  pipe_pst4k  pipe_sst4k  pipe_tst4k
     	There are others ...
 
+    Consider testing alternative malloc implementations?
+
     Add shared vs. private mmap/munmap/mprotect/msync tests?
 
-    Add mutex benchmark tests for -h, -p and -o switches
-
-    Add cascade_cond and cascade_mutex benchmark tests for -s and -o switches
-
-    Consider testing alternative malloc implementations?
+    Add mutex benchmark tests for the -h switch
