@@ -27,3 +27,5 @@
     Add shared vs. private mmap/munmap/mprotect/msync tests?
 
     Add mutex benchmark tests for the -h switch
+
+    Fold OpenBSD, NetBSD and Android patches for libMicro into the main fold
