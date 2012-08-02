@@ -1,6 +1,3 @@
-
-BUGS:
-
     Depending on the configuration of a given system, the connection tests can
     hang.
 
@@ -13,35 +10,3 @@ BUGS:
         detects resolution as 1nsec
 
 	Check that the number of samples is reasonable
-
-TODO:
-
-    .o files should probably be separated from generated binaries (obj-sun4u?)
-
-    Move more of the system info data gathering into tattle
-
-    Would be nice to show the platform name (uname -i) if available
-
-    Multiview's "red" can get a little too bright.
-
-    Consider recoding multiview to use a different performance indicator than
-        color (smileys and bombs?)  -- today a 20% perf difference is hard to
-        spot (it's very very light pink).
-
-    Add a summary suite runs
-
-    Add ability to compare various tests within a suite?
-        e.g.:
-            pipe_fmp1   pipe_pmp1   pipe_smp1   pipe_tmp1 
-            pipe_fmp4k  pipe_pmp4k  pipe_smp4k  pipe_tmp4k
-            pipe_fmt1   pipe_pmt1   pipe_smt1   pipe_tmt1 
-            pipe_fmt4k  pipe_pmt4k  pipe_smt4k  pipe_tmt4k
-            pipe_fst1   pipe_pst1   pipe_sst1   pipe_tst1 
-            pipe_fst4k  pipe_pst4k  pipe_sst4k  pipe_tst4k
-    	There are others ...
-
-    Consider testing alternative malloc implementations?
-
-    Add shared vs. private mmap/munmap/mprotect/msync tests?
-
-    Add mutex benchmark tests for the -h switch
