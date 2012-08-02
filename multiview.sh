@@ -30,6 +30,10 @@
 #
 
 #
+# Modifications by Red Hat, Inc.
+#
+
+#
 # output html comparison of several libmicro output data files
 # usage: multiview file1 file2 file3 file4 ...
 #

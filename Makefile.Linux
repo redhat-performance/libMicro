@@ -28,6 +28,9 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
 
 CC=		gcc
 

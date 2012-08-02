@@ -30,6 +30,10 @@
 # Use is subject to license terms.
 #
 
+#
+# Modifications by Red Hat, Inc.
+#
+
 bench_version=0.4.0
 libmicro_version=`bin/tattle -V`
 
