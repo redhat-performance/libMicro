@@ -29,3 +29,5 @@
     Add mutex benchmark tests for the -h switch
 
     Fold OpenBSD, NetBSD and Android patches for libMicro into the main fold
+
+    Add headers for where /tmp and /var/tmp are mounted
