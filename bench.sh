@@ -57,6 +57,8 @@ if [ ! -e "$DIRNAME/suites/$suite.txt" ]; then
 	exit 1
 fi
 
+ARCH=`uname -p`
+
 TMPROOT=/tmp/libmicro.$$
 VARROOT=/var/tmp/libmicro.$$
 mkdir -p $TMPROOT
@@ -78,6 +80,16 @@ mkdir -p $VDIR1 $VDIR2
 
 touch $IFILE
 
+CP="cp --remove-destination"
+
+mkdir -p $VARROOT/bin
+$CP $DIRNAME/bin-$ARCH/* $VARROOT/bin/
+$CP $DIRNAME/mem.awk $VARROOT/bin/
+$CP $DIRNAME/numactl.awk $VARROOT/bin/
+
+mkdir -p $VARROOT/suites
+$CP $DIRNAME/suites/$suite.txt $VARROOT/suites/
+
 OPTS="-C 100 -D 10000 -X 600000 -E -L -S -W"
 
 ROOT_UID=0   # Only users with $UID 0 have root privileges.
@@ -86,16 +98,13 @@ if [ "$UID" -eq "$ROOT_UID" ]
 then
 	# Make an attempt to keep the system from going into
 	# energy savings mode (Intel systems only?).
-	$DIRNAME/bin/pm_qos > /dev/null 2>&1 < /dev/null &
+	$VARROOT/bin/pm_qos > /dev/null 2>&1 < /dev/null &
     PM_QOS_PID=$!
 fi
-
-ARCH=`uname -p`
 
 # produce benchmark header for easier comparisons
 
 hostname=`uname -n`
-
 printf "!Libmicro_#:          %45s\n" $libmicro_version
 printf "!Options:             %45s\n" "$OPTS"
 printf "!Machine_name:        %45s\n" $hostname
@@ -106,15 +115,15 @@ printf "!IPV4_address:        %45s\n" `getent ahostsv4 $hostname | grep STREAM |
 printf "!IPV6_address:        %45s\n" `getent ahostsv6 $hostname | grep STREAM | awk '{print $1}'`
 printf "!Run_by:              %45s\n" $LOGNAME
 printf "!Date:                %45s\n" "`date '+%D %R'`"
-printf "!Compiler:            %45s\n" `$DIRNAME/bin/tattle -c`
-printf "!Compiler Ver.:       %45s\n" "`$DIRNAME/bin/tattle -v`"
-printf "!Libc Ver.:           %45s\n" "`$DIRNAME/bin/tattle -l`"
-printf "!Libpthread Ver.:     %45s\n" "`$DIRNAME/bin/tattle -p`"
-printf "!sizeof(long):        %45s\n" `$DIRNAME/bin/tattle -s`
-printf "!extra_CFLAGS:        %45s\n" "`$DIRNAME/bin/tattle -f`"
-printf "!TimerRes:            %45s\n" "`$DIRNAME/bin/tattle -r`"
-printf "!Location /tmp:       %45s\n" `df -h /tmp | tail -1 | awk '{ print $6 }'`
-printf "!Location /var/tmp:   %45s\n" `df -h /var/tmp | tail -1 | awk '{ print $6 }'`
+printf "!Compiler:            %45s\n" `$VARROOT/bin/tattle -c`
+printf "!Compiler Ver.:       %45s\n" "`$VARROOT/bin/tattle -v`"
+printf "!Libc Ver.:           %45s\n" "`$VARROOT/bin/tattle -l`"
+printf "!Libpthread Ver.:     %45s\n" "`$VARROOT/bin/tattle -p`"
+printf "!sizeof(long):        %45s\n" `$VARROOT/bin/tattle -s`
+printf "!extra_CFLAGS:        %45s\n" "`$VARROOT/bin/tattle -f`"
+printf "!TimerRes:            %45s\n" "`$VARROOT/bin/tattle -r`"
+printf "!Location /tmp:       %45s\n" `df -P /tmp | tail -1 | awk '{ print $6 }'`
+printf "!Location /var/tmp:   %45s\n" `df -P /var/tmp | tail -1 | awk '{ print $6 }'`
 
 if [ -f /usr/sbin/psrinfo ]; then
 	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'`
@@ -130,11 +139,11 @@ printf "!CPU_NAME:            %45s\n" "$p_type"
 if [ L"`uname -s`" = L"Linux" ]; then
     lscpu | sed 's/(s)/s/g' | sed -r 's/: +/:/g' | sed 's/, /,/g' | sed 's/ /_/g' | sed 's/:/ /g' | sed 's/Architecture/Processor/g' | sed -r 's/^CPUs/#CPUs/g' | sed 's/CPU_sockets/Sockets/g' | awk '{name=$1; val=$2; printf("!%-20s %45s\n", name ":", val);}'
 
-    dmidecode --type 17 2> /dev/null | awk -f $DIRNAME/mem.awk | awk '{printf("!%-40s %25s\n", "Memory:", $1 "," $2 "," $3)}'
+    dmidecode --type 17 2> /dev/null | awk -f $VARROOT/bin/mem.awk | awk '{printf("!%-40s %25s\n", "Memory:", $1 "," $2 "," $3)}'
 
     sysctl -A 2> /dev/null | grep sched | grep -v sched_domain | awk '{printf("!%-40s %25s\n", $1 ":", $3)}'
 
-    numactl --hardware | awk -f $DIRNAME/numactl.awk
+    numactl --hardware | awk -f $VARROOT/bin/numactl.awk
 else
     if [ -f /usr/sbin/psrinfo ]; then
     	p_count=`psrinfo|wc -l`
@@ -153,18 +162,12 @@ else
     printf "!CPU_MHz:      %30s\n" $p_mhz
 fi
 
-mkdir -p $TMPROOT/bin
-cp $DIRNAME/bin-$ARCH/exec_bin $TMPROOT/bin/
-
-mkdir -p $TMPROOT/suites
-cp $DIRNAME/suites/$suite.txt $TMPROOT/suites/
-
 while read A B C
 do
 	# If we encounter a problem where the "trap" runs above, we will have lost
-	# the TMPROOT directory. So just exit the loop when we detect that it no
+	# the VARROOT directory. So just exit the loop when we detect that it no
 	# longer exists.
-	if [ ! -e $TMPROOT ]
+	if [ ! -e $VARROOT ]
 	then
 		break
 	fi
@@ -193,11 +196,6 @@ do
 		continue
 	esac
 
-	if [ ! -f $TMPROOT/bin/$A ]
-	then
-		cp $DIRNAME/bin-$ARCH/$A $TMPROOT/bin/$A
-	fi
-
 	if [ "$UID" -eq "$ROOT_UID" ]
 	then
 		# Clear the system caches before starting the run
@@ -205,8 +203,8 @@ do
 		echo 3 > /proc/sys/vm/drop_caches
 	fi
 
-	(cd $TMPROOT && eval "bin/$A -N $B $OPTS $C")
-done < $TMPROOT/suites/$suite.txt
+	(cd $VARROOT && eval "bin/$A -N $B $OPTS $C")
+done < $VARROOT/suites/$suite.txt
 
 # Clean up background processes
 if [ -n "$PM_QOS_PID" ]; then
