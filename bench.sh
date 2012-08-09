@@ -113,6 +113,8 @@ printf "!Libpthread Ver.:     %45s\n" "`$DIRNAME/bin/tattle -p`"
 printf "!sizeof(long):        %45s\n" `$DIRNAME/bin/tattle -s`
 printf "!extra_CFLAGS:        %45s\n" "`$DIRNAME/bin/tattle -f`"
 printf "!TimerRes:            %45s\n" "`$DIRNAME/bin/tattle -r`"
+printf "!Location /tmp:       %45s\n" `df -h /tmp | tail -1 | awk '{ print $6 }'`
+printf "!Location /var/tmp:   %45s\n" `df -h /var/tmp | tail -1 | awk '{ print $6 }'`
 
 if [ -f /usr/sbin/psrinfo ]; then
 	p_type=`psrinfo -vp 2>/dev/null | awk '{if (NR == 3) {print $0; exit}}'`
