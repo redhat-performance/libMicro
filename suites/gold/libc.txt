@@ -8,6 +8,7 @@ getpid "getpidT4" -B 640000 -T 4
 getrusage "getrusage"
 gettimeofday "gettimeofday" -B 400000
 isatty "isatty_no" -f $IFILE
+isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
 localtime_r "localtime_r"
 longjmp "longjmp" -B 5m

@@ -105,6 +105,7 @@ getrusage "getrusage"
 getsockname "getsockname"
 gettimeofday "gettimeofday" -B 400000
 isatty "isatty_no" -f $IFILE
+isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
 listen "listen" -B 50k
 localtime_r "localtime_r"
