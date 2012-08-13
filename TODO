@@ -6,11 +6,7 @@
 
     Multiview's "red" can get a little too bright.
 
-    Consider recoding multiview to use a different performance indicator than
-        color (smileys and bombs?)  -- today a 20% perf difference is hard to
-        spot (it's very very light pink).
-
-    Add a summary suite runs
+    Add a summary suite run
 
     Add ability to compare various tests within a suite?
         e.g.:
