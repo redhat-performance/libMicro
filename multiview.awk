@@ -35,25 +35,21 @@
 
 #
 # output html comparison of several libmicro output data files
-# usage: awk -f multiview.awk file1 file2 file3 file4 ...
+#   usage: awk -f multiview.awk file1 file2 file3 file4 ...
 #
-#	Relative ranking is calculated using first as reference;
-#	color interpolation is done to indicate relative performance:
-#	the redder the color, the slower the result, the greener the
-#	faster.
+#	Relative ranking is calculated using first as reference; color
+#	interpolation is done to indicate relative performance: the redder the
+#	color, the slower the result, the greener the faster.
+#
+#   Green and red colors selected via colorbrewer2.org (selecting single hue
+#   green and red color pallettes, 9 data classes, sequential data, colorblind
+#   safe schemes, hex, and then throwing out the first light color)
 #
 BEGIN {
 	benchmark_count = 0;
 	benchmark_name = "";
 	header_count = 0;
 	result_header = "";
-
-    # Green and red colors selected via colorbrewer2.org (selecting single hue
-    # green and red color pallettes, 9 data classes, sequential data,
-    # colorblind safe schemes, hex, and then throwing out the first light
-    # color)
-    faster_color_map = "#FFFFFF:#E5F5E0:#C7E9C0:#A1D99B:#74C476:#41AB5D:#238B45:#006D2C:#00441B";
-    slower_color_map = "#FFFFFF:#FEE0D2:#FCBBA1:#FC9272:#FB6A4A:#EF3B2C:#CB181D:#A50F15:#67000D";
 }
 
 /^##/ {
@@ -146,14 +142,34 @@ END {
 	printf("    <meta name=\"author\" content=\"autogen\" />\n");
 	printf("    <title>multiview comparison</title>\n");
 	printf("    <style type=\"text/css\">\n");
-	printf("      body { font-family: sans-serif; }\n");
+	printf("      body { font-family: sans-serif; background-color:#ffffff; }\n");
 	printf("      table { border-collapse: collapse; }\n");
 	printf("      td { padding: 0.1em; border: 1px solid #ccc; text-align: right; }\n");
+	printf("      td.errors { background-color: #ff0000; }\n");
+	printf("      td.missing { background-color: #ffff00; }\n");
+	printf("      td.numactl_center { background-color: #00ff00 }\n");
 	printf("      td.header { text-align: left; }\n");
-	printf("      pre { margin-top: 0em; margin-bottom: 0em; }\n");
+	printf("      pre { margin-top: 0em; margin-bottom: 0em; color: blue; }\n");
+	printf("      td.fast1 pre, td.slow1 pre { color: black; }\n");
+	printf("      td.fast2 pre { color: black; background-color: #e5f5e0; }\n");
+	printf("      td.fast3 pre { color: black; background-color: #c7e9c0; }\n");
+	printf("      td.fast4 pre { color: black; background-color: #a1d99b; }\n");
+	printf("      td.fast5 pre { color: black; background-color: #74c476; }\n");
+	printf("      td.fast6 pre { color: black; background-color: #41ab5d; }\n");
+	printf("      td.fast7 pre { color: black; background-color: #238b45; }\n");
+	printf("      td.fast8 pre { color: white; background-color: #006d2c; }\n");
+	printf("      td.fast9 pre { color: white; background-color: #00441b; }\n");
+	printf("      td.slow2 pre { color: black; background-color: #fee0d2; }\n");
+	printf("      td.slow3 pre { color: black; background-color: #fcbba1; }\n");
+	printf("      td.slow4 pre { color: black; background-color: #fc9272; }\n");
+	printf("      td.slow5 pre { color: black; background-color: #fb6a4a; }\n");
+	printf("      td.slow6 pre { color: black; background-color: #ef3b2c; }\n");
+	printf("      td.slow7 pre { color: black; background-color: #cb181d; }\n");
+	printf("      td.slow8 pre { color: white; background-color: #a50f15; }\n");
+	printf("      td.slow9 pre { color: white; background-color: #67000d; }\n");
 	printf("    </style>\n");
 	printf("  </head>\n");
-	printf("  <body bgcolor=\"#ffffff\" link=\"#0000ee\" vlink=\"#cc0000\" alink=\"#0000ee\">\n");
+	printf("  <body link=\"#0000ee\" vlink=\"#cc0000\" alink=\"#0000ee\">\n");
 	printf("    <table border=\"1\" cellspacing=\"1\">\n");
 	printf("      <tbody>\n");
 	for(i = 1; i <= header_count; i++) {
@@ -197,9 +213,9 @@ END {
 			printf("><pre>%f</pre></td>\n", a);
 		else {
 			if (a < 0)
-				printf(" bgcolor=\"#ff0000\">%s</td>\n", "ERRORS");
+				printf(" class=\"errors\">%s</td>\n", "ERRORS");
 			else
-				printf(" bgcolor=\"#ffff00\">%s</td>\n", "missing");
+				printf(" class=\"missing\">%s</td>\n", "missing");
 
 			for (j = 2; j < ARGC; j++)
 				printf("          <td id=\"%s_%d\" onclick=\"showHide('%s_%d'); return false;\">%s</td>\n", name, j, name, j, "not computed");
@@ -215,16 +231,16 @@ END {
 					percentage = -((factor * 100) - 100);
 				if (factor <= 1)
 					percentage =   (100 / factor) - 100;
-				bgcolor = colormap(percentage);
+				class = colormap(percentage);
 
-				printf(" bgcolor=\"%s\"><pre>%11.5f[%#+7.1f%%]</pre></td>\n",
-					bgcolor, b, percentage);
+				printf(" class=\"%s\"><pre>%11.5f[%#+7.1f%%]</pre></td>\n",
+					class, b, percentage);
 			}
 
 			else if (b < 0)
-				printf(" bgcolor=\"#ff0000\">%s</td>\n", "ERRORS");
+				printf(" class=\"errors\">%s</td>\n", "ERRORS");
 			else
-				printf(" bgcolor=\"#ffff00\">%25s</td>\n", "missing");
+				printf(" class=\"missing\">%25s</td>\n", "missing");
 
 		}
 		printf("        </tr>\n");
@@ -285,7 +301,7 @@ END {
 				else {
 					val = int(val)
 					if (val == 10)
-						printf("                  <td bgcolor=\"#00ff00\">%s</td>\n", val);
+						printf("                  <td class=\"numactl_center\">%s</td>\n", val);
 					else
 						printf("                  <td>%s</td>\n", val);
 				}
@@ -359,45 +375,45 @@ END {
 
 function colormap(percentage)
 {
-    if (percentage < 0) {
-        norm_percent = percentage * -1;
-		split(slower_color_map, color_map, ":");
-    }
-    else {
-        norm_percent = percentage;
-        split(faster_color_map, color_map, ":");
-    }
+	if (percentage < 0) {
+		norm_percent = percentage * -1;
+		map = "slow";
+	}
+	else {
+		norm_percent = percentage;
+		map = "fast";
+	}
 
 	if (norm_percent < 2.0) {
-        idx = 1;
-    }
-    else if (norm_percent >= 100.0) {
-        idx = 9;
-    }
-    else if (norm_percent >= 86.0) {
-        idx = 8;
-    }
-    else if (norm_percent >= 72.0) {
-        idx = 7;
-    }
-    else if (norm_percent >= 58.0) {
-        idx = 6;
-    }
-    else if (norm_percent >= 44.0) {
-        idx = 5;
-    }
-    else if (norm_percent >= 30.0) {
-        idx = 4;
-    }
-    else if (norm_percent >= 16.0) {
-        idx = 3;
-    }
-    else if (norm_percent >= 2.0) {
-        idx = 2;
-    }
-    else {
-        idx = 1;
-    }
+		idx = 1;
+	}
+	else if (norm_percent >= 100.0) {
+		idx = 9;
+	}
+	else if (norm_percent >= 86.0) {
+		idx = 8;
+	}
+	else if (norm_percent >= 72.0) {
+		idx = 7;
+	}
+	else if (norm_percent >= 58.0) {
+		idx = 6;
+	}
+	else if (norm_percent >= 44.0) {
+		idx = 5;
+	}
+	else if (norm_percent >= 30.0) {
+		idx = 4;
+	}
+	else if (norm_percent >= 16.0) {
+		idx = 3;
+	}
+	else if (norm_percent >= 2.0) {
+		idx = 2;
+	}
+	else {
+		idx = 1;
+	}
 
-	return color_map[idx];
+	return sprintf("%s%d", map, idx);
 }
