@@ -47,6 +47,13 @@ BEGIN {
 	benchmark_name = "";
 	header_count = 0;
 	result_header = "";
+
+    # Green and red colors selected via colorbrewer2.org (selecting single hue
+    # green and red color pallettes, 9 data classes, sequential data,
+    # colorblind safe schemes, hex, and then throwing out the first light
+    # color)
+    faster_color_map = "#FFFFFF:#E5F5E0:#C7E9C0:#A1D99B:#74C476:#41AB5D:#238B45:#006D2C:#00441B";
+    slower_color_map = "#FFFFFF:#FEE0D2:#FCBBA1:#FC9272:#FB6A4A:#EF3B2C:#CB181D:#A50F15:#67000D";
 }
 
 /^##/ {
@@ -204,11 +211,11 @@ END {
 			b = benchmark_data[name, ARGV[j]];
 			if (b > 0) {
 				factor = b/a;
-				bgcolor = colormap(factor);
 				if (factor > 1)
-					percentage = -(factor * 100 - 100);
+					percentage = -((factor * 100) - 100);
 				if (factor <= 1)
-					percentage = 100/factor - 100;
+					percentage =   (100 / factor) - 100;
+				bgcolor = colormap(percentage);
 
 				printf(" bgcolor=\"%s\"><pre>%11.5f[%#+7.1f%%]</pre></td>\n",
 					bgcolor, b, percentage);
@@ -350,32 +357,47 @@ END {
 	printf("</html>\n");
 }
 
-function colormap(value, bgcolor, r, g, b)
+function colormap(percentage)
 {
-	if (value <= .2)
-		value = .2;
-	if (value > 5)
-		value = 5;
+    if (percentage < 0) {
+        norm_percent = percentage * -1;
+		split(slower_color_map, color_map, ":");
+    }
+    else {
+        norm_percent = percentage;
+        split(faster_color_map, color_map, ":");
+    }
 
-	if (value < .9) {
-		r = colorcalc(.2, value, .9, 0, 255);
-		g = colorcalc(.2, value, .9, 153, 255);
-		b = colorcalc(.2, value, .9, 0, 255);
-		bgcolor=sprintf("#%2.2x%2.2x%2.2x", r, g, b);
-	}
-	else if (value < 1.1)
-		bgcolor="#ffffff";
-	else {
-		r = 255;
-		g = colorcalc(1.1, value, 5, 255, 0);
-		b = colorcalc(1.1, value, 5, 255, 0);
-		bgcolor=sprintf("#%2.2x%2.2x%2.2x", r, g, b);
-	}
+	if (norm_percent < 2.0) {
+        idx = 1;
+    }
+    else if (norm_percent >= 100.0) {
+        idx = 9;
+    }
+    else if (norm_percent >= 86.0) {
+        idx = 8;
+    }
+    else if (norm_percent >= 72.0) {
+        idx = 7;
+    }
+    else if (norm_percent >= 58.0) {
+        idx = 6;
+    }
+    else if (norm_percent >= 44.0) {
+        idx = 5;
+    }
+    else if (norm_percent >= 30.0) {
+        idx = 4;
+    }
+    else if (norm_percent >= 16.0) {
+        idx = 3;
+    }
+    else if (norm_percent >= 2.0) {
+        idx = 2;
+    }
+    else {
+        idx = 1;
+    }
 
-	return (bgcolor);
-}
-
-function colorcalc(min, value, max, mincolor, maxcolor)
-{
-	return((value - min)/(max-min) * (maxcolor-mincolor) + mincolor);
+	return color_map[idx];
 }

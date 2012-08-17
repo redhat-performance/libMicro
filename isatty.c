@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string.h>
 
 #include "libmicro.h"
 
@@ -85,34 +86,78 @@ benchmark_optswitch(int opt, char *optarg)
 	return 0;
 }
 
-int
-benchmark_initworker(void *tsd)
+static int
+getfd(void)
 {
-	tsd_t		*ts = (tsd_t *)tsd;
+	int	fd;
 
-	ts->ts_fd = ((optb == 0) ?
-		open(optf, O_RDONLY) : 1024);
-	if (ts->ts_fd == -1) {
+	fd = ((optb == 0)
+			? open(optf, O_RDONLY)
+			: 1024);
+	if (fd == -1) {
 		if (errno == ENXIO) {
-			printf("Unable to run benchmark, process is not connected to a tty\n");
+			fprintf(stderr, "(***Unable to run benchmark, process is not connected to a tty***)\n");
 		}
 		else {
 			perror("open");
 		}
-		return 1;
 	}
-	return 0;
+	return fd;
+}
+
+int
+benchmark_initrun(void)
+{
+	int fd = getfd();
+
+	if (fd != -1 && fd != 1024) {
+		/*
+		 * Close this one out since the individual workers will open them
+		 * individually.
+		 */
+		close(fd);
+	}
+
+	return fd;
+}
+
+int
+benchmark_initworker(void *tsd)
+{
+	tsd_t  *ts = (tsd_t *)tsd;
+
+	ts->ts_fd = getfd();
+	return (ts->ts_fd == -1) ? 1 : 0;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t	   *ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
-	for (i = 0; i < lm_optB; i++) {
-		if (isatty(ts->ts_fd) == -1) {
-			res->re_errors++;
+	if (ts->ts_fd == 1024) {
+		// Expecting EBADF since this FD is not open
+		for (i = 0; i < lm_optB; i++) {
+			if (isatty(ts->ts_fd) != 0 && errno != EBADF) {
+				res->re_errors++;
+			}
+		}
+	}
+	else if (strcmp(optf, DEFF) == 0) {
+		// Expecting 1, since this is a valid TTY
+		for (i = 0; i < lm_optB; i++) {
+			if (isatty(ts->ts_fd) != 1) {
+				res->re_errors++;
+			}
+		}
+	}
+	else {
+		// Expected 0 and ENOTTY since this is an open file FD
+		for (i = 0; i < lm_optB; i++) {
+			if (isatty(ts->ts_fd) != 0 && errno != ENOTTY) {
+				res->re_errors++;
+			}
 		}
 	}
 	res->re_count = i;

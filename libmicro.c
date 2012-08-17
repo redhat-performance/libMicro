@@ -349,7 +349,7 @@ actual_main(int argc, char *argv[])
 
 	if (lm_optE) {
 		(void) fflush(stdout);
-		(void) fprintf(stderr, "Running:%30s", lm_optN);
+		(void) fprintf(stderr, "Running:%30s ", lm_optN);
 		(void) fflush(stderr);
 	}
 
@@ -595,7 +595,7 @@ actual_main(int argc, char *argv[])
 
 	if (lm_optE) {
 		(void) fflush(stdout);
-		(void) fprintf(stderr, " for %12.5f seconds\n",
+		(void) fprintf(stderr, "for %12.5f seconds\n",
 			(double)(getnsecs() - startnsecs) /
 			1.e9);
 		(void) fflush(stderr);

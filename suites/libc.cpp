@@ -48,7 +48,8 @@ memmove	"memmove_1m"	-s 1m	-B 100
 memmove	"memmove_10m"	-s 10m	-B 50
 
 isatty	"isatty_yes"
-isatty	"isatty_no" 	-f $IFILE
+isatty	"isatty_no_badfd"	-b
+isatty	"isatty_no"	-f $IFILE
 
 malloc	"malloc_10"	-s 10	-g 10	-B 1000
 malloc	"malloc_100"	-s 100	-g 10	-B 1000
