@@ -860,7 +860,7 @@ print_warnings(barrier_t *b)
 	}
 }
 
-#define STATS_FORMAT	"# %*s %12.5f %*s %12.5f\n"
+#define STATS_FORMAT	"# %*s %12.5f %*s %12.5f"
 #define STATS_FIRST_COLUMN	25
 #define STATS_SEP_WIDTH	10
 
@@ -877,45 +877,45 @@ print_stats(barrier_t *b)
 			"usecs/call", STATS_SEP_WIDTH, "(raw)",
 			"usecs/call", "(outliers removed)");
 
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "min",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "min",
 			b->ba_raw.st_min,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_min);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "max",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "max",
 			b->ba_raw.st_max,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_max);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "mean",
+	(void) printf(STATS_FORMAT "%s\n", STATS_FIRST_COLUMN, "mean",
 			b->ba_raw.st_mean,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_mean,
 			lm_optM?"*":"");
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "median",
+	(void) printf(STATS_FORMAT "%s\n", STATS_FIRST_COLUMN, "median",
 			b->ba_raw.st_median,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_median,
 			lm_optM?"":"*");
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "stddev",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "stddev",
 			b->ba_raw.st_stddev,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_stddev);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "standard error",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "standard error",
 			b->ba_raw.st_stderr,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_stderr);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "99% confidence level",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "99% confidence level",
 			b->ba_raw.st_99confidence,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_99confidence);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "skew",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "skew",
 			b->ba_raw.st_skew,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_skew);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "kurtosis",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "kurtosis",
 			b->ba_raw.st_kurtosis,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_kurtosis);
-	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "time correlation",
+	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "time correlation",
 			b->ba_raw.st_timecorr,
 			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_timecorr);
@@ -1483,14 +1483,14 @@ sizetoint(const char *arg)
 }
 
 static void
-print_bar(long count, long total)
+print_bar(long count, long total, unsigned int width)
 {
 	int			i;
 
 	(void) putchar_unlocked(count ? '*' : ' ');
-	for (i = 1; i < (32 * count) / total; i++)
+	for (i = 1; i < (width * count) / total; i++)
 		(void) putchar_unlocked('*');
-	for (; i < 32; i++)
+	for (; i < width; i++)
 		(void) putchar_unlocked(' ');
 }
 
@@ -1507,26 +1507,29 @@ doublecmp(const void *p1, const void *p2)
 	return 0;
 }
 
-# define HISTO_INDENT	7
+#define HISTO_INDENT	7
+#define HISTO_COL1W	12
+#define HISTO_COL2W	14
+#define HISTO_COL3W	14
+#define HISTO_BARW	32U
+#define HISTO_PREC	7
 
 static void
 print_histo(barrier_t *b)
 {
 	int			n;
 	int			i;
-	int			j;
+	int			idx;
 	int			last;
 	long long	maxcount;
 	double		sum;
-	long long	min;
-	long long	scale;
-	double		x;
-	long long	y;
+	double		min;
+	double		bucket_width;
 	long long	count;
-	int			i95;
-	double		p95;
-	double		r95;
-	double		m95;
+	int			i95;	// Index of 95%ile element
+	double		v95;	// Value of 95%ile element
+	double		r95;	// Range of values in 95%ile
+	double		m95;	// Mean of 95%itle values
 	histo_t	   *histo;
 
 	(void) printf("#\n");
@@ -1537,62 +1540,42 @@ print_histo(barrier_t *b)
 
 	/* find the 95th percentile - index, value and range */
 	qsort((void *)b->ba_data, n, sizeof (double), doublecmp);
-	min = b->ba_data[0] + 0.000001;
 
 	/* Skip over any infinity or NaN results */
 	for (i95 = ((n * 95) / 100); (i95 > 0); i95--) {
-		p95 = b->ba_data[i95];
-		if (p95 != INFINITY && p95 != NAN)
+		v95 = b->ba_data[i95];
+		if (v95 != INFINITY && v95 != NAN)
 			break;
 	}
 
-	if ((p95 == INFINITY) || (p95 == NAN)) {
+	if ((v95 == INFINITY) || (v95 == NAN)) {
 		printf("#%*sNo valid data present.\n", HISTO_INDENT, "");
 		return;
 	}
 
-	r95 = p95 - min + 1;
+	min = b->ba_data[0];
+	r95 = v95 - min;
 
 	/* find a suitable min and scale */
-	i = 0;
-	x = r95 / (HISTOSIZE - 1);
-	while (x >= 10.0) {
-		x /= 10.0;
-		i++;
-	}
-	y = x + 0.9999999999;
-	while (i > 0) {
-		y *= 10;
-		i--;
-	}
-	min /= y;
-	min *= y;
-	scale = y * (HISTOSIZE - 1);
-	if (scale < (HISTOSIZE - 1)) {
-		scale = (HISTOSIZE - 1);
-	}
+	bucket_width = r95 / HISTOSIZE;
 
 	/* create and initialise the histogram */
-	histo = malloc(HISTOSIZE * sizeof (histo_t));
-	for (i = 0; i < HISTOSIZE; i++) {
-		histo[i].sum = 0.0;
-		histo[i].count = 0;
-	}
+	histo = calloc(sizeof (histo_t), HISTOSIZE);
 
 	/* populate the histogram */
 	last = 0;
 	sum = 0.0;
 	count = 0;
-	for (i = 0; i <= i95; i++) {
-		j = (HISTOSIZE - 1) * (b->ba_data[i] - min) / scale;
-
-		if (j >= HISTOSIZE) {
-			(void) printf("%*s** panic! ** invalid bucket index\n", HISTO_INDENT, "");
-			j = HISTOSIZE - 1;
+	for (i = 0; i < i95; i++) {
+		idx = (int)((b->ba_data[i] - min) / bucket_width);
+		if (idx >= HISTOSIZE) {
+			if (idx > HISTOSIZE)
+				(void) printf("%*s** panic! ** invalid bucket index\n", HISTO_INDENT, "");
+			idx = HISTOSIZE - 1;
 		}
 
-		histo[j].sum += b->ba_data[i];
-		histo[j].count++;
+		histo[idx].sum += b->ba_data[i];
+		histo[idx].count++;
 
 		sum += b->ba_data[i];
 		count++;
@@ -1608,21 +1591,23 @@ print_histo(barrier_t *b)
 				maxcount = histo[i].count;
 		}
 
-	(void) printf("#%*s%12s %12s %32s %12s\n", HISTO_INDENT, "", "counts", "usecs/call",
-		"", "means");
+	(void) printf("#%*s%*s %*s %*s %*s\n", HISTO_INDENT, "",
+			HISTO_COL1W, "counts", HISTO_COL2W, "usecs/call",
+			HISTO_BARW, "", HISTO_COL3W, "means");
 
 	/* print the buckets */
 	for (i = 0; i <= last; i++) {
-		(void) printf("#%*s%12lld %12.5f |", HISTO_INDENT, "", histo[i].count,
-			(min + scale * (double)i / (HISTOSIZE - 1)));
+		(void) printf("#%*s%*lld %*.*f |", HISTO_INDENT, "",
+				HISTO_COL1W, histo[i].count,
+				HISTO_COL2W, HISTO_PREC, min + (bucket_width * (double)i));
 
-		print_bar(histo[i].count, maxcount);
+		print_bar(histo[i].count, maxcount, HISTO_BARW);
 
 		if (histo[i].count > 0)
-			(void) printf("%12.5f\n",
-				histo[i].sum / histo[i].count);
+			(void) printf("%*.*f\n",
+					HISTO_COL3W, HISTO_PREC, histo[i].sum / histo[i].count);
 		else
-			(void) printf("%12s\n", "-");
+			(void) printf("%*s\n", HISTO_COL3W, "-");
 	}
 
 	/* find the mean of values beyond the 95th percentile */
@@ -1635,15 +1620,18 @@ print_histo(barrier_t *b)
 
 	/* print the >95% bucket summary */
 	(void) printf("#\n");
-	(void) printf("#%*s%12lld %12s |", HISTO_INDENT, "", count, "> 95%");
-	print_bar(count, maxcount);
+	(void) printf("#%*s%*lld %*s |", HISTO_INDENT, "", HISTO_COL1W, count,
+			HISTO_COL2W, "> 95%");
+	print_bar(count, maxcount, HISTO_BARW);
 	if (count > 0)
-		(void) printf("%12.5f\n", sum / count);
+		(void) printf("%*.*f\n", HISTO_COL3W, HISTO_PREC, sum / count);
 	else
-		(void) printf("%12s\n", "-");
+		(void) printf("%*s\n", HISTO_COL3W, "-");
 	(void) printf("#\n");
-	(void) printf("#%*s%12s %12.5f\n", HISTO_INDENT, "", "mean of 95%", m95);
-	(void) printf("#%*s%12s %12.5f\n", HISTO_INDENT, "", "95th %ile", p95);
+	(void) printf("#%*s%*s %*.*f\n", HISTO_INDENT, "",
+			HISTO_COL1W, "mean of 95%", HISTO_COL2W, HISTO_PREC, m95);
+	(void) printf("#%*s%*s %*.*f\n", HISTO_INDENT, "",
+			HISTO_COL1W, "95th %ile", HISTO_COL2W, HISTO_PREC, v95);
 }
 
 static void
