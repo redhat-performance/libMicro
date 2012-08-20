@@ -965,7 +965,7 @@ update_stats(barrier_t *b, result_t *r)
 		 * the processes and then averaging them all together?
 		 */
 
-		nsecs_per_call = time / (double)b->ba_count0 *
+		nsecs_per_call = (time / (double)b->ba_count0) *
 			(double)(lm_optT * lm_optP);
 
 		long long orig_ba_count = b->ba_count;
@@ -1481,10 +1481,10 @@ doublecmp(const void *p1, const void *p2)
 	double b = *((double *)p2);
 
 	if (a > b)
-		return (1);
+		return 1;
 	if (a < b)
-		return (-1);
-	return (0);
+		return -1;
+	return 0;
 }
 
 static void
