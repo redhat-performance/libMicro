@@ -402,7 +402,7 @@ actual_main(int argc, char *argv[])
 	 */
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main() calling benchmark_initrun()\n");
-    ret = benchmark_initrun();
+	ret = benchmark_initrun();
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: actual_main() benchmark_initrun() returned %d\n", ret);
 	if (ret == -1) {
 		exit(1);
@@ -653,7 +653,7 @@ worker_thread(void *arg)
 	result_t	r;
 	long long	last_sleep = 0;
 	long long	t;
-    int         ret;
+	int			ret;
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initworker()\n");
 	r.re_errors = ret = benchmark_initworker(arg);
@@ -761,6 +761,8 @@ usage(void)
 		lm_usage);
 }
 
+#define WARNING_INDENT	5
+
 void
 print_warnings(barrier_t *b)
 {
@@ -778,10 +780,10 @@ print_warnings(barrier_t *b)
 		increase = (long long)(floor((nsecs_resolution * 100.0) /
 			((double)lm_optB * median * 1000.0)) +
 			1.0);
-		(void) printf("#     Quantization error likely; "
+		(void) printf("#%*sQuantization error likely; "
 				"increase batch size (-B option, "
 				"currently %d) %lldX to avoid.\n",
-				lm_optB, increase);
+				WARNING_INDENT, "", lm_optB, increase);
 	}
 
 	long long per_batch = (long long)round((b->ba_count / (double)b->ba_batches));
@@ -812,9 +814,10 @@ print_warnings(barrier_t *b)
 		 * timed per batch, lowering the number of over samples.
 		 */
 		increase = (long long)round(((double)b->ba_count / DEF_SAMPLES) / per_batch);
-		(void) printf("#     Low runs (%lld) per sample (%d samples) "
+		(void) printf("#%*sLow runs (%lld) per sample (%d samples) "
 				"consider increasing batch size (-B option, "
 				"currently %d) %lldX (to about %lld) to avoid.\n",
+				WARNING_INDENT, "",
 				per_batch, b->ba_batches, lm_optB, increase,
 				(long long)round((double)b->ba_count / DEF_SAMPLES));
 	}
@@ -824,9 +827,10 @@ print_warnings(barrier_t *b)
 			(void) printf("#\n# WARNINGS\n");
 		}
 
-		(void) printf("#     Too few samples, %d < %d, "
+		(void) printf("#%*sToo few samples, %d < %d, "
 				"consider running test longer, "
 				"or for a least %d samples\n",
+				WARNING_INDENT, "",
 				b->ba_batches, DEF_SAMPLES, DEF_SAMPLES);
 	}
 
@@ -840,11 +844,11 @@ print_warnings(barrier_t *b)
 		}
 
 		if (b->ba_killed == KILLED_LONG) {
-			printf("#	  Ran too long\n");
+			printf("#%*sRan too long\n", WARNING_INDENT, "");
 		}
 		else {
 			assert(b->ba_killed == KILLED_INT);
-			printf("#	  Interrupted\n");
+			printf("#%*sInterrupted\n", WARNING_INDENT, "");
 		}
 	}
 
@@ -852,9 +856,13 @@ print_warnings(barrier_t *b)
 		if (!head++) {
 			(void) printf("#\n# WARNINGS\n");
 		}
-		(void) printf("#	 Errors occured during benchmark.\n");
+		(void) printf("#%*sErrors occured during benchmark.\n", WARNING_INDENT, "");
 	}
 }
+
+#define STATS_FORMAT	"# %*s %12.5f %*s %12.5f\n"
+#define STATS_FIRST_COLUMN	25
+#define STATS_SEP_WIDTH	10
 
 void
 print_stats(barrier_t *b)
@@ -864,58 +872,70 @@ print_stats(barrier_t *b)
 	}
 
 	(void) printf("#\n");
-	(void) printf("# STATISTICS                 %12s           %12s\n",
-		"usecs/call (raw)",
-		"usecs/call (outliers removed)");
+	(void) printf("# %*s %12s %-*s %12s %s\n",
+			STATS_FIRST_COLUMN, "STATISTICS",
+			"usecs/call", STATS_SEP_WIDTH, "(raw)",
+			"usecs/call", "(outliers removed)");
 
-	(void) printf("#                        min %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "min",
 			b->ba_raw.st_min,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_min);
-	(void) printf("#                        max %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "max",
 			b->ba_raw.st_max,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_max);
-	(void) printf("#                       mean %12.5f            %12.5f%s\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "mean",
 			b->ba_raw.st_mean,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_mean,
 			lm_optM?"*":"");
-	(void) printf("#                     median %12.5f            %12.5f%s\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "median",
 			b->ba_raw.st_median,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_median,
 			lm_optM?"":"*");
-	(void) printf("#                     stddev %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "stddev",
 			b->ba_raw.st_stddev,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_stddev);
-	(void) printf("#             standard error %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "standard error",
 			b->ba_raw.st_stderr,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_stderr);
-	(void) printf("#       99%% confidence level %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "99% confidence level",
 			b->ba_raw.st_99confidence,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_99confidence);
-	(void) printf("#                       skew %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "skew",
 			b->ba_raw.st_skew,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_skew);
-	(void) printf("#                   kurtosis %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "kurtosis",
 			b->ba_raw.st_kurtosis,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_kurtosis);
-	(void) printf("#           time correlation %12.5f            %12.5f\n",
+	(void) printf(STATS_FORMAT, STATS_FIRST_COLUMN, "time correlation",
 			b->ba_raw.st_timecorr,
+			STATS_SEP_WIDTH, "",
 			b->ba_corrected.st_timecorr);
-	(void) printf("#\n");
 
-	(void) printf("#               elasped time %12.5f\n",
+	(void) printf("#\n# %*s %12.5f\n#\n",
+			STATS_FIRST_COLUMN, "elasped time",
 			(b->ba_endtime - b->ba_starttime) / 1.0e9);
-	(void) printf("#\n");
 
-	(void) printf("#          number of samples %12d\n", b->ba_batches);
+	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of samples",
+			b->ba_batches);
 	if (b->ba_batches > b->ba_datasize)
-		(void) printf("# number of samples retained %12d (%d samples dropped)\n",
-				b->ba_datasize, b->ba_batches - b->ba_datasize);
-	(void) printf("#         number of outliers %12d\n", b->ba_outliers);
-	(void) printf("#    number of final samples %12d\n", b->ba_batches_final);
-	(void) printf("#          getnsecs overhead %12d\n", (int)nsecs_overhead);
-
-	(void) printf("#\n");
-	(void) printf("# DISTRIBUTION\n");
+		(void) printf("# %*s %12d (%d samples dropped)\n",
+				STATS_FIRST_COLUMN, "number of samples retained",
+				b->ba_datasize, (b->ba_batches - b->ba_datasize));
+	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of outliers",
+			b->ba_outliers);
+	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of final samples",
+			b->ba_batches_final);
+	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "getnsecs overhead",
+			(int)nsecs_overhead);
 
 	print_histo(b);
 
@@ -927,8 +947,8 @@ print_stats(barrier_t *b)
 void
 update_stats(barrier_t *b, result_t *r)
 {
-	double			time;
-	double			nsecs_per_call;
+	double	time;
+	double	nsecs_per_call;
 
 	if (b->ba_waiters == 0) {
 		/* first thread only */
@@ -1346,7 +1366,7 @@ getusecs(void)
 {
 	struct timespec		ts;
 
-    (void) clock_gettime(CLOCK_MONOTONIC, &ts);
+	(void) clock_gettime(CLOCK_MONOTONIC, &ts);
 
 	return ((long long)ts.tv_sec * 1000000LL + (long long) ts.tv_nsec) / 1000LL;
 }
@@ -1356,7 +1376,7 @@ getnsecs(void)
 {
 	struct timespec		ts;
 
-    (void) clock_gettime(CLOCK_MONOTONIC, &ts);
+	(void) clock_gettime(CLOCK_MONOTONIC, &ts);
 
 	return ((long long)ts.tv_sec * 1000000000LL + (long long) ts.tv_nsec);
 }
@@ -1487,6 +1507,8 @@ doublecmp(const void *p1, const void *p2)
 	return 0;
 }
 
+# define HISTO_INDENT	7
+
 static void
 print_histo(barrier_t *b)
 {
@@ -1494,18 +1516,21 @@ print_histo(barrier_t *b)
 	int			i;
 	int			j;
 	int			last;
-	long long		maxcount;
-	double			sum;
-	long long		min;
-	long long		scale;
-	double			x;
-	long long		y;
-	long long		count;
+	long long	maxcount;
+	double		sum;
+	long long	min;
+	long long	scale;
+	double		x;
+	long long	y;
+	long long	count;
 	int			i95;
-	double			p95;
-	double			r95;
-	double			m95;
-	histo_t			*histo;
+	double		p95;
+	double		r95;
+	double		m95;
+	histo_t	   *histo;
+
+	(void) printf("#\n");
+	(void) printf("# DISTRIBUTION\n");
 
 	/* calculate how much data we've captured */
 	n = b->ba_batches > b->ba_datasize ? b->ba_datasize : b->ba_batches;
@@ -1522,7 +1547,7 @@ print_histo(barrier_t *b)
 	}
 
 	if ((p95 == INFINITY) || (p95 == NAN)) {
-		printf("\tNo valid data present.\n");
+		printf("#%*sNo valid data present.\n", HISTO_INDENT, "");
 		return;
 	}
 
@@ -1562,7 +1587,7 @@ print_histo(barrier_t *b)
 		j = (HISTOSIZE - 1) * (b->ba_data[i] - min) / scale;
 
 		if (j >= HISTOSIZE) {
-			(void) printf("panic!\n");
+			(void) printf("%*s** panic! ** invalid bucket index\n", HISTO_INDENT, "");
 			j = HISTOSIZE - 1;
 		}
 
@@ -1583,12 +1608,12 @@ print_histo(barrier_t *b)
 				maxcount = histo[i].count;
 		}
 
-	(void) printf("#       %12s %12s %32s %12s\n", "counts", "usecs/call",
+	(void) printf("#%*s%12s %12s %32s %12s\n", HISTO_INDENT, "", "counts", "usecs/call",
 		"", "means");
 
 	/* print the buckets */
 	for (i = 0; i <= last; i++) {
-		(void) printf("#       %12lld %12.5f |", histo[i].count,
+		(void) printf("#%*s%12lld %12.5f |", HISTO_INDENT, "", histo[i].count,
 			(min + scale * (double)i / (HISTOSIZE - 1)));
 
 		print_bar(histo[i].count, maxcount);
@@ -1610,15 +1635,15 @@ print_histo(barrier_t *b)
 
 	/* print the >95% bucket summary */
 	(void) printf("#\n");
-	(void) printf("#       %12lld %12s |", count, "> 95%");
+	(void) printf("#%*s%12lld %12s |", HISTO_INDENT, "", count, "> 95%");
 	print_bar(count, maxcount);
 	if (count > 0)
 		(void) printf("%12.5f\n", sum / count);
 	else
 		(void) printf("%12s\n", "-");
 	(void) printf("#\n");
-	(void) printf("#       %12s %12.5f\n", "mean of 95%", m95);
-	(void) printf("#       %12s %12.5f\n", "95th %ile", p95);
+	(void) printf("#%*s%12s %12.5f\n", HISTO_INDENT, "", "mean of 95%", m95);
+	(void) printf("#%*s%12s %12.5f\n", HISTO_INDENT, "", "95th %ile", p95);
 }
 
 static void
@@ -1707,7 +1732,7 @@ crunch_stats(double *data, int count, stats_t *stats)
 	dupdata = malloc(bytes = sizeof (double) * count);
 	(void) memcpy(dupdata, data, bytes);
 	qsort((void *)dupdata, count, sizeof (double), doublecmp);
-	stats->st_median   = dupdata[count/2];
+	stats->st_median = dupdata[count/2];
 
 	/*
 	 * reuse dupdata to compute time correlation of data to
