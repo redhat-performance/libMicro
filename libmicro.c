@@ -874,12 +874,14 @@ print_stats(barrier_t *b)
 	(void) printf("#                        max %12.5f            %12.5f\n",
 			b->ba_raw.st_max,
 			b->ba_corrected.st_max);
-	(void) printf("#                       mean %12.5f            %12.5f\n",
+	(void) printf("#                       mean %12.5f            %12.5f%s\n",
 			b->ba_raw.st_mean,
-			b->ba_corrected.st_mean);
-	(void) printf("#                     median %12.5f            %12.5f\n",
+			b->ba_corrected.st_mean,
+			lm_optM?"*":"");
+	(void) printf("#                     median %12.5f            %12.5f%s\n",
 			b->ba_raw.st_median,
-			b->ba_corrected.st_median);
+			b->ba_corrected.st_median,
+			lm_optM?"":"*");
 	(void) printf("#                     stddev %12.5f            %12.5f\n",
 			b->ba_raw.st_stddev,
 			b->ba_corrected.st_stddev);
