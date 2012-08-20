@@ -7,6 +7,8 @@
 //
 getpid	"getpid"	-B 640000
 getpid	"getpidT4"	-B 640000	-T 4
+getpid	"getpidP4"	-B 640000	-P 4
+getpid	"getpidT4P4"	-B 640000	-T 4	-P 4
 
 getenv	"getenv"	-B 90000	-s 100
 getenv	"getenvT2"	-B 90000	-T 2	-s 100
