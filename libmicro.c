@@ -1689,14 +1689,14 @@ compute_stats(barrier_t *b)
 static int
 crunch_stats(double *data, int count, stats_t *stats)
 {
-	double a;
-	double std;
-	double diff;
-	double sk;
-	double ku;
-	double mean;
-	int i;
-	int bytes;
+	double	a;
+	double	std;
+	double	diff;
+	double	sk;
+	double	ku;
+	double	mean;
+	int		i;
+	int		bytes;
 	double *dupdata;
 
 	/*
@@ -1789,13 +1789,13 @@ fit_line(double *x, double *y, int count, double *a, double *b)
 	denom = count * sumx2 - sumx * sumx;
 
 	if (denom == 0.0)
-		return (-1);
+		return -1;
 
 	*a = (sumy * sumx2 - sumx * sumxy) / denom;
 
 	*b = (count * sumxy - sumx * sumy) / denom;
 
-	return (0);
+	return 0;
 }
 
 /*
@@ -1803,15 +1803,15 @@ fit_line(double *x, double *y, int count, double *a, double *b)
  */
 
 int
-nop()
+nop(void)
 {
-	return (1);
+	return 1;
 }
 
 #define	NSECITER 1000
 
 static long long
-get_nsecs_overhead()
+get_nsecs_overhead(void)
 {
 	long long s;
 
@@ -1842,7 +1842,7 @@ get_nsecs_overhead()
 		(void) crunch_stats(data, count, &stats);
 	}
 
-	return ((long long)stats.st_mean);
+	return (long long)stats.st_mean;
 
 }
 
@@ -1862,7 +1862,7 @@ get_nsecs_overhead()
  * case assume the resolution is 1ns.
  */
 long long
-get_nsecs_resolution()
+get_nsecs_resolution(void)
 {
 	long long y[1000];
 
@@ -1921,7 +1921,7 @@ get_nsecs_resolution()
 	if (res == 0)
 		res = 1;
 
-	return (res);
+	return res;
 }
 
 /*
@@ -1942,5 +1942,5 @@ remove_outliers(double *data, int count, stats_t *stats)
 		else
 			data[j++] = data[i];
 
-	return (outliers);
+	return outliers;
 }
