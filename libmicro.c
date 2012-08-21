@@ -89,7 +89,9 @@ int				lm_optI;
 int				lm_optL = 0;
 int				lm_optM = 0;
 char		   *lm_optN;
+unsigned int	lm_optO = 0;
 int				lm_optP;
+unsigned int	lm_optR = 0;
 int				lm_optS;
 int				lm_optT;
 int				lm_optW;
@@ -145,9 +147,8 @@ static void			usage();
 static void			print_stats(barrier_t *);
 static void			print_histo(barrier_t *);
 static int			remove_outliers(double *, int, stats_t *);
-static long long	nsecs_overhead;
-static long long	nsecs_resolution;
-static long long	get_nsecs_overhead();
+static unsigned int	nsecs_overhead;
+static unsigned int	nsecs_resolution;
 static int			crunch_stats(double *, int, stats_t *);
 static void			compute_stats(barrier_t *);
 /*
@@ -188,9 +189,6 @@ actual_main(int argc, char *argv[])
 			"lm_tsdsize not set\n");
 		exit(1);
 	}
-
-	nsecs_overhead = get_nsecs_overhead();
-	nsecs_resolution = get_nsecs_resolution();
 
 	/*
 	 * Set defaults
@@ -242,7 +240,7 @@ actual_main(int argc, char *argv[])
 	 * Parse command line arguments
 	 */
 
-	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:P:ST:VWX:?%s", lm_optstr);
+	(void) snprintf(optstr, sizeof(optstr), "1AB:C:D:EG:HI:LMN:O:P:R:ST:VWX:?%s", lm_optstr);
 	while ((opt = getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case '1':
@@ -293,8 +291,14 @@ actual_main(int argc, char *argv[])
 		case 'N':
 			lm_optN = optarg;
 			break;
+		case 'O':
+			lm_optO = (unsigned int)atoi(optarg);
+			break;
 		case 'P':
 			lm_optP = sizetoint(optarg);
+			break;
+		case 'R':
+			lm_optR = (unsigned int)atoi(optarg);
 			break;
 		case 'S':
 			lm_optS = 1;
@@ -340,6 +344,20 @@ actual_main(int argc, char *argv[])
 	 */
 	assert((lm_optC > 0 && lm_optD >= 0) || (lm_optC >= 0 && lm_optD > 0));
 	assert(lm_optX == 0 || lm_optX > lm_optD);
+
+    if (lm_optO > 0) {
+        nsecs_overhead = lm_optO;
+    }
+    else {
+        nsecs_overhead = get_nsecs_overhead();
+    }
+
+    if (lm_optR > 0) {
+        nsecs_resolution = lm_optR;
+    }
+    else {
+        nsecs_resolution = get_nsecs_resolution();
+    }
 
 	/* deal with implicit and overriding options */
 	if (lm_opt1 && lm_optP > 1) {
@@ -972,8 +990,7 @@ update_stats(barrier_t *b, result_t *r)
 	if (b->ba_waiters == b->ba_hwm - 1) {
 		/* last thread only */
 
-		time = (double)b->ba_t1 - (double)b->ba_t0 -
-			(double)nsecs_overhead;
+		time = (double)b->ba_t1 - (double)b->ba_t0 - nsecs_overhead;
 
 		if (time < (100 * nsecs_resolution))
 			b->ba_quant++;
@@ -1810,7 +1827,7 @@ nop(void)
 
 #define	NSECITER 1000
 
-static long long
+unsigned int
 get_nsecs_overhead(void)
 {
 	long long s;
@@ -1842,8 +1859,7 @@ get_nsecs_overhead(void)
 		(void) crunch_stats(data, count, &stats);
 	}
 
-	return (long long)stats.st_mean;
-
+	return (unsigned int)round(stats.st_mean);
 }
 
 /*
@@ -1861,19 +1877,19 @@ get_nsecs_overhead(void)
  * with a very fast and consistent hardware counter based getnsecs(). In that
  * case assume the resolution is 1ns.
  */
-long long
+unsigned int
 get_nsecs_resolution(void)
 {
 	long long y[1000];
 
 	volatile int i, j;
-	int nops, res;
+	int nops;
+	unsigned int res;
 	long long start, stop;
 
 	/*
-	 * first, figure out how many nops to use
-	 * to get any delta between time measurements.
-	 * use a minimum of one.
+	 * first, figure out how many nops to use to get any delta between time
+	 * measurements, using a minimum of one.
 	 */
 
 	/*
@@ -1916,10 +1932,12 @@ get_nsecs_resolution(void)
 
 		if (diff > 0 && res > diff)
 			res = diff;
-
 	}
-	if (res == 0)
+
+	if (res == 0) {
+		// All differences are dead on, assume 1 nanosecond resolution.
 		res = 1;
+	}
 
 	return res;
 }

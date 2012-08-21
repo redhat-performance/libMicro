@@ -94,7 +94,7 @@ main(int argc, char *argv[])
 	cleanup(compiler_version);
 	cleanup(extra_compiler_flags);
 
-	while ((c = getopt(argc, argv, "vcfrsVTRlp")) != -1) {
+	while ((c = getopt(argc, argv, "vcfrsVTRlpO")) != -1) {
 		switch (c) {
 		case 'V':
 			(void) printf("%s\n", LIBMICRO_VERSION);
@@ -120,7 +120,11 @@ main(int argc, char *argv[])
 			break;
 
 		case 'r':
-			(void) printf("%lld nsecs\n", get_nsecs_resolution());
+			(void) printf("%u\n", get_nsecs_resolution());
+			break;
+
+		case 'O':
+			(void) printf("%u\n", get_nsecs_overhead());
 			break;
 
 		case 'R': {

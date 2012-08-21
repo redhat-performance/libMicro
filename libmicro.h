@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.19"
+#define	LIBMICRO_VERSION	"0.4.1-rh.20"
 
 #define	STRSIZE			1024
 
@@ -188,15 +188,16 @@ extern size_t		lm_tsdsize;
  * Utility functions
  */
 
-int 		getpindex(void);
-int 		gettindex(void);
-void 	   *gettsd(int, int);
-long long 	getusecs(void);
-long long 	getnsecs(void);
-void 		setfdlimit(int);
-long long 	sizetoll(const char *);
-int 		sizetoint(const char *);
-int			fit_line(double *, double *, int, double *, double *);
-long long	get_nsecs_resolution(void);
+int 			getpindex(void);
+int 			gettindex(void);
+void 		   *gettsd(int, int);
+long long		getusecs(void);
+long long		getnsecs(void);
+void			setfdlimit(int);
+long long		sizetoll(const char *);
+int				sizetoint(const char *);
+int				fit_line(double *, double *, int, double *, double *);
+unsigned int	get_nsecs_resolution(void);
+unsigned int	get_nsecs_overhead(void);
 
 #endif /* LIBMICRO_H */

@@ -36,7 +36,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.19
+bench_version=0.4.1-rh.20
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -90,8 +90,6 @@ $CP $DIRNAME/numactl.awk $VARROOT/bin/
 mkdir -p $VARROOT/suites
 $CP $DIRNAME/suites/$suite.txt $VARROOT/suites/
 
-OPTS="-C 100 -D 10000 -X 600000 -E -L -S -W"
-
 ROOT_UID=0   # Only users with $UID 0 have root privileges.
 
 if [ "$UID" -eq "$ROOT_UID" ]
@@ -100,7 +98,16 @@ then
 	# energy savings mode (Intel systems only?).
 	$VARROOT/bin/pm_qos > /dev/null 2>&1 < /dev/null &
     PM_QOS_PID=$!
+
+    CHRT="chrt -f 1"
+else
+    CHRT=""
 fi
+
+NSECS_OVERHEAD=$(numactl -C 0 $CHRT $VARROOT/bin/tattle -O)
+NSECS_RESOLUTION=$(numactl -C 0 $CHRT $VARROOT/bin/tattle -r)
+
+OPTS="-E -L -W -O $NSECS_OVERHEAD -R $NSECS_RESOLUTION -C 100 -D 10000 -X 600000"
 
 # produce benchmark header for easier comparisons
 
@@ -121,7 +128,8 @@ printf "!Libc Ver.:           %45s\n" "`$VARROOT/bin/tattle -l`"
 printf "!Libpthread Ver.:     %45s\n" "`$VARROOT/bin/tattle -p`"
 printf "!sizeof(long):        %45s\n" `$VARROOT/bin/tattle -s`
 printf "!extra_CFLAGS:        %45s\n" "`$VARROOT/bin/tattle -f`"
-printf "!TimerRes:            %45s\n" "`$VARROOT/bin/tattle -r`"
+printf "!TimerRes:            %45s\n" "$NSECS_RESOLUTION nsecs"
+printf "!TimerOverhead:       %45s\n" "$NSECS_OVERHEAD nsecs"
 printf "!Location /tmp:       %45s\n" `df -P /tmp | tail -1 | awk '{ print $6 }'`
 printf "!Location /var/tmp:   %45s\n" `df -P /var/tmp | tail -1 | awk '{ print $6 }'`
 
