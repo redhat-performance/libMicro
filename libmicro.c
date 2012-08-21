@@ -753,7 +753,7 @@ usage(void)
 		"\t[-S] (print detailed stats)\n"
 		"\t[-T threads (default %d)]\n"
 		"\t[-V] (print the libMicro version and exit)\n"
-		"\t[-W] (flag possible benchmark problems)\n"
+		"\t[-W] (flag possible benchmark problems, implies -S)\n"
 		"\t[-X maximum duration in ms (default %dms)]\n"
 		"%s\n",
 		lm_procname,
