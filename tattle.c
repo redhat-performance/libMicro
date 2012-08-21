@@ -38,9 +38,9 @@
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#include <math.h>
 #include <tattle.h>
 #include "libmicro.h"
-#include <math.h>
 
 
 #ifdef USE_RDTSC
@@ -57,7 +57,7 @@
 int
 benchmark(void *tsd, result_t *res)
 {
-	return (0);
+	return 0;
 }
 
 static void
@@ -81,9 +81,7 @@ cleanup(char *s)
 
 	while (*e == ' ' && e > o)
 		*e-- = 0;
-
 }
-
 
 int
 main(int argc, char *argv[])
@@ -125,51 +123,51 @@ main(int argc, char *argv[])
 			(void) printf("%lld nsecs\n", get_nsecs_resolution());
 			break;
 
-		case 'R':
+		case 'R': {
 #ifdef ENABLE_RDTSC
-			{
-				struct timeval 	s;
-				struct timeval	f;
-				long long 	start_nsecs;
-				long long 	end_nsecs;
-				long 		elapsed_usecs;
+			struct timeval	s;
+			struct timeval	f;
+			long long	start_nsecs;
+			long long	end_nsecs;
+			long		elapsed_usecs;
 
-				gettimeofday(&s, NULL);
-				start_nsecs = rdtsc();
-				for (;;) {
-					gettimeofday(&f, NULL);
-					elapsed_usecs = (f.tv_sec - s.tv_sec) *
-					    1000000 + (f.tv_usec - s.tv_usec);
-					if (elapsed_usecs > 1000000)
-						break;
-				}
-				end_nsecs = rdtsc();
-				(void) printf("LIBMICRO_HZ=%lld\n",
-				    (long long)elapsed_usecs *
-				    (end_nsecs - start_nsecs) / 1000000LL);
+			gettimeofday(&s, NULL);
+			start_nsecs = rdtsc();
+			for (;;) {
+				gettimeofday(&f, NULL);
+				elapsed_usecs = (f.tv_sec - s.tv_sec) *
+					1000000 + (f.tv_usec - s.tv_usec);
+				if (elapsed_usecs > 1000000)
+					break;
 			}
+			end_nsecs = rdtsc();
+			(void) printf("LIBMICRO_HZ=%lld\n",
+				(long long)elapsed_usecs *
+				(end_nsecs - start_nsecs) / 1000000LL);
 #else
 			(void) printf("\n");
 #endif
-            case 'l':
-            case 'p': {
-                char buf[80];
-                int code = (c == 'l'
-                        ? _CS_GNU_LIBC_VERSION
-                        : _CS_GNU_LIBPTHREAD_VERSION);
-                int res = confstr(code, buf, sizeof(buf));
-                if (res > 0)
-                    printf("%s\n", buf);
-                else
-                    printf("\n");
-                break;
-            }
-        default:
+			break;
+		}
+		case 'l':
+		case 'p': {
+			char buf[80];
+			int code = (c == 'l'
+					? _CS_GNU_LIBC_VERSION
+					: _CS_GNU_LIBPTHREAD_VERSION);
+			int res = confstr(code, buf, sizeof(buf));
+			if (res > 0)
+				printf("%s\n", buf);
+			else
+				printf("\n");
+			break;
+		}
+		default:
 			(void) printf("\n");
 			break;
 		}
 	}
 
 	exit(0);
-	return (0);
+	return 0;
 }
