@@ -878,9 +878,12 @@ print_warnings(barrier_t *b)
 	}
 }
 
-#define STATS_FORMAT	"# %*s %12.5f %*s %12.5f"
-#define STATS_FIRST_COLUMN	25
-#define STATS_SEP_WIDTH	10
+#define STATS_FORMAT	"# %*s %*.*f %*s %*.*f"
+#define STATS_1COLW	25
+#define STATS_2COLW	12
+#define STATS_3COLW	12
+#define STATS_PREC	5
+#define STATS_SEPW	10
 
 void
 print_stats(barrier_t *b)
@@ -890,70 +893,72 @@ print_stats(barrier_t *b)
 	}
 
 	(void) printf("#\n");
-	(void) printf("# %*s %12s %-*s %12s %s\n",
-			STATS_FIRST_COLUMN, "STATISTICS",
-			"usecs/call", STATS_SEP_WIDTH, "(raw)",
-			"usecs/call", "(outliers removed)");
+	(void) printf("# %*s %*s %-*s %*s %s\n",
+			STATS_1COLW, "STATISTICS",
+			STATS_2COLW, "usecs/call",
+            STATS_SEPW, "(raw)",
+			STATS_3COLW, "usecs/call",
+            "(outliers removed)");
 
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "min",
-			b->ba_raw.st_min,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_min);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "max",
-			b->ba_raw.st_max,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_max);
-	(void) printf(STATS_FORMAT "%s\n", STATS_FIRST_COLUMN, "mean",
-			b->ba_raw.st_mean,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_mean,
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "min",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_min,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_min);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "max",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_max,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_max);
+	(void) printf(STATS_FORMAT "%s\n", STATS_1COLW, "mean",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_mean,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_mean,
 			lm_optM?"*":"");
-	(void) printf(STATS_FORMAT "%s\n", STATS_FIRST_COLUMN, "median",
-			b->ba_raw.st_median,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_median,
+	(void) printf(STATS_FORMAT "%s\n", STATS_1COLW, "median",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_median,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_median,
 			lm_optM?"":"*");
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "stddev",
-			b->ba_raw.st_stddev,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_stddev);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "standard error",
-			b->ba_raw.st_stderr,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_stderr);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "99% confidence level",
-			b->ba_raw.st_99confidence,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_99confidence);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "skew",
-			b->ba_raw.st_skew,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_skew);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "kurtosis",
-			b->ba_raw.st_kurtosis,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_kurtosis);
-	(void) printf(STATS_FORMAT "\n", STATS_FIRST_COLUMN, "time correlation",
-			b->ba_raw.st_timecorr,
-			STATS_SEP_WIDTH, "",
-			b->ba_corrected.st_timecorr);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "stddev",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_stddev,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_stddev);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "standard error",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_stderr,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_stderr);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "99% confidence level",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_99confidence,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_99confidence);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "skew",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_skew,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_skew);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "kurtosis",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_kurtosis,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_kurtosis);
+	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "time correlation",
+			STATS_2COLW, STATS_PREC, b->ba_raw.st_timecorr,
+			STATS_SEPW, "",
+			STATS_3COLW, STATS_PREC, b->ba_corrected.st_timecorr);
 
-	(void) printf("#\n# %*s %12.5f\n#\n",
-			STATS_FIRST_COLUMN, "elasped time",
-			(b->ba_endtime - b->ba_starttime) / 1.0e9);
+	(void) printf("#\n# %*s %*.*f\n",
+			STATS_1COLW, "elasped time",
+			STATS_2COLW, STATS_PREC, (b->ba_endtime - b->ba_starttime) / 1.0e9);
+	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
+			STATS_2COLW, nsecs_overhead);
 
-	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of samples",
-			b->ba_batches);
+	(void) printf("# %*s %*d\n", STATS_1COLW, "number of samples",
+			STATS_2COLW, b->ba_batches);
 	if (b->ba_batches > b->ba_datasize)
-		(void) printf("# %*s %12d (%d samples dropped)\n",
-				STATS_FIRST_COLUMN, "number of samples retained",
-				b->ba_datasize, (b->ba_batches - b->ba_datasize));
-	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of outliers",
-			b->ba_outliers);
-	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "number of final samples",
-			b->ba_batches_final);
-	(void) printf("# %*s %12d\n", STATS_FIRST_COLUMN, "getnsecs overhead",
-			(int)nsecs_overhead);
+		(void) printf("# %*s %*d (%d samples dropped)\n",
+				STATS_1COLW, "number of samples retained",
+				STATS_2COLW, b->ba_datasize, (b->ba_batches - b->ba_datasize));
+	(void) printf("# %*s %*d\n", STATS_1COLW, "number of outliers",
+			STATS_2COLW, b->ba_outliers);
+	(void) printf("# %*s %*d\n", STATS_1COLW, "number of final samples",
+			STATS_2COLW, b->ba_batches_final);
 
 	print_histo(b);
 
