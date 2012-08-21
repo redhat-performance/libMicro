@@ -1558,7 +1558,7 @@ print_histo(barrier_t *b)
 	(void) printf("# DISTRIBUTION\n");
 
 	/* calculate how much data we've captured */
-	n = b->ba_batches > b->ba_datasize ? b->ba_datasize : b->ba_batches;
+	n = b->ba_batches_final;
 
 	/* find the 95th percentile - index, value and range */
 	qsort((void *)b->ba_data, n, sizeof (double), doublecmp);
