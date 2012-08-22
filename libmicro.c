@@ -1879,24 +1879,33 @@ get_nsecs_overhead(void)
  * course resolution (e.g. derived instead by a periodic interrupt).
  *
  * Algorithm:
- * Determine a busy loop that is long enough for successive nanosecond counter
- * reads to report different times. Then take 1000 samples with busy loop
- * interval successively increases by i. The counter resolution is assumed to
- * be the smallest non-zero time delta between these 1000 samples.
  *
- * One last wrinkle is all 1000 samples may have the same delta on a system
- * with a very fast and consistent hardware counter based getnsecs(). In that
- * case assume the resolution is 1ns.
+ * Determine a busy loop that is long enough for successive nanosecond counter
+ * reads to report different times, called nops. Then take RES_SAMPLES samples
+ * with busy loop interval successively increases by multiples of nops. The
+ * counter resolution is assumed to be the smallest non-zero time delta
+ * between these samples.
+ *
+ * One last wrinkle is all samples may have the same delta on a system with a
+ * very fast and consistent hardware counter based getnsecs(). In that case
+ * assume the resolution is 1ns.
  */
+#define RES_SAMPLES	10000
 unsigned int
 get_nsecs_resolution(void)
 {
-	long long y[1000];
+	long long *y;
 
 	volatile int i, j;
 	int nops;
 	unsigned int res;
 	long long start, stop;
+
+	y = calloc(sizeof(*y), RES_SAMPLES);
+	if (y == NULL) {
+		perror("calloc");
+		exit(1);
+	}
 
 	/*
 	 * first, figure out how many nops to use to get any delta between time
@@ -1908,15 +1917,19 @@ get_nsecs_resolution(void)
 	 */
 
 	stop = start = getnsecs();
-
-	for (i = 1; i < 10000000; i++) {
-		start = getnsecs();
-		for (j = i; j; j--)
-			;
-		stop = getnsecs();
-		if (stop > start)
-			break;
-	}
+	int maxiter = 1000;
+	do {
+		for (i = 1; i <= maxiter; i++) {
+			start = getnsecs();
+			for (j = i; j; j--)
+				;
+			stop = getnsecs();
+			if (stop > start)
+				break;
+		}
+		if (stop <= start)
+			maxiter *= 10;
+	} while (stop <= start);
 
 	nops = i;
 
@@ -1924,7 +1937,7 @@ get_nsecs_resolution(void)
 	 * now collect data at linearly varying intervals
 	 */
 
-	for (i = 0; i < 1000; i++) {
+	for (i = 0; i < RES_SAMPLES; i++) {
 		start = getnsecs();
 		for (j = nops * i; j; j--)
 			;
@@ -1933,12 +1946,12 @@ get_nsecs_resolution(void)
 	}
 
 	/*
-	 * find smallest positive difference between samples;
-	 * this is the counter resolution
+	 * find smallest positive difference between samples; this is the counter
+	 * resolution
 	 */
 
 	res = y[0];
-	for (i = 1; i < 1000; i++) {
+	for (i = 1; i < RES_SAMPLES; i++) {
 		int diff = y[i] - y[i-1];
 
 		if (diff > 0 && res > diff)
@@ -1950,6 +1963,7 @@ get_nsecs_resolution(void)
 		res = 1;
 	}
 
+	free(y);
 	return res;
 }
 
