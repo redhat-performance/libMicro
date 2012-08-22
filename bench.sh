@@ -98,14 +98,10 @@ then
 	# energy savings mode (Intel systems only?).
 	$VARROOT/bin/pm_qos > /dev/null 2>&1 < /dev/null &
     PM_QOS_PID=$!
-
-    CHRT="chrt -f 1"
-else
-    CHRT=""
 fi
 
-NSECS_OVERHEAD=$(numactl -C 0 $CHRT $VARROOT/bin/tattle -O)
-NSECS_RESOLUTION=$(numactl -C 0 $CHRT $VARROOT/bin/tattle -r)
+NSECS_OVERHEAD=$($VARROOT/bin/tattle -O)
+NSECS_RESOLUTION=$($VARROOT/bin/tattle -r)
 
 OPTS="-E -L -W -O $NSECS_OVERHEAD -R $NSECS_RESOLUTION -C 100 -D 10000 -X 600000"
 
