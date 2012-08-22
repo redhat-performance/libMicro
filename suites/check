@@ -14,5 +14,5 @@
 
 for i in *.txt
 do
-    diff -cw gold/$i $i
+    diff -cwB gold/$i $i
 done
