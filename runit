@@ -44,11 +44,19 @@ else
 	suite=$2
 fi
 
+#
+# We choose the last CPU listed from lscpu -p since:
+#  * It won't be CPU 0 on a single socket, multi-core system
+#  * It won't be a CPU on Node 0 in a multi-socket, multi-core system
+#    "nodeid" is only used if "nodes" is not 1
+coreid=$(lscpu -p | tail -1 | awk '{ split($0, array, ","); print array[1]; }')
+nodeid=$(lscpu -p | tail -1 | awk '{ split($0, array, ","); print array[4]; }')
+
 template_base="$results/$1-$HN-$suite"
 template_nonuma="$template_base-nonuma-lm.$VER"
-template_numa="$template_base-numa.N1m1-lm.$VER"
-template_nonuma_chrt="$template_base-nonuma-chrt.f1-lm.$VER"
-template_numa_chrt="$template_base-numa.N1m1-chrt.f1-lm.$VER"
+template_numa="$template_base-numa.N$nodeid.m$nodeid-lm.$VER"
+template_core="$template_base-numa.C$coreid.m$nodeid-lm.$VER"
+template_core_chrt="$template_base-numa.C$coreid.m$nodeid-chrt.f1-lm.$VER"
 
 function checkit {
     if [ -e "$1" ]; then
@@ -59,14 +67,14 @@ function checkit {
 }
 
 function checkem {
-    checkit $template_nonuma-run.$1-results.txt || return 1;
-    checkit $template_nonuma-run.$1-timings.txt || return 1;
-    checkit $template_numa-run.$1-results.txt || return 1;
-    checkit $template_numa-run.$1-timings.txt || return 1;
-    checkit $template_nonuma_chrt-run.$1-results.txt || return 1;
-    checkit $template_nonuma_chrt-run.$1-timings.txt || return 1;
-    checkit $template_numa_chrt-run.$1-results.txt || return 1;
-    checkit $template_numa_chrt-run.$1-timings.txt || return 1;
+    checkit $template_nonuma-run.$1-results.txt      || return 1;
+    checkit $template_nonuma-run.$1-timings.txt      || return 1;
+    checkit $template_numa-run.$1-results.txt        || return 1;
+    checkit $template_numa-run.$1-timings.txt        || return 1;
+    checkit $template_core-run.$1-results.txt        || return 1;
+    checkit $template_core-run.$1-timings.txt        || return 1;
+    checkit $template_core_chrt-run.$1-results.txt   || return 1;
+    checkit $template_core_chrt-run.$1-timings.txt   || return 1;
     return 0;
 }
 
@@ -78,24 +86,28 @@ run="run.$idx"
 
 nodes=$(numactl --hardware | grep available | awk '{print $2}')
 
-echo "!Runit-command: $DN/bench -s $suite" >                             $template_nonuma-$run-results.txt
-                      $DN/bench -s $suite >>                             $template_nonuma-$run-results.txt    2> $template_nonuma-$run-timings.txt
+echo "!Runit-command: $DN/bench -s $suite" > $template_nonuma-$run-results.txt
+                      $DN/bench -s $suite >> $template_nonuma-$run-results.txt 2> $template_nonuma-$run-timings.txt
 if [ "$nodes" == "1" ]; then
+    echo "!Runit-command: numactl -C $coreid $DN/bench -s $suite" > $template_core-$run-results.txt
+                          numactl -C $coreid $DN/bench -s $suite >> $template_core-$run-results.txt 2> $template_core-$run-timings.txt
     if [ "$UID" -eq "$ROOT_UID" ]; then
-        echo "!Runit-command: numactl chrt -f 1 $DN/bench -s $suite" > $template_nonuma_chrt-$run-results.txt
-                              numactl chrt -f 1 $DN/bench -s $suite >> $template_nonuma_chrt-$run-results.txt 2> $template_nonuma_chrt-$run-timings.txt
-	    $DN/multiview $template_nonuma-$run-results.txt $template_nonuma_chrt-$run-results.txt > $template_base-$run-results.html
+        echo "!Runit-command: numactl -C $coreid chrt -f 1 $DN/bench -s $suite" > $template_core_chrt-$run-results.txt
+                              numactl -C $coreid chrt -f 1 $DN/bench -s $suite >> $template_core_chrt-$run-results.txt 2> $template_core_chrt-$run-timings.txt
+	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-$run-results.html
     else
-	    $DN/multiview $template_nonuma-$run-results.txt > $template_base-$run-results.html
+	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt                                      > $template_base-$run-results.html
     fi
 else
-    echo "!Runit-command: numactl -N 1 -m 1 $DN/bench -s $suite" >           $template_numa-$run-results.txt
-                          numactl -N 1 -m 1 $DN/bench -s $suite >>           $template_numa-$run-results.txt      2> $template_numa-$run-timings.txt
+    echo "!Runit-command: numactl -N $nodeid -m $nodeid $DN/bench -s $suite" > $template_numa-$run-results.txt
+                          numactl -N $nodeid -m $nodeid $DN/bench -s $suite >> $template_numa-$run-results.txt 2> $template_numa-$run-timings.txt
+    echo "!Runit-command: numactl -C $coreid -m $nodeid $DN/bench -s $suite" > $template_core-$run-results.txt
+                          numactl -C $coreid -m $nodeid $DN/bench -s $suite >> $template_core-$run-results.txt 2> $template_core-$run-timings.txt
     if [ "$UID" -eq "$ROOT_UID" ]; then
-        echo "!Runit-command: numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite" > $template_numa_chrt-$run-results.txt
-                              numactl -N 1 -m 1 chrt -f 1 $DN/bench -s $suite >> $template_numa_chrt-$run-results.txt 2> $template_numa_chrt-$run-timings.txt
-        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_numa_chrt-$run-results.txt > $template_base-$run-results.html
+        echo "!Runit-command: numactl -C $coreid -m $nodeid chrt -f 1 $DN/bench -s $suite" > $template_core_chrt-$run-results.txt
+                              numactl -C $coreid -m $nodeid chrt -f 1 $DN/bench -s $suite >> $template_core_chrt-$run-results.txt 2> $template_core_chrt-$run-timings.txt
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-$run-results.html
     else
-        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt > $template_base-$run-results.html
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt                                                                           > $template_base-$run-results.html
     fi
 fi
