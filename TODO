@@ -25,3 +25,6 @@
     Add mutex benchmark tests for the -h switch
 
     Fold OpenBSD, NetBSD and Android patches for libMicro into the main fold
+
+    Rename suite templates from .cpp to some other name that does not indicate
+    they are c++ files
