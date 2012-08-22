@@ -430,12 +430,12 @@ actual_main(int argc, char *argv[])
 
 	/* allocate dynamic data */
 	pids = (pid_t *)malloc(lm_optP * sizeof (pid_t));
-	if (pids == NULL) {
+	if (NULL == pids) {
 		perror("malloc(pids)");
 		exit(1);
 	}
 	tids = (pthread_t *)malloc(lm_optT * sizeof (pthread_t));
-	if (tids == NULL) {
+	if (NULL == tids) {
 		perror("malloc(tids)");
 		exit(1);
 	}
@@ -1584,6 +1584,10 @@ print_histo(barrier_t *b)
 
 	/* create and initialise the histogram */
 	histo = calloc(sizeof (histo_t), HISTOSIZE);
+	if (NULL == histo) {
+		printf("#%*sNo available memory for histogram.\n", HISTO_INDENT, "");
+		return;
+	}
 
 	/* populate the histogram */
 	last = 0;
@@ -1825,14 +1829,19 @@ nop(void)
 	return 1;
 }
 
-#define	NSECITER 1000
+#define	NSECITER	1000*1000*20
 
 unsigned int
 get_nsecs_overhead(void)
 {
 	long long s;
 
-	double data[NSECITER];
+	double *data = calloc(sizeof(double), NSECITER);
+	if (NULL == data) {
+		perror("get_nsecs_overhead: calloc()");
+		exit(1);
+	}
+
 	stats_t stats;
 
 	int i;
@@ -1860,6 +1869,7 @@ get_nsecs_overhead(void)
 		crunch_stats(data, count, &stats);
 	}
 
+	free(data);
 	return (unsigned int)round(stats.st_mean);
 }
 
