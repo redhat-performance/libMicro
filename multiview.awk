@@ -50,6 +50,8 @@ BEGIN {
 	benchmark_name = "";
 	header_count = 0;
 	result_header = "";
+	base_values = "";
+	curr_values = "";
 }
 
 /^##/ {
@@ -67,6 +69,10 @@ BEGIN {
 
 /errors/ {
 	result_header = $0;
+	if (base_values == "") {
+		base_values = $3;
+	}
+	curr_values = $3;
 	next;
 }
 
@@ -116,8 +122,18 @@ BEGIN {
 			benchmarks[benchmark_count] = $1;
 		}
 		if ($6 == 0)
-			benchmark_data[$1,FILENAME] = $4;
+			# No errors, result it good
+			if (base_values == curr_values)
+				benchmark_data[$1,FILENAME] = $4;
+			else if (base_values == "nsecs/call") {
+				# Must be microseconds
+				benchmark_data[$1,FILENAME] = $4 * 1000;
+			}
+			else {
+				benchmark_data[$1,FILENAME] = $4 / 1000;
+			}
 		else
+			# Bad result because of errors
 			benchmark_data[$1,FILENAME] = -1;
 		benchmark_name = $1;
 
@@ -185,9 +201,9 @@ END {
 
 	printf("        <tr>\n");
 	printf("          <th>BENCHMARK</th>\n");
-	printf("          <th align=\"right\">USECS</th>\n");
+	printf("          <th align=\"right\">%s</th>\n", toupper(base_values));
 	for (i = 2; i < ARGC; i++)
-		printf("          <th align=\"right\">USECS [percentage]</th>\n");
+		printf("          <th align=\"right\">%s [percentage]</th>\n", toupper(base_values));
 	printf("        </tr>\n");
 
 	# Bubble sort the names of the benchmarks

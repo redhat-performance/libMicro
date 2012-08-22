@@ -34,40 +34,40 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.20"
+#define	LIBMICRO_VERSION	"0.4.1-rh.21"
 
-#define	STRSIZE			1024
+#define	STRSIZE	1024
 
 typedef struct {
-	long long		re_count;
-	long long		re_errors;
-	long long		re_t0;
-	long long		re_t1;
+	long long	re_count;
+	long long	re_errors;
+	long long	re_t0;
+	long long	re_t1;
 } result_t;
 
 typedef struct {
-	double			sum;
-	long long		count;
+	long long	sum;
+	long long	count;
 } histo_t;
 
-#define	HISTOSIZE		32
-#define	DATASIZE		100000
+#define	HISTOSIZE	32
+#define	DATASIZE	100000
 
 /*
  * stats we compute on data sets
  */
 
 typedef struct stats {
-	double	st_min;
-	double	st_max;
-	double	st_mean;
-	double	st_median;
-	double	st_stddev;
-	double	st_stderr;
-	double	st_99confidence;
-	double	st_skew;
-	double	st_kurtosis;
-	double	st_timecorr;	/* correlation with respect to time */
+	long long	st_min;
+	long long	st_max;
+	double		st_mean;
+	long long	st_median;
+	double		st_stddev;
+	double		st_stderr;
+	double		st_99confidence;
+	double		st_skew;
+	double		st_kurtosis;
+	double		st_timecorr;	/* correlation with respect to time */
 } stats_t;
 
 #define KILLED_INT	1		/* Killed by INT, TERM, QUIT, etc. */
@@ -129,7 +129,7 @@ typedef struct {
 	long long		ba_errors0;
 
 	int				ba_datasize;	/* possible #items data	*/
-	double			ba_data[1];		/* start of data ararry	*/
+	long long		ba_data[1];		/* start of data ararry	*/
 } barrier_t;
 
 
@@ -188,9 +188,9 @@ extern size_t		lm_tsdsize;
  * Utility functions
  */
 
-int 			getpindex(void);
-int 			gettindex(void);
-void 		   *gettsd(int, int);
+int				getpindex(void);
+int				gettindex(void);
+void		   *gettsd(int, int);
 long long		getusecs(void);
 long long		getnsecs(void);
 void			setfdlimit(int);

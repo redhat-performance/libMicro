@@ -121,7 +121,6 @@ char			lm_optstr[STRSIZE];
 char			lm_header[STRSIZE];
 size_t			lm_tsdsize = 0;
 
-
 /*
  *	Globals we do not export to the user
  */
@@ -137,7 +136,6 @@ static size_t		tsdsize = 0;
 static long long	lm_hz = 0;
 #endif
 
-
 /*
  * Forward references
  */
@@ -146,12 +144,12 @@ static void			worker_process();
 static void			usage();
 static void			print_stats(barrier_t *);
 static void			print_histo(barrier_t *);
-static int			remove_outliers(double *, int, stats_t *);
+static int			remove_outliers(long long *, int, stats_t *);
 static unsigned int	nsecs_overhead;
 static unsigned int	nsecs_resolution;
-static void			crunch_stats(double *, int, stats_t *);
+static void			crunch_stats(long long *, int, stats_t *);
 static void			compute_stats(barrier_t *);
-static void			fit_line(double *, double *, int, double *, double *);
+static void			fit_line(long long *, long long *, int, double *, double *);
 
 /*
  * main routine; renamed in this file to allow linking with other
@@ -621,21 +619,33 @@ actual_main(int argc, char *argv[])
 		(void) fflush(stderr);
 	}
 
+#define RES_WIDTH	15
+#define RES_PREC	 5
+
 	/* print result header (unless suppressed) */
 	if (!lm_optH) {
-		(void) printf("%*s %3s %3s %12s %12s %8s %8s %s\n",
+		(void) printf("%*s %3s %3s %*s %12s %8s %8s %s\n",
 				strlen(lm_optN), "", "prc", "thr",
-				"usecs/call",
+				RES_WIDTH, "nsecs/call",
 				"samples", "errors", "cnt/samp", lm_header);
 	}
 
 	/* print result */
 
-	(void) printf("%-*s %3d %3d %12.5f %12d %8lld %8d %s\n",
-			strlen(lm_optN), lm_optN, lm_optP, lm_optT,
-			(lm_optM?b->ba_corrected.st_mean:b->ba_corrected.st_median),
-			b->ba_batches_final, b->ba_errors, lm_optB,
-			benchmark_result());
+	if (lm_optM) {
+		(void) printf("%-*s %3d %3d %*.*f %12d %8lld %8d %s\n",
+				strlen(lm_optN), lm_optN, lm_optP, lm_optT,
+				RES_WIDTH, RES_PREC, b->ba_corrected.st_mean,
+				b->ba_batches_final, b->ba_errors, lm_optB,
+				benchmark_result());
+	}
+	else {
+		(void) printf("%-*s %3d %3d %*lld %12d %8lld %8d %s\n",
+				strlen(lm_optN), lm_optN, lm_optP, lm_optT,
+				RES_WIDTH, b->ba_corrected.st_median,
+				b->ba_batches_final, b->ba_errors, lm_optB,
+				benchmark_result());
+	}
 
 	/* print arguments benchmark was invoked with ? */
 	if (lm_optL) {
@@ -795,8 +805,8 @@ print_warnings(barrier_t *b)
 		}
 		assert(nsecs_resolution > 0);
 		assert(lm_optB > 0);
-		float median = b->ba_corrected.st_median;
-		if (median <= 0.0) median = 1.0;
+		long long median = b->ba_corrected.st_median;
+		if (median <= 0) median = 1;
 		increase = (long long)(floor((nsecs_resolution * 100.0) /
 			((double)lm_optB * median * 1000.0)) +
 			1.0);
@@ -880,12 +890,16 @@ print_warnings(barrier_t *b)
 	}
 }
 
+#define STATS_FORMAT_L	"# %*s %*lld %*s %*lld"
 #define STATS_FORMAT	"# %*s %*.*f %*s %*.*f"
-#define STATS_1COLW	25
-#define STATS_2COLW	12
-#define STATS_3COLW	12
-#define STATS_PREC	5
-#define STATS_SEPW	10
+#define STATS_1COLW		25
+#define STATS_2COLW_L	 9
+#define STATS_2COLW		15
+#define STATS_3COLW_L	 9
+#define STATS_3COLW		15
+#define STATS_PREC		 5
+#define STATS_SEPW_L	16
+#define STATS_SEPW		10
 
 void
 print_stats(barrier_t *b)
@@ -897,28 +911,28 @@ print_stats(barrier_t *b)
 	(void) printf("#\n");
 	(void) printf("# %*s %*s %-*s %*s %s\n",
 			STATS_1COLW, "STATISTICS",
-			STATS_2COLW, "usecs/call",
+			STATS_2COLW, "nsecs/call",
 			STATS_SEPW, "(raw)",
-			STATS_3COLW, "usecs/call",
+			STATS_3COLW, "nsecs/call",
 			"(outliers removed)");
 
-	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "min",
-			STATS_2COLW, STATS_PREC, b->ba_raw.st_min,
-			STATS_SEPW, "",
-			STATS_3COLW, STATS_PREC, b->ba_corrected.st_min);
-	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "max",
-			STATS_2COLW, STATS_PREC, b->ba_raw.st_max,
-			STATS_SEPW, "",
-			STATS_3COLW, STATS_PREC, b->ba_corrected.st_max);
+	(void) printf(STATS_FORMAT_L "\n", STATS_1COLW, "min",
+			STATS_2COLW_L, b->ba_raw.st_min,
+			STATS_SEPW_L, "",
+			STATS_3COLW_L, b->ba_corrected.st_min);
+	(void) printf(STATS_FORMAT_L "\n", STATS_1COLW, "max",
+			STATS_2COLW_L, b->ba_raw.st_max,
+			STATS_SEPW_L, "",
+			STATS_3COLW_L, b->ba_corrected.st_max);
 	(void) printf(STATS_FORMAT "%s\n", STATS_1COLW, "mean",
 			STATS_2COLW, STATS_PREC, b->ba_raw.st_mean,
 			STATS_SEPW, "",
 			STATS_3COLW, STATS_PREC, b->ba_corrected.st_mean,
 			lm_optM?"*":"");
-	(void) printf(STATS_FORMAT "%s\n", STATS_1COLW, "median",
-			STATS_2COLW, STATS_PREC, b->ba_raw.st_median,
-			STATS_SEPW, "",
-			STATS_3COLW, STATS_PREC, b->ba_corrected.st_median,
+	(void) printf(STATS_FORMAT_L "%s\n", STATS_1COLW, "median",
+			STATS_2COLW_L, b->ba_raw.st_median,
+			STATS_SEPW_L, "",
+			STATS_3COLW_L, b->ba_corrected.st_median,
 			lm_optM?"":"*");
 	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "stddev",
 			STATS_2COLW, STATS_PREC, b->ba_raw.st_stddev,
@@ -972,8 +986,8 @@ print_stats(barrier_t *b)
 void
 update_stats(barrier_t *b, result_t *r)
 {
-	double	time;
-	double	nsecs_per_call;
+	long long	time;
+	long long	nsecs_per_call;
 
 	if (b->ba_waiters == 0) {
 		/* first thread only */
@@ -994,11 +1008,10 @@ update_stats(barrier_t *b, result_t *r)
 	b->ba_count0  += r->re_count;
 	b->ba_errors0 += r->re_errors;
 
-	if (b->ba_waiters == b->ba_hwm - 1) {
+	if (b->ba_waiters == (b->ba_hwm - 1)) {
 		/* last thread only */
 
-		time = (double)b->ba_t1 - (double)b->ba_t0 - nsecs_overhead;
-
+		time = b->ba_t1 - b->ba_t0 - nsecs_overhead;
 		if (time < (100 * nsecs_resolution))
 			b->ba_quant++;
 
@@ -1009,16 +1022,14 @@ update_stats(barrier_t *b, result_t *r)
 		 * the processes and then averaging them all together?
 		 */
 
-		nsecs_per_call = (time / (double)b->ba_count0) *
-			(double)(lm_optT * lm_optP);
+		nsecs_per_call = (long long)round(
+				(time / (double)b->ba_count0) * (lm_optT * lm_optP));
+		b->ba_data[b->ba_batches % b->ba_datasize] = nsecs_per_call;
 
 		long long orig_ba_count = b->ba_count;
 		b->ba_count	 += b->ba_count0;
 		if (lm_optG >= 8) fprintf(stderr, "DEBUG8: update_stats(): b->ba_count (%lld) + b->ba_count0 (%lld) = b->ba_count (%lld)\n", orig_ba_count, b->ba_count0, b->ba_count);
 		b->ba_errors += b->ba_errors0;
-
-		b->ba_data[b->ba_batches % b->ba_datasize] =
-			nsecs_per_call;
 
 		b->ba_batches++;
 	}
@@ -1037,7 +1048,7 @@ barrier_create(int hwm, int datasize)
 
 	/*LINTED*/
 	b = (barrier_t *)mmap(NULL,
-		sizeof (barrier_t) + (datasize - 1) * sizeof (double),
+		sizeof (barrier_t) + (datasize - 1) * sizeof (*b->ba_data),
 		PROT_READ | PROT_WRITE,
 		MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if (b == (barrier_t *)MAP_FAILED) {
@@ -1176,19 +1187,20 @@ barrier_create(int hwm, int datasize)
 {
 	pthread_mutexattr_t	mattr;
 	pthread_condattr_t	cattr;
-	barrier_t		*b;
+	barrier_t		   *b;
 
 	/*LINTED*/
 	b = (barrier_t *)mmap(NULL,
-		sizeof (barrier_t) + (datasize - 1) * sizeof (double),
-		PROT_READ | PROT_WRITE,
-		MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
-	if (b == (barrier_t *)MAP_FAILED) {
-		return (NULL);
+			sizeof (barrier_t) + ((datasize - 1) * sizeof (*b->ba_data)),
+			PROT_READ | PROT_WRITE,
+			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
+	if ((barrier_t *)MAP_FAILED == b) {
+		return NULL;
 	}
-	b->ba_datasize = datasize;
 
+	b->ba_datasize = datasize;
 	b->ba_hwm = hwm;
+
 	b->ba_flag	= 0;
 
 	int ret = pthread_mutexattr_init(&mattr);
@@ -1433,7 +1445,6 @@ setfdlimit(int limit)
 	return;
 }
 
-
 #define	KILOBYTE		1024
 #define	MEGABYTE		(KILOBYTE * KILOBYTE)
 #define	GIGABYTE		(KILOBYTE * MEGABYTE)
@@ -1519,10 +1530,10 @@ print_bar(long count, long total, unsigned int width)
 }
 
 static int
-doublecmp(const void *p1, const void *p2)
+longlongcmp(const void *p1, const void *p2)
 {
-	double a = *((double *)p1);
-	double b = *((double *)p2);
+	long long a = *((long long *)p1);
+	long long b = *((long long *)p2);
 
 	if (a > b)
 		return 1;
@@ -1533,10 +1544,10 @@ doublecmp(const void *p1, const void *p2)
 
 #define HISTO_INDENT	7
 #define HISTO_COL1W	12
-#define HISTO_COL2W	14
-#define HISTO_COL3W	14
+#define HISTO_COL2W	15
+#define HISTO_COL3W	15
 #define HISTO_BARW	32U
-#define HISTO_PREC	7
+#define HISTO_PREC	5
 
 static void
 print_histo(barrier_t *b)
@@ -1546,18 +1557,22 @@ print_histo(barrier_t *b)
 	int			idx;
 	int			last;
 	long long	maxcount;
-	double		sum;
-	double		min;
-	double		bucket_width;
+	long long	sum;
+	long long	min;
+	long long	bucket_width;
 	long long	count;
 	int			i95;	// Index of 95%ile element
-	double		v95;	// Value of 95%ile element
-	double		r95;	// Range of values in 95%ile
+	long long	v95;	// Value of 95%ile element
+	long long	r95;	// Range of values in 95%ile
 	double		m95;	// Mean of 95%itle values
 	histo_t	   *histo;
 
-	(void) printf("#\n");
-	(void) printf("# DISTRIBUTION\n");
+	/* create and initialise the histogram */
+	histo = calloc(sizeof (histo_t), HISTOSIZE);
+	if (NULL == histo) {
+		printf("#%*sNo available memory for histogram.\n", HISTO_INDENT, "");
+		return;
+	}
 
 	/* calculate how much data we've captured */
 	n = b->ba_batches_final;
@@ -1567,31 +1582,28 @@ print_histo(barrier_t *b)
 	/* Skip over any infinity or NaN results */
 	for (i95 = ((n * 95) / 100); (i95 > 0); i95--) {
 		v95 = b->ba_data[i95];
-		if (v95 != INFINITY && v95 != NAN)
+		if (v95 > 0) {
 			break;
+		}
 	}
 
-	if ((v95 == INFINITY) || (v95 == NAN)) {
-		printf("#%*sNo valid data present.\n", HISTO_INDENT, "");
+	if (i95 < 0) {
+		printf("#%*sNo valid data present for histogram.\n", HISTO_INDENT, "");
 		return;
 	}
+
+	(void) printf("#\n");
+	(void) printf("# DISTRIBUTION\n");
 
 	min = b->ba_data[0];
-	r95 = v95 - min;
+	r95 = (v95 - min) + 1;
 
 	/* find a suitable min and scale */
-	bucket_width = r95 / HISTOSIZE;
-
-	/* create and initialise the histogram */
-	histo = calloc(sizeof (histo_t), HISTOSIZE);
-	if (NULL == histo) {
-		printf("#%*sNo available memory for histogram.\n", HISTO_INDENT, "");
-		return;
-	}
+	bucket_width = (long long)ceil((double)r95 / HISTOSIZE);
 
 	/* populate the histogram */
 	last = 0;
-	sum = 0.0;
+	sum = 0;
 	count = 0;
 	for (i = 0; i < i95; i++) {
 		idx = (int)((b->ba_data[i] - min) / bucket_width);
@@ -1607,7 +1619,7 @@ print_histo(barrier_t *b)
 		sum += b->ba_data[i];
 		count++;
 	}
-	m95 = sum / count;
+	m95 = (double)sum / count;
 
 	/* find the largest bucket */
 	maxcount = 0;
@@ -1619,26 +1631,26 @@ print_histo(barrier_t *b)
 		}
 
 	(void) printf("#%*s%*s %*s %*s %*s\n", HISTO_INDENT, "",
-			HISTO_COL1W, "counts", HISTO_COL2W, "usecs/call",
+			HISTO_COL1W, "counts", HISTO_COL2W, "nsecs/call",
 			HISTO_BARW, "", HISTO_COL3W, "means");
 
 	/* print the buckets */
 	for (i = 0; i <= last; i++) {
-		(void) printf("#%*s%*lld %*.*f |", HISTO_INDENT, "",
+		(void) printf("#%*s%*lld %*lld |", HISTO_INDENT, "",
 				HISTO_COL1W, histo[i].count,
-				HISTO_COL2W, HISTO_PREC, min + (bucket_width * (double)i));
+				HISTO_COL2W, min + (bucket_width * i));
 
 		print_bar(histo[i].count, maxcount, HISTO_BARW);
 
-		if (histo[i].count > 0)
+		if ((histo[i].count > 0) && (bucket_width > 1))
 			(void) printf("%*.*f\n",
-					HISTO_COL3W, HISTO_PREC, histo[i].sum / histo[i].count);
+					HISTO_COL3W, HISTO_PREC, (double)histo[i].sum / histo[i].count);
 		else
 			(void) printf("%*s\n", HISTO_COL3W, "-");
 	}
 
 	/* find the mean of values beyond the 95th percentile */
-	sum = 0.0;
+	sum = 0;
 	count = 0;
 	for (i = i95; i < n; i++) {
 		sum += b->ba_data[i];
@@ -1651,14 +1663,14 @@ print_histo(barrier_t *b)
 			HISTO_COL2W, "> 95%");
 	print_bar(count, maxcount, HISTO_BARW);
 	if (count > 0)
-		(void) printf("%*.*f\n", HISTO_COL3W, HISTO_PREC, sum / count);
+		(void) printf("%*.*f\n", HISTO_COL3W, HISTO_PREC, (double)sum / count);
 	else
 		(void) printf("%*s\n", HISTO_COL3W, "-");
 	(void) printf("#\n");
 	(void) printf("#%*s%*s %*.*f\n", HISTO_INDENT, "",
 			HISTO_COL1W, "mean of 95%", HISTO_COL2W, HISTO_PREC, m95);
-	(void) printf("#%*s%*s %*.*f\n", HISTO_INDENT, "",
-			HISTO_COL1W, "95th %ile", HISTO_COL2W, HISTO_PREC, v95);
+	(void) printf("#%*s%*s %*lld\n", HISTO_INDENT, "",
+			HISTO_COL1W, "95th %ile", HISTO_COL2W, v95);
 }
 
 static void
@@ -1671,17 +1683,10 @@ compute_stats(barrier_t *b)
 		: b->ba_batches;
 
 	/*
-	 * convert to usecs/call
-	 */
-
-	for (i = 0; i < batches; i++)
-		b->ba_data[i] /= 1000.0;
-
-	/*
 	 * do raw stats
 	 */
 
-	qsort((void *)b->ba_data, batches, sizeof (double), doublecmp);
+	qsort((void *)b->ba_data, batches, sizeof (*b->ba_data), longlongcmp);
 	crunch_stats(b->ba_data, batches, &b->ba_raw);
 
 	/*
@@ -1713,16 +1718,16 @@ compute_stats(barrier_t *b)
  */
 
 static void
-crunch_stats(double *data, int count, stats_t *stats)
+crunch_stats(long long *data, int count, stats_t *stats)
 {
-	double	a;
-	double	std;
-	double	diff;
-	double	sk;
-	double	ku;
-	double	mean;
-	int		i;
-	double *xdata;
+	double		a;
+	double		std;
+	double		diff;
+	double		sk;
+	double		ku;
+	double		mean;
+	int			i;
+	long long  *xdata;
 
 	/*
 	 * first we need the mean
@@ -1751,7 +1756,7 @@ crunch_stats(double *data, int count, stats_t *stats)
 	}
 
 	for (i = 0; i < count; i++) {
-		xdata[i] = (double)i;
+		xdata[i] = i;
 	}
 	fit_line(xdata, data, count, &a, &stats->st_timecorr);
 
@@ -1762,7 +1767,7 @@ crunch_stats(double *data, int count, stats_t *stats)
 	ku	= 0.0;
 
 	stats->st_max = -1;
-	stats->st_min = HUGE_VAL;
+	stats->st_min = LLONG_MAX;
 
 	for (i = 0; i < count; i++) {
 		if (data[i] > stats->st_max)
@@ -1793,7 +1798,7 @@ crunch_stats(double *data, int count, stats_t *stats)
  */
 
 static void
-fit_line(double *x, double *y, int count, double *a, double *b)
+fit_line(long long *x, long long *y, int count, double *a, double *b)
 {
 	double sumx, sumy, sumxy, sumx2;
 	double denom;
@@ -1836,7 +1841,7 @@ get_nsecs_overhead(void)
 {
 	long long s;
 
-	double *data = calloc(sizeof(double), NSECITER);
+	long long *data = calloc(sizeof(long long), NSECITER);
 	if (NULL == data) {
 		perror("get_nsecs_overhead: calloc()");
 		exit(1);
@@ -1861,7 +1866,7 @@ get_nsecs_overhead(void)
 		data[i] = getnsecs() - s;
 	}
 
-	qsort((void *)data, count, sizeof (double), doublecmp);
+	qsort((void *)data, count, sizeof (long long), longlongcmp);
 	crunch_stats(data, count, &stats);
 
 	while ((outliers = remove_outliers(data, count, &stats)) != 0) {
@@ -1973,10 +1978,10 @@ get_nsecs_resolution(void)
  */
 
 static int
-remove_outliers(double *data, int count, stats_t *stats)
+remove_outliers(long long *data, int count, stats_t *stats)
 {
-	double outmin = stats->st_mean - 3 * stats->st_stddev;
-	double outmax = stats->st_mean + 3 * stats->st_stddev;
+	long long outmin = (long long)round(stats->st_mean - 3 * stats->st_stddev);
+	long long outmax = (long long)round(stats->st_mean + 3 * stats->st_stddev);
 
 	int i, outliers;
 
