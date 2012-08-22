@@ -196,7 +196,6 @@ long long		getnsecs(void);
 void			setfdlimit(int);
 long long		sizetoll(const char *);
 int				sizetoint(const char *);
-int				fit_line(double *, double *, int, double *, double *);
 unsigned int	get_nsecs_resolution(void);
 unsigned int	get_nsecs_overhead(void);
 

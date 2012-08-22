@@ -149,8 +149,10 @@ static void			print_histo(barrier_t *);
 static int			remove_outliers(double *, int, stats_t *);
 static unsigned int	nsecs_overhead;
 static unsigned int	nsecs_resolution;
-static int			crunch_stats(double *, int, stats_t *);
+static void			crunch_stats(double *, int, stats_t *);
 static void			compute_stats(barrier_t *);
+static void			fit_line(double *, double *, int, double *, double *);
+
 /*
  * main routine; renamed in this file to allow linking with other
  * files
@@ -345,19 +347,19 @@ actual_main(int argc, char *argv[])
 	assert((lm_optC > 0 && lm_optD >= 0) || (lm_optC >= 0 && lm_optD > 0));
 	assert(lm_optX == 0 || lm_optX > lm_optD);
 
-    if (lm_optO > 0) {
-        nsecs_overhead = lm_optO;
-    }
-    else {
-        nsecs_overhead = get_nsecs_overhead();
-    }
+	if (lm_optO > 0) {
+		nsecs_overhead = lm_optO;
+	}
+	else {
+		nsecs_overhead = get_nsecs_overhead();
+	}
 
-    if (lm_optR > 0) {
-        nsecs_resolution = lm_optR;
-    }
-    else {
-        nsecs_resolution = get_nsecs_resolution();
-    }
+	if (lm_optR > 0) {
+		nsecs_resolution = lm_optR;
+	}
+	else {
+		nsecs_resolution = get_nsecs_resolution();
+	}
 
 	/* deal with implicit and overriding options */
 	if (lm_opt1 && lm_optP > 1) {
@@ -896,9 +898,9 @@ print_stats(barrier_t *b)
 	(void) printf("# %*s %*s %-*s %*s %s\n",
 			STATS_1COLW, "STATISTICS",
 			STATS_2COLW, "usecs/call",
-            STATS_SEPW, "(raw)",
+			STATS_SEPW, "(raw)",
 			STATS_3COLW, "usecs/call",
-            "(outliers removed)");
+			"(outliers removed)");
 
 	(void) printf(STATS_FORMAT "\n", STATS_1COLW, "min",
 			STATS_2COLW, STATS_PREC, b->ba_raw.st_min,
@@ -1561,7 +1563,6 @@ print_histo(barrier_t *b)
 	n = b->ba_batches_final;
 
 	/* find the 95th percentile - index, value and range */
-	qsort((void *)b->ba_data, n, sizeof (double), doublecmp);
 
 	/* Skip over any infinity or NaN results */
 	for (i95 = ((n * 95) / 100); (i95 > 0); i95--) {
@@ -1676,7 +1677,8 @@ compute_stats(barrier_t *b)
 	 * do raw stats
 	 */
 
-	(void) crunch_stats(b->ba_data, batches, &b->ba_raw);
+	qsort((void *)b->ba_data, batches, sizeof (double), doublecmp);
+	crunch_stats(b->ba_data, batches, &b->ba_raw);
 
 	/*
 	 * recursively apply 3 sigma rule to remove outliers
@@ -1689,12 +1691,10 @@ compute_stats(barrier_t *b)
 		int removed;
 
 		do {
-			removed = remove_outliers(b->ba_data, batches,
-				&b->ba_corrected);
+			removed = remove_outliers(b->ba_data, batches, &b->ba_corrected);
 			b->ba_outliers += removed;
 			batches -= removed;
-			(void) crunch_stats(b->ba_data, batches,
-				&b->ba_corrected);
+			crunch_stats(b->ba_data, batches, &b->ba_corrected);
 			} while (removed != 0 && batches > 40);
 	}
 	b->ba_batches_final = batches;
@@ -1705,10 +1705,10 @@ compute_stats(barrier_t *b)
 }
 
 /*
- * routine to compute various statistics on array of doubles.
+ * routine to compute various statistics on array of doubles (previously sorted).
  */
 
-static int
+static void
 crunch_stats(double *data, int count, stats_t *stats)
 {
 	double	a;
@@ -1718,8 +1718,7 @@ crunch_stats(double *data, int count, stats_t *stats)
 	double	ku;
 	double	mean;
 	int		i;
-	int		bytes;
-	double *dupdata;
+	double *xdata;
 
 	/*
 	 * first we need the mean
@@ -1734,33 +1733,32 @@ crunch_stats(double *data, int count, stats_t *stats)
 	mean /= count;
 
 	stats->st_mean = mean;
-
-	/*
-	 * malloc and sort so we can do median
-	 */
-
-	dupdata = malloc(bytes = sizeof (double) * count);
-	(void) memcpy(dupdata, data, bytes);
-	qsort((void *)dupdata, count, sizeof (double), doublecmp);
-	stats->st_median = dupdata[count/2];
+	stats->st_median = data[count/2];
 
 	/*
 	 * reuse dupdata to compute time correlation of data to
 	 * detect interesting time-based trends
 	 */
 
-	for (i = 0; i < count; i++)
-		dupdata[i] = (double)i;
+	xdata = malloc(sizeof (*xdata) * count);
+	if (NULL == xdata) {
+		perror("crunch_stats: malloc()");
+		exit(1);
+	}
 
-	(void) fit_line(dupdata, data, count, &a, &stats->st_timecorr);
-	free(dupdata);
+	for (i = 0; i < count; i++) {
+		xdata[i] = (double)i;
+	}
+	fit_line(xdata, data, count, &a, &stats->st_timecorr);
+
+	free(xdata);
 
 	std = 0.0;
 	sk	= 0.0;
 	ku	= 0.0;
 
 	stats->st_max = -1;
-	stats->st_min = 1.0e99; /* hard to find portable values */
+	stats->st_min = HUGE_VAL;
 
 	for (i = 0; i < count; i++) {
 		if (data[i] > stats->st_max)
@@ -1783,8 +1781,6 @@ crunch_stats(double *data, int count, stats_t *stats)
 	double std3		   = (std * std * std);
 	stats->st_skew	   = (sk / (cm1 * std3));
 	stats->st_kurtosis = (ku / (cm1 * (std3 * std))) - 3;
-
-	return 0;
 }
 
 /*
@@ -1792,7 +1788,7 @@ crunch_stats(double *data, int count, stats_t *stats)
  * fits a line y = a + bx. Returns a, b
  */
 
-int
+static void
 fit_line(double *x, double *y, int count, double *a, double *b)
 {
 	double sumx, sumy, sumxy, sumx2;
@@ -1810,14 +1806,13 @@ fit_line(double *x, double *y, int count, double *a, double *b)
 
 	denom = count * sumx2 - sumx * sumx;
 
-	if (denom == 0.0)
-		return -1;
-
-	*a = (sumy * sumx2 - sumx * sumxy) / denom;
-
-	*b = (count * sumxy - sumx * sumy) / denom;
-
-	return 0;
+	if (denom == 0.0) {
+		*a = *b = NAN;
+	}
+	else {
+		*a = (sumy * sumx2 - sumx * sumxy) / denom;
+		*b = (count * sumxy - sumx * sumy) / denom;
+	}
 }
 
 /*
@@ -1857,11 +1852,12 @@ get_nsecs_overhead(void)
 		data[i] = getnsecs() - s;
 	}
 
-	(void) crunch_stats(data, count, &stats);
+	qsort((void *)data, count, sizeof (double), doublecmp);
+	crunch_stats(data, count, &stats);
 
 	while ((outliers = remove_outliers(data, count, &stats)) != 0) {
 		count -= outliers;
-		(void) crunch_stats(data, count, &stats);
+		crunch_stats(data, count, &stats);
 	}
 
 	return (unsigned int)round(stats.st_mean);
@@ -1948,7 +1944,8 @@ get_nsecs_resolution(void)
 }
 
 /*
- * remove any data points from the array more than 3 sigma out
+ * remove any data points from the array more than 3 sigma out; assumes the
+ * data is already sorted.
  */
 
 static int
@@ -1957,13 +1954,34 @@ remove_outliers(double *data, int count, stats_t *stats)
 	double outmin = stats->st_mean - 3 * stats->st_stddev;
 	double outmax = stats->st_mean + 3 * stats->st_stddev;
 
-	int i, j, outliers;
+	int i, outliers;
 
-	for (outliers = i = j = 0; i < count; i++)
-		if (data[i] > outmax || data[i] < outmin)
-			outliers++;
-		else
-			data[j++] = data[i];
+	int min_idx = count;
+	for (i = 0; i < count; i++) {
+		if (data[i] >= outmin) {
+			min_idx = i;
+			break;
+		}
+	}
+
+	int max_idx = -1;
+	for (i = (count - 1); i >= 0; i--) {
+		if (data[i] <= outmax) {
+			max_idx = i;
+			break;
+		}
+	}
+
+	if (min_idx > 0) {
+		int idx;
+		for (idx = min_idx, i = 0; idx <= max_idx && i < count; idx++, i++) {
+			data[i] = data[idx];
+		}
+		outliers = count - i;
+	}
+	else {
+		outliers = count - (max_idx + 1);
+	}
 
 	return outliers;
 }
