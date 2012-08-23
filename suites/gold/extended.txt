@@ -96,7 +96,15 @@ exit "exit_100" -B 100
 exit "exit_1000" -B 1000
 exit "exit_1000_nolibc" -e -B 1000
 exit "exit_100_nolibc" -e -B 100
-exp "exp" -B 2000000
+exp "exp" -B 2000000 -f exp
+exp "exp10" -B 2000000 -f exp10
+exp "exp10f" -B 2000000 -f exp10f
+exp "exp10l" -B 2000000 -f exp10l
+exp "exp2" -B 2000000 -f exp2
+exp "exp2f" -B 2000000 -f exp2f
+exp "exp2l" -B 2000000 -f exp2l
+exp "expf" -B 2000000 -f expf
+exp "expl" -B 2000000 -f expl
 fcntl_ndelay "fcntl_ndelay"
 fcntl "fcntl_tmp" -f $TFILE
 fcntl "fcntl_usr" -f $VFILE
@@ -123,7 +131,15 @@ isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
 listen "listen" -B 50k
 localtime_r "localtime_r"
-log "log" -B 2000000
+log "log" -B 2000000 -f log
+log "log10" -B 2000000 -f log10
+log "log10f" -B 2000000 -f log10f
+log "log10l" -B 2000000 -f log10l
+log "log2" -B 2000000 -f log2
+log "log2f" -B 2000000 -f log2f
+log "log2l" -B 2000000 -f log2l
+log "logf" -B 2000000 -f logf
+log "logl" -B 2000000 -f logl
 longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
 lseek "lseek_t8k" -s 8k -f $TFILE
