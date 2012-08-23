@@ -1039,41 +1039,80 @@ update_stats(barrier_t *b, result_t *r)
 # error "Use of SEMOP barriers required on FreeBSD"
 #endif
 
-#ifdef USE_SEMOP
 barrier_t *
 barrier_create(int hwm, int datasize)
 {
-	struct sembuf		s[1];
-	barrier_t		*b;
-
 	/*LINTED*/
-	b = (barrier_t *)mmap(NULL,
-		sizeof (barrier_t) + (datasize - 1) * sizeof (*b->ba_data),
-		PROT_READ | PROT_WRITE,
-		MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
-	if (b == (barrier_t *)MAP_FAILED) {
-		return (NULL);
+	barrier_t	*b = (barrier_t *)mmap(NULL,
+			sizeof (barrier_t) + ((datasize - 1) * sizeof (*b->ba_data)),
+			PROT_READ | PROT_WRITE,
+			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
+	if ((barrier_t *)MAP_FAILED == b) {
+        perror("barrier_create(): mmap()");
+		return NULL;
 	}
+
 	b->ba_datasize = datasize;
+	b->ba_hwm = hwm;
 
 	b->ba_flag	= 0;
-	b->ba_hwm	= hwm;
+
+#ifdef USE_SEMOP
 	b->ba_semid = semget(IPC_PRIVATE, 3, 0600);
 	if (b->ba_semid == -1) {
+        perror("barrier_create(): semget()");
 		(void) munmap((void *)b, sizeof (barrier_t));
-		return (NULL);
+		return NULL;
 	}
+
+	struct sembuf		s[1];
 
 	/* [hwm - 1, 0, 0] */
 	s[0].sem_num = 0;
 	s[0].sem_op	 = hwm - 1;
 	s[0].sem_flg = 0;
 	if (semop(b->ba_semid, s, 1) == -1) {
-		perror("semop(1)");
+		perror("barrier_create(): semop(1)");
 		(void) semctl(b->ba_semid, 0, IPC_RMID);
 		(void) munmap((void *)b, sizeof (barrier_t));
-		return (NULL);
+		return NULL;
 	}
+#else
+	pthread_mutexattr_t	mattr;
+	int ret = pthread_mutexattr_init(&mattr);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutexattr_init(%p) failed: (%d) %s\n", &mattr, ret, strerror(ret));
+		return NULL;
+	}
+	ret = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutexattr_setpshared(%p, %d) failed: (%d) %s\n", &mattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+		return NULL;
+	}
+
+	pthread_condattr_t	cattr;
+	ret = pthread_condattr_init(&cattr);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_condattr_init(%p) failed: (%d) %s\n", &cattr, ret, strerror(ret));
+		return NULL;
+	}
+	ret = pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_condattr_setpshared(%p, %d) failed: (%d) %s\n", &cattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
+		return NULL;
+	}
+
+	ret = pthread_mutex_init(&b->ba_lock, &mattr);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_mutex_init(%p, %p) failed: (%d) %s\n", &b->ba_lock, &mattr, ret, strerror(ret));
+		return NULL;
+	}
+	ret = pthread_cond_init(&b->ba_cv, &cattr);
+	if (ret != 0) {
+		fprintf(stderr, "barrier_create(): pthread_cond_init(%p, %p) failed: (%d) %s\n", &b->ba_cv, &cattr, ret, strerror(ret));
+		return NULL;
+	}
+#endif
 
 	b->ba_waiters = 0;
 	b->ba_phase = 0;
@@ -1081,21 +1120,24 @@ barrier_create(int hwm, int datasize)
 	b->ba_count = 0;
 	b->ba_errors = 0;
 
-	return (b);
+	return b;
 }
 
 int
 barrier_destroy(barrier_t *b)
 {
+#ifdef USE_SEMOP
 	(void) semctl(b->ba_semid, 0, IPC_RMID);
+#endif
 	(void) munmap((void *)b, sizeof (barrier_t));
 
-	return (0);
+	return 0;
 }
 
 int
 barrier_queue(barrier_t *b, result_t *r)
 {
+#ifdef USE_SEMOP
 	struct sembuf		s[2];
 
 	/*
@@ -1176,91 +1218,8 @@ barrier_queue(barrier_t *b, result_t *r)
 			return (-1);
 		}
 	}
-
-	return (0);
-}
-
 #else /* USE_SEMOP */
-
-barrier_t *
-barrier_create(int hwm, int datasize)
-{
-	pthread_mutexattr_t	mattr;
-	pthread_condattr_t	cattr;
-	barrier_t		   *b;
-
-	/*LINTED*/
-	b = (barrier_t *)mmap(NULL,
-			sizeof (barrier_t) + ((datasize - 1) * sizeof (*b->ba_data)),
-			PROT_READ | PROT_WRITE,
-			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
-	if ((barrier_t *)MAP_FAILED == b) {
-		return NULL;
-	}
-
-	b->ba_datasize = datasize;
-	b->ba_hwm = hwm;
-
-	b->ba_flag	= 0;
-
-	int ret = pthread_mutexattr_init(&mattr);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_mutexattr_init(%p) failed: (%d) %s\n", &mattr, ret, strerror(ret));
-		exit(1);
-	}
-	(void) pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_mutexattr_setpshared(%p, %d) failed: (%d) %s\n", &mattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
-		exit(1);
-	}
-
-	(void) pthread_condattr_init(&cattr);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_condattr_init(%p) failed: (%d) %s\n", &cattr, ret, strerror(ret));
-		exit(1);
-	}
-	(void) pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_condattr_setpshared(%p, %d) failed: (%d) %s\n", &cattr, PTHREAD_PROCESS_SHARED, ret, strerror(ret));
-		exit(1);
-	}
-
-	(void) pthread_mutex_init(&b->ba_lock, &mattr);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_mutex_init(%p, %p) failed: (%d) %s\n", &b->ba_lock, &mattr, ret, strerror(ret));
-		exit(1);
-	}
-	(void) pthread_cond_init(&b->ba_cv, &cattr);
-	if (ret != 0) {
-		fprintf(stderr, "barrier_create(): pthread_cond_init(%p, %p) failed: (%d) %s\n", &b->ba_cv, &cattr, ret, strerror(ret));
-		exit(1);
-	}
-
-	b->ba_waiters = 0;
-	b->ba_phase = 0;
-
-	b->ba_count = 0;
-	b->ba_errors = 0;
-
-	return b;
-}
-
-int
-barrier_destroy(barrier_t *b)
-{
-	int ret = munmap((void *)b, sizeof (barrier_t));
-	if (ret != 0) {
-		perror("barrier_destroy(): munmap");
-		exit(1);
-	}
-
-	return 0;
-}
-
-int
-barrier_queue(barrier_t *b, result_t *r)
-{
-	int			phase;
+	int	phase;
 
 	int ret = pthread_mutex_lock(&b->ba_lock);
 	if (ret != 0) {
@@ -1298,10 +1257,10 @@ barrier_queue(barrier_t *b, result_t *r)
 		fprintf(stderr, "barrier_queue(): pthread_mutex_unlock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
 		exit(1);
 	}
+#endif /* USE_SEMOP */
 
 	return 0;
 }
-#endif /* USE_SEMOP */
 
 int
 gettindex(void)
