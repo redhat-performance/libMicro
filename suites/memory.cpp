@@ -71,55 +71,55 @@ mprotect	"mprot_twz8k"	-l 8k	-w	-t	-f /dev/zero	-B 10k
 mprotect	"mprot_tw128k"	-l 128k	-w	-t	-f /dev/zero	-B 5k
 mprotect	"mprot_tw4m"	-l 4m	-w	-t	-f /dev/zero	-B 500
 
-msync	"msync_t8k"	-l 8k	-f $TFILE	-B 10k
-msync	"msync_t128k"	-l 128k	-f $TFILE	-B 5k
-msync	"msync_u8k"	-l 8k	-f $VFILE	-B 10k
-msync	"msync_u128k"	-l 128k	-f $VFILE	-B 5k
-msync	"msync_ta8k"	-l 8k	-f $TFILE	-a	-B 10k
-msync	"msync_ta128k"	-l 128k	-f $TFILE	-a	-B 5k
-msync	"msync_ua8k"	-l 8k	-f $VFILE	-a	-B 10k
-msync	"msync_ua128k"	-l 128k	-f $VFILE	-a	-B 5k
-msync	"msync_ti8k"	-l 8k	-f $TFILE	-i	-B 10k
-msync	"msync_ti128k"	-l 128k	-f $TFILE	-i	-B 5k
-msync	"msync_ui8k"	-l 8k	-f $VFILE	-i	-B 10k
-msync	"msync_ui128k"	-l 128k	-f $VFILE	-i	-B 5k
-msync	"msync_tai8k"	-l 8k	-f $TFILE	-a	-i	-B 10k
-msync	"msync_tai128k"	-l 128k	-f $TFILE	-a	-i	-B 5k
-msync	"msync_uai8k"	-l 8k	-f $VFILE	-a	-i	-B 10k
-msync	"msync_uai128k"	-l 128k	-f $VFILE	-a	-i	-B 5k
+msync	"msync_t8k"	-l 8k	-f $TFILE	-B 30k
+msync	"msync_t128k"	-l 128k	-f $TFILE	-B 30k
+msync	"msync_u8k"	-l 8k	-f $VFILE	-B 30k
+msync	"msync_u128k"	-l 128k	-f $VFILE	-B 30k
+msync	"msync_ta8k"	-l 8k	-f $TFILE	-a	-B 30k
+msync	"msync_ta128k"	-l 128k	-f $TFILE	-a	-B 30k
+msync	"msync_ua8k"	-l 8k	-f $VFILE	-a	-B 30k
+msync	"msync_ua128k"	-l 128k	-f $VFILE	-a	-B 30k
+msync	"msync_ti8k"	-l 8k	-f $TFILE	-i	-B 30k
+msync	"msync_ti128k"	-l 128k	-f $TFILE	-i	-B 30k
+msync	"msync_ui8k"	-l 8k	-f $VFILE	-i	-B 30k
+msync	"msync_ui128k"	-l 128k	-f $VFILE	-i	-B 30k
+msync	"msync_tai8k"	-l 8k	-f $TFILE	-a	-i	-B 30k
+msync	"msync_tai128k"	-l 128k	-f $TFILE	-a	-i	-B 30k
+msync	"msync_uai8k"	-l 8k	-f $VFILE	-a	-i	-B 30k
+msync	"msync_uai128k"	-l 128k	-f $VFILE	-a	-i	-B 30k
 
-msync	"msync_rt8k"	-l 8k	-r	-f $TFILE	-B 10k
-msync	"msync_rt128k"	-l 128k	-r	-f $TFILE	-B 5k
-msync	"msync_ru8k"	-l 8k	-r	-f $VFILE	-B 10k
-msync	"msync_ru128k"	-l 128k	-r	-f $VFILE	-B 5k
-msync	"msync_rat8k"	-l 8k	-r	-f $TFILE	-a	-B 10k
-msync	"msync_rat128k"	-l 128k	-r	-f $TFILE	-a	-B 5k
-msync	"msync_rau8k"	-l 8k	-r	-f $VFILE	-a	-B 10k
-msync	"msync_rau128k"	-l 128k	-r	-f $VFILE	-a	-B 5k
-msync	"msync_rit8k"	-l 8k	-r	-f $TFILE	-i	-B 10k
-msync	"msync_rit128k"	-l 128k	-r	-f $TFILE	-i	-B 5k
-msync	"msync_riu8k"	-l 8k	-r	-f $VFILE	-i	-B 10k
-msync	"msync_riu128k"	-l 128k	-r	-f $VFILE	-i	-B 5k
-msync	"msync_rait8k"	-l 8k	-r	-f $TFILE	-a	-i	-B 10k
-msync	"msync_rait128k"	-l 128k	-r	-f $TFILE	-a	-i	-B 5k
-msync	"msync_raiu8k"	-l 8k	-r	-f $VFILE	-a	-i	-B 10k
-msync	"msync_raiu128k"	-l 128k	-r	-f $VFILE	-a	-i	-B 5k
+msync	"msync_rt8k"	-l 8k	-r	-f $TFILE	-B 15k
+msync	"msync_rt128k"	-l 128k	-r	-f $TFILE	-B 15k
+msync	"msync_ru8k"	-l 8k	-r	-f $VFILE	-B 15k
+msync	"msync_ru128k"	-l 128k	-r	-f $VFILE	-B 15k
+msync	"msync_rat8k"	-l 8k	-r	-f $TFILE	-a	-B 15k
+msync	"msync_rat128k"	-l 128k	-r	-f $TFILE	-a	-B 15k
+msync	"msync_rau8k"	-l 8k	-r	-f $VFILE	-a	-B 15k
+msync	"msync_rau128k"	-l 128k	-r	-f $VFILE	-a	-B 15k
+msync	"msync_rit8k"	-l 8k	-r	-f $TFILE	-i	-B 15k
+msync	"msync_rit128k"	-l 128k	-r	-f $TFILE	-i	-B 15k
+msync	"msync_riu8k"	-l 8k	-r	-f $VFILE	-i	-B 15k
+msync	"msync_riu128k"	-l 128k	-r	-f $VFILE	-i	-B 15k
+msync	"msync_rait8k"	-l 8k	-r	-f $TFILE	-a	-i	-B 15k
+msync	"msync_rait128k"	-l 128k	-r	-f $TFILE	-a	-i	-B 15k
+msync	"msync_raiu8k"	-l 8k	-r	-f $VFILE	-a	-i	-B 15k
+msync	"msync_raiu128k"	-l 128k	-r	-f $VFILE	-a	-i	-B 15k
 
-msync	"msync_wt8k"	-l 8k	-w	-f $TFILE	-B 10k
-msync	"msync_wt128k"	-l 128k	-w	-f $TFILE	-B 1k
-msync	"msync_wu8k"	-l 8k	-w	-f $VFILE	-B 10k
-msync	"msync_wu128k"	-l 128k	-w	-f $VFILE	-B 1k
-msync	"msync_wat8k"	-l 8k	-w	-f $TFILE	-a	-B 10k
-msync	"msync_wat128k"	-l 128k	-w	-f $TFILE	-a	-B 1k
-msync	"msync_wau8k"	-l 8k	-w	-f $VFILE	-a	-B 10k
-msync	"msync_wau128k"	-l 128k	-w	-f $VFILE	-a	-B 1k
-msync	"msync_wit8k"	-l 8k	-w	-f $TFILE	-i	-B 10k
-msync	"msync_wit128k"	-l 128k	-w	-f $TFILE	-i	-B 1k
-msync	"msync_wiu8k"	-l 8k	-w	-f $VFILE	-i	-B 10k
-msync	"msync_wiu128k"	-l 128k	-w	-f $VFILE	-i	-B 1k
-msync	"msync_wait8k"	-l 8k	-w	-f $TFILE	-a	-i	-B 10k
-msync	"msync_wait128k"	-l 128k	-w	-f $TFILE	-a	-i	-B 1k
-msync	"msync_waiu8k"	-l 8k	-w	-f $VFILE	-a	-i	-B 10k
-msync	"msync_waiu128k"	-l 128k	-w	-f $VFILE	-a	-i	-B 1k
+msync	"msync_wt8k"	-l 8k	-w	-f $TFILE	-B 30k
+msync	"msync_wt128k"	-l 128k	-w	-f $TFILE	-B 10k
+msync	"msync_wu8k"	-l 8k	-w	-f $VFILE	-B 30k
+msync	"msync_wu128k"	-l 128k	-w	-f $VFILE	-B 10k
+msync	"msync_wat8k"	-l 8k	-w	-f $TFILE	-a	-B 30k
+msync	"msync_wat128k"	-l 128k	-w	-f $TFILE	-a	-B 10k
+msync	"msync_wau8k"	-l 8k	-w	-f $VFILE	-a	-B 30k
+msync	"msync_wau128k"	-l 128k	-w	-f $VFILE	-a	-B 10k
+msync	"msync_wit8k"	-l 8k	-w	-f $TFILE	-i	-B 30k
+msync	"msync_wit128k"	-l 128k	-w	-f $TFILE	-i	-B 10k
+msync	"msync_wiu8k"	-l 8k	-w	-f $VFILE	-i	-B 30k
+msync	"msync_wiu128k"	-l 128k	-w	-f $VFILE	-i	-B 10k
+msync	"msync_wait8k"	-l 8k	-w	-f $TFILE	-a	-i	-B 30k
+msync	"msync_wait128k"	-l 128k	-w	-f $TFILE	-a	-i	-B 10k
+msync	"msync_waiu8k"	-l 8k	-w	-f $VFILE	-a	-i	-B 30k
+msync	"msync_waiu128k"	-l 128k	-w	-f $VFILE	-a	-i	-B 10k
 
 #endif /* _MEMORY_ */

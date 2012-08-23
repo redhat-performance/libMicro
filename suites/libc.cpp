@@ -5,8 +5,8 @@
 // Obligatory null system call: use very short time
 // for default since SuSe implements this "syscall" in userland
 //
-getpid	"getpid"	-B 640000
-getpid	"getpidT4"	-B 640000	-T 4
+getpid	"getpid"	-B 2m
+getpid	"getpidT4"	-B 2m	-T 4
 getpid	"getpidP4"	-B 640000	-P 4
 getpid	"getpidT4P4"	-B 640000	-T 4	-P 4
 
@@ -43,26 +43,22 @@ memset	"memsetP2_10m"	-s 10m	-B 50	-P 2
 
 #include "memcpy.cpp"
 
-memmove	"memmove_10"	-s 10
-memmove	"memmove_1k"	-s 1k
-memmove	"memmove_10k"	-s 10k
-memmove	"memmove_1m"	-s 1m	-B 100
-memmove	"memmove_10m"	-s 10m	-B 50
+#include "memmove.cpp"
 
 isatty	"isatty_yes"
 isatty	"isatty_no_badfd"	-b
 isatty	"isatty_no"	-f $IFILE
 
-malloc	"malloc_10"	-s 10	-g 10	-B 1000
-malloc	"malloc_100"	-s 100	-g 10	-B 1000
-malloc	"malloc_1k"	-s 1k	-g 10	-B 1000
-malloc	"malloc_10k"	-s 10k	-g 10	-B 1000
+malloc	"malloc_10"	-s 10	-g 10	-B 10k
+malloc	"malloc_100"	-s 100	-g 10	-B 10k
+malloc	"malloc_1k"	-s 1k	-g 10	-B 10k
+malloc	"malloc_10k"	-s 10k	-g 10	-B 10k
 malloc	"malloc_100k"	-s 100k	-g 10	-B 1000
 
-malloc	"mallocT2_10"	 	-s 10	 	-g 10	-T 2	-B 1000
-malloc	"mallocT2_100"	 	-s 100 	-g 10	-T 2	-B 1000
-malloc	"mallocT2_1k"	 	-s 1k	 	-g 10	-T 2	-B 1000
-malloc	"mallocT2_10k"	 	-s 10k 	-g 10	-T 2	-B 1000
+malloc	"mallocT2_10"	 	-s 10	 	-g 10	-T 2	-B 8k
+malloc	"mallocT2_100"	 	-s 100 	-g 10	-T 2	-B 8k
+malloc	"mallocT2_1k"	 	-s 1k	 	-g 10	-T 2	-B 8k
+malloc	"mallocT2_10k"	 	-s 10k 	-g 10	-T 2	-B 8k
 malloc	"mallocT2_100k" 	-s 100k	-g 10	-T 2	-B 1000
 
 strcpy	"strcpy_10"	-s 10	-B 10m
