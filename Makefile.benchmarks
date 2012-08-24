@@ -118,6 +118,7 @@ ALL=					\
 		system			\
 		time			\
 		times			\
+		usleep			\
 		write			\
 		writev
 

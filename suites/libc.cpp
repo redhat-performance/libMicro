@@ -27,6 +27,13 @@ nanosleep	"nanosleep_d1000"	-B 1500	-d 1000
 nanosleep	"nanosleep_d10000"	-B 1000	-d 10000
 nanosleep	"nanosleep_d100000"	-B 1000	-d 100000
 
+usleep	"usleep"	-B 1500
+
+usleep	"usleepT4"	-B 1500	-T 4
+
+usleep	"usleep_d10"	-B 1500	-d 10
+usleep	"usleep_d100"	-B 1500	-d 100
+
 lrand48	"lrand48"	-B 8000000
 
 memset	"memset_10"	-s 10	-B 10m

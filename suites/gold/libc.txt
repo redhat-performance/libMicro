@@ -75,3 +75,7 @@ strlen "strlen_1k" -s 1k -B 1m
 strtol "strtol" -B 1m
 time "time" -B 2m
 times "times" -B 800k
+usleep "usleep" -B 1500
+usleep "usleepT4" -B 1500 -T 4
+usleep "usleep_d10" -B 1500 -d 10
+usleep "usleep_d100" -B 1500 -d 100
