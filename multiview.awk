@@ -73,6 +73,7 @@ BEGIN {
 		base_values = $3;
 	}
 	curr_values = $3;
+	benchmark_values[FILENAME] = $3;
 	next;
 }
 
@@ -225,8 +226,14 @@ END {
 		printf("          <td>%s</td>\n", name);
 
 		printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
-		if (a > 0)
-			printf("><pre>%11.5f</pre></td>\n", a);
+		if (a > 0) {
+			if (base_values == "nsecs/call" && base_values == benchmark_values[ARGV[1]]) {
+				printf("><pre>%5d</pre></td>\n", a);
+			}
+			else {
+				printf("><pre>%11.5f</pre></td>\n", a);
+			}
+		}
 		else {
 			if (a < 0)
 				printf(" class=\"errors\">%s</td>\n", "ERRORS");
@@ -249,8 +256,14 @@ END {
 					percentage =   (100 / factor) - 100;
 				class = colormap(percentage);
 
-				printf(" class=\"%s\"><pre>%11.5f[%#+7.1f%%]</pre></td>\n",
-					class, b, percentage);
+				if (base_values == "nsecs/call" && base_values == benchmark_values[ARGV[j]]) {
+					printf(" class=\"%s\"><pre>%5d [%#+7.1f%%]</pre></td>\n",
+							class, b, percentage);
+				}
+				else {
+					printf(" class=\"%s\"><pre>%11.5f [%#+7.1f%%]</pre></td>\n",
+							class, b, percentage);
+				}
 			}
 
 			else if (b < 0)
