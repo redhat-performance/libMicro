@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.21"
+#define	LIBMICRO_VERSION	"0.4.1-rh.22"
 
 #define	STRSIZE	1024
 
@@ -49,9 +49,6 @@ typedef struct {
 	long long	sum;
 	long long	count;
 } histo_t;
-
-#define	HISTOSIZE	32
-#define	DATASIZE	100000
 
 /*
  * stats we compute on data sets
@@ -122,11 +119,6 @@ typedef struct {
 	stats_t			ba_corrected;	/* corrected stats */
 
 	int				ba_outliers;	/* outlier count */
-
-	long long		ba_t0;			/* first thread/proc */
-	long long		ba_t1;			/* time of last thread */
-	long long		ba_count0;
-	long long		ba_errors0;
 
 	int				ba_datasize;	/* possible #items data	*/
 	long long		ba_data[1];		/* start of data ararry	*/

@@ -66,6 +66,9 @@
 
 #include "libmicro.h"
 
+#define	HISTOSIZE	32
+#define	DATASIZE	2000
+
 #define DEF_SAMPLES 100
 #define DEF_TIME 10 /* seconds */
 #define MAX_TIME 600 /* seconds, or 10 minutes */
@@ -717,7 +720,7 @@ worker_thread(void *arg)
 		/* time to stop? */
 		if (((lm_barrier->ba_deadline > 0)
 					&& (r.re_t1 > lm_barrier->ba_deadline))
-				|| ((lm_barrier->ba_batches >= lm_optC)
+				|| ((lm_barrier->ba_batches >= (lm_optC * lm_optT * lm_optP))
 						&& (r.re_t1 > lm_barrier->ba_minruntime))) {
 			lm_barrier->ba_flag = 0;
 		}
@@ -825,7 +828,7 @@ print_warnings(barrier_t *b)
 				lm_optB, per_batch, b->ba_count, b->ba_batches,
 				b->ba_count / (double)b->ba_batches);
 
-	if ((per_batch / (double)b->ba_batches) < 0.01618) {
+	if ((per_batch / ((double)b->ba_batches / (lm_optT * lm_optP))) < 0.01618) {
 		/*
 		 * The ratio of 0.01618, or The Golden Ratio / 100, is just a way to
 		 * catch a test run with small number of runs in a batch with
@@ -838,13 +841,13 @@ print_warnings(barrier_t *b)
 		}
 
 		/*
-		 * The number of batches is either really high, or the number of runs
-		 * per batch is really low. In either case, we should probably
-		 * re-balance the test run so that a sufficient count of operations is
-		 * timed per batch, lowering the number of over samples.
+		 * The number of batches (samples) is either really high, or the
+		 * number of runs per batch is really low. In either case, we should
+		 * probably re-balance the test run so that a sufficient count of
+		 * operations is timed per batch, lowering the number of over batches.
 		 */
-		increase = (long long)round(((double)b->ba_count / DEF_SAMPLES) / per_batch);
-		(void) printf("#%*sLow runs (%lld) per sample (%d samples) "
+		increase = (long long)round(((double)(b->ba_count / (lm_optT * lm_optP)) / DEF_SAMPLES) / per_batch);
+		(void) printf("#%*sLow runs (%lld) per batch (%d batches) "
 				"consider increasing batch size (-B option, "
 				"currently %d) %lldX (to about %lld) to avoid.\n",
 				WARNING_INDENT, "",
@@ -892,7 +895,7 @@ print_warnings(barrier_t *b)
 
 #define STATS_FORMAT_L	"# %*s %*lld %*s %*lld"
 #define STATS_FORMAT	"# %*s %*.*f %*s %*.*f"
-#define STATS_1COLW		25
+#define STATS_1COLW		26
 #define STATS_2COLW_L	 9
 #define STATS_2COLW		15
 #define STATS_3COLW_L	 9
@@ -965,8 +968,14 @@ print_stats(barrier_t *b)
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
 			STATS_2COLW, nsecs_overhead);
 
-	(void) printf("# %*s %*d\n", STATS_1COLW, "number of samples",
-			STATS_2COLW, b->ba_batches);
+    if ((lm_optT * lm_optP) > 1) {
+		(void) printf("# %*s %*d (%d per thread)\n", STATS_1COLW, "number of samples",
+				STATS_2COLW, b->ba_batches, (b->ba_batches / (lm_optT * lm_optP)));
+    }
+    else {
+		(void) printf("# %*s %*d\n", STATS_1COLW, "number of samples",
+				STATS_2COLW, b->ba_batches);
+    }
 	if (b->ba_batches > b->ba_datasize)
 		(void) printf("# %*s %*d (%d samples dropped)\n",
 				STATS_1COLW, "number of samples retained",
@@ -989,50 +998,17 @@ update_stats(barrier_t *b, result_t *r)
 	long long	time;
 	long long	nsecs_per_call;
 
-	if (b->ba_waiters == 0) {
-		/* first thread only */
-		b->ba_t0 = r->re_t0;
-		b->ba_t1 = r->re_t1;
-		b->ba_count0 = 0;
-		b->ba_errors0 = 0;
-	} else {
-		/* all but first thread */
-		if (r->re_t0 < b->ba_t0) {
-			b->ba_t0 = r->re_t0;
-		}
-		if (r->re_t1 > b->ba_t1) {
-			b->ba_t1 = r->re_t1;
-		}
-	}
+	b->ba_count  += r->re_count;
+	b->ba_errors += r->re_errors;
 
-	b->ba_count0  += r->re_count;
-	b->ba_errors0 += r->re_errors;
+    time = r->re_t1 - r->re_t0 - nsecs_overhead;
+    if (time < (100 * nsecs_resolution))
+        b->ba_quant++;
 
-	if (b->ba_waiters == (b->ba_hwm - 1)) {
-		/* last thread only */
+    nsecs_per_call = (long long)round((time / (double)r->re_count));
+    b->ba_data[b->ba_batches % b->ba_datasize] = nsecs_per_call;
 
-		time = b->ba_t1 - b->ba_t0 - nsecs_overhead;
-		if (time < (100 * nsecs_resolution))
-			b->ba_quant++;
-
-		/*
-		 * normalize by procs * threads if not -U
-		 *
-		 * FIXME: Should we not be getting the data from each thread in all
-		 * the processes and then averaging them all together?
-		 */
-
-		nsecs_per_call = (long long)round(
-				(time / (double)b->ba_count0) * (lm_optT * lm_optP));
-		b->ba_data[b->ba_batches % b->ba_datasize] = nsecs_per_call;
-
-		long long orig_ba_count = b->ba_count;
-		b->ba_count	 += b->ba_count0;
-		if (lm_optG >= 8) fprintf(stderr, "DEBUG8: update_stats(): b->ba_count (%lld) + b->ba_count0 (%lld) = b->ba_count (%lld)\n", orig_ba_count, b->ba_count0, b->ba_count);
-		b->ba_errors += b->ba_errors0;
-
-		b->ba_batches++;
-	}
+    b->ba_batches++;
 }
 
 #if defined(__FreeBSD__) && !defined(USE_SEMOP)
@@ -1044,7 +1020,7 @@ barrier_create(int hwm, int datasize)
 {
 	/*LINTED*/
 	barrier_t	*b = (barrier_t *)mmap(NULL,
-			sizeof (barrier_t) + ((datasize - 1) * sizeof (*b->ba_data)),
+			sizeof (barrier_t) + (((datasize * hwm) - 1) * sizeof (*b->ba_data)),
 			PROT_READ | PROT_WRITE,
 			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if ((barrier_t *)MAP_FAILED == b) {
@@ -1052,7 +1028,7 @@ barrier_create(int hwm, int datasize)
 		return NULL;
 	}
 
-	b->ba_datasize = datasize;
+	b->ba_datasize = datasize * hwm;
 	b->ba_hwm = hwm;
 
 	b->ba_flag	= 0;

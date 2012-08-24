@@ -7,8 +7,8 @@
 //
 getpid	"getpid"	-B 2m
 getpid	"getpidT4"	-B 2m	-T 4
-getpid	"getpidP4"	-B 640000	-P 4
-getpid	"getpidT4P4"	-B 640000	-T 4	-P 4
+getpid	"getpidP4"	-B 2m	-P 4
+getpid	"getpidT4P4"	-B 2m	-T 4	-P 4
 
 getenv	"getenv"	-B 90000	-s 100
 getenv	"getenvT2"	-B 90000	-T 2	-s 100
@@ -55,11 +55,11 @@ malloc	"malloc_1k"	-s 1k	-g 10	-B 10k
 malloc	"malloc_10k"	-s 10k	-g 10	-B 10k
 malloc	"malloc_100k"	-s 100k	-g 10	-B 1000
 
-malloc	"mallocT2_10"	 	-s 10	 	-g 10	-T 2	-B 8k
-malloc	"mallocT2_100"	 	-s 100 	-g 10	-T 2	-B 8k
-malloc	"mallocT2_1k"	 	-s 1k	 	-g 10	-T 2	-B 8k
-malloc	"mallocT2_10k"	 	-s 10k 	-g 10	-T 2	-B 8k
-malloc	"mallocT2_100k" 	-s 100k	-g 10	-T 2	-B 1000
+malloc	"mallocT2_10"	 	-s 10	-g 10	-T 2	-B 16k
+malloc	"mallocT2_100"	 	-s 100 	-g 10	-T 2	-B 16k
+malloc	"mallocT2_1k"	 	-s 1k	-g 10	-T 2	-B 16k
+malloc	"mallocT2_10k"	 	-s 10k 	-g 10	-T 2	-B 16k
+malloc	"mallocT2_100k" 	-s 100k	-g 10	-T 2	-B 1K
 
 strcpy	"strcpy_10"	-s 10	-B 10m
 strcpy	"strcpy_1k"	-s 1k	-B 1m

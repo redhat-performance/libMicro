@@ -4,9 +4,9 @@ getcontext "getcontext"
 getenv "getenv" -B 90000 -s 100
 getenv "getenvT2" -B 90000 -T 2 -s 100
 getpid "getpid" -B 2m
-getpid "getpidP4" -B 640000 -P 4
+getpid "getpidP4" -B 2m -P 4
 getpid "getpidT4" -B 2m -T 4
-getpid "getpidT4P4" -B 640000 -T 4 -P 4
+getpid "getpidT4P4" -B 2m -T 4 -P 4
 getrusage "getrusage"
 gettimeofday "gettimeofday" -B 400000
 isatty "isatty_no" -f $IFILE
@@ -15,11 +15,11 @@ isatty "isatty_yes"
 localtime_r "localtime_r"
 longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
-malloc "mallocT2_10" -s 10 -g 10 -T 2 -B 8k
-malloc "mallocT2_100" -s 100 -g 10 -T 2 -B 8k
-malloc "mallocT2_100k" -s 100k -g 10 -T 2 -B 1000
-malloc "mallocT2_10k" -s 10k -g 10 -T 2 -B 8k
-malloc "mallocT2_1k" -s 1k -g 10 -T 2 -B 8k
+malloc "mallocT2_10" -s 10 -g 10 -T 2 -B 16k
+malloc "mallocT2_100" -s 100 -g 10 -T 2 -B 16k
+malloc "mallocT2_100k" -s 100k -g 10 -T 2 -B 1K
+malloc "mallocT2_10k" -s 10k -g 10 -T 2 -B 16k
+malloc "mallocT2_1k" -s 1k -g 10 -T 2 -B 16k
 malloc "malloc_10" -s 10 -g 10 -B 10k
 malloc "malloc_100" -s 100 -g 10 -B 10k
 malloc "malloc_100k" -s 100k -g 10 -B 1000
