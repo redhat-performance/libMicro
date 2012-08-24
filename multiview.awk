@@ -122,7 +122,7 @@ BEGIN {
 			benchmarks[benchmark_count] = $1;
 		}
 		if ($6 == 0)
-			# No errors, result it good
+			# No errors, result is good
 			if (base_values == curr_values)
 				benchmark_data[$1,FILENAME] = $4;
 			else if (base_values == "nsecs/call") {
@@ -226,7 +226,7 @@ END {
 
 		printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
 		if (a > 0)
-			printf("><pre>%f</pre></td>\n", a);
+			printf("><pre>%11.5f</pre></td>\n", a);
 		else {
 			if (a < 0)
 				printf(" class=\"errors\">%s</td>\n", "ERRORS");
@@ -256,7 +256,7 @@ END {
 			else if (b < 0)
 				printf(" class=\"errors\">%s</td>\n", "ERRORS");
 			else
-				printf(" class=\"missing\">%25s</td>\n", "missing");
+				printf(" class=\"missing\">%s</td>\n", "missing");
 
 		}
 		printf("        </tr>\n");
