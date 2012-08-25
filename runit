@@ -97,9 +97,9 @@ if [ "$nodes" == "1" ]; then
         echo "Running:        numactl -C $coreid chrt -f 1 $DN/bench -s $suite"
         echo "!Runit-command: numactl -C $coreid chrt -f 1 $DN/bench -s $suite" > $template_core_chrt-$run-results.txt
                               numactl -C $coreid chrt -f 1 $DN/bench -s $suite >> $template_core_chrt-$run-results.txt 2> $template_core_chrt-$run-timings.txt
-	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-$run-results.html
+	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-lm.$VER-$run-results.html
     else
-	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt                                      > $template_base-$run-results.html
+	    $DN/multiview $template_nonuma-$run-results.txt $template_core-$run-results.txt                                      > $template_base-lm.$VER-$run-results.html
     fi
 else
     echo "Running:        numactl -N $nodeid -m $nodeid $DN/bench -s $suite"
@@ -112,8 +112,8 @@ else
         echo "Running:        numactl -C $coreid -m $nodeid chrt -f 1 $DN/bench -s $suite"
         echo "!Runit-command: numactl -C $coreid -m $nodeid chrt -f 1 $DN/bench -s $suite" > $template_core_chrt-$run-results.txt
                               numactl -C $coreid -m $nodeid chrt -f 1 $DN/bench -s $suite >> $template_core_chrt-$run-results.txt 2> $template_core_chrt-$run-timings.txt
-        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-$run-results.html
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt $template_core_chrt-$run-results.txt > $template_base-lm.$VER-$run-results.html
     else
-        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt                                      > $template_base-$run-results.html
+        $DN/multiview $template_nonuma-$run-results.txt $template_numa-$run-results.txt $template_core-$run-results.txt                                      > $template_base-lm.$VER-$run-results.html
     fi
 fi
