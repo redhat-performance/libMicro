@@ -10,3 +10,5 @@
         detects resolution as 1nsec
 
 	Check that the number of samples is reasonable
+
+    Fix hang for getpid and cascade_flock tests (probably in barrier code)
