@@ -1134,7 +1134,7 @@ barrier_queue(barrier_t *b, result_t *r)
 	s[0].sem_flg = 0;
 	if (semop(b->ba_semid, s, 1) == -1) {
 		perror("semop(2)");
-		return (-1);
+		return -1;
 	}
 
 	s[0].sem_num = 1;
@@ -1143,7 +1143,7 @@ barrier_queue(barrier_t *b, result_t *r)
 	if (semop(b->ba_semid, s, 1) == -1) {
 		if (errno != EAGAIN) {
 			perror("semop(3)");
-			return (-1);
+			return -1;
 		}
 
 		/* all but the last thread */
@@ -1162,7 +1162,7 @@ barrier_queue(barrier_t *b, result_t *r)
 		s[1].sem_flg = 0;
 		if (semop(b->ba_semid, s, 2) == -1) {
 			perror("semop(4)");
-			return (-1);
+			return -1;
 		}
 
 		s[0].sem_num = 0;
@@ -1173,7 +1173,7 @@ barrier_queue(barrier_t *b, result_t *r)
 		s[1].sem_flg = 0;
 		if (semop(b->ba_semid, s, 2) == -1) {
 			perror("semop(5)");
-			return (-1);
+			return -1;
 		}
 
 	} else {
@@ -1191,7 +1191,7 @@ barrier_queue(barrier_t *b, result_t *r)
 		s[0].sem_flg = 0;
 		if (semop(b->ba_semid, s, 1) == -1) {
 			perror("semop(6)");
-			return (-1);
+			return -1;
 		}
 	}
 #else /* USE_SEMOP */
@@ -1266,7 +1266,7 @@ void *
 gettsd(int p, int t)
 {
 	if ((p < 0) || (p >= lm_optP) || (t < 0) || (t >= lm_optT))
-		return (NULL);
+		return NULL;
 
 	return ((void *)((unsigned long)tsdseg +
 		(((p * lm_optT) + t) * tsdsize)));
@@ -1276,13 +1276,13 @@ gettsd(int p, int t)
 long long
 getnsecs(void)
 {
-	return (gethrtime());
+	return gethrtime();
 }
 
 long long
 getusecs(void)
 {
-	return (gethrtime() / 1000);
+	return gethrtime() / 1000;
 }
 
 #elif USE_RDTSC /* USE_GETHRTIME */
@@ -1292,19 +1292,19 @@ rdtsc(void)
 {
 	unsigned long long x;
 	__asm__ volatile(".byte 0x0f, 0x31" : "=A" (x));
-	return (x);
+	return x;
 }
 
 long long
 getusecs(void)
 {
-	return (rdtsc() * 1000000 / lm_hz);
+	return (rdtsc() * 1000000LL) / lm_hz;
 }
 
 long long
 getnsecs(void)
 {
-	return (rdtsc() * 1000000000 / lm_hz);
+	return (rdtsc() * 1000000000LL) / lm_hz;
 }
 
 #elif USE_GTOD /* USE_GETHRTIME */
@@ -1316,7 +1316,7 @@ getusecs(void)
 
 	(void) gettimeofday(&tv, NULL);
 
-	return ((long long)tv.tv_sec * 1000000LL + (long long) tv.tv_usec);
+	return ((long long)tv.tv_sec * 1000000LL) + (long long)tv.tv_usec;
 }
 
 long long
@@ -1326,8 +1326,7 @@ getnsecs(void)
 
 	(void) gettimeofday(&tv, NULL);
 
-	return ((long long)tv.tv_sec * 1000000000LL +
-		(long long) tv.tv_usec * 1000LL);
+	return ((long long)tv.tv_sec * 1000000000LL) + ((long long)tv.tv_usec * 1000LL);
 }
 
 #else /* USE_GETHRTIME */
@@ -1339,7 +1338,7 @@ getusecs(void)
 
 	(void) clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	return ((long long)ts.tv_sec * 1000000LL + (long long) ts.tv_nsec) / 1000LL;
+	return ((long long)ts.tv_sec * 1000000LL) + ((long long)ts.tv_nsec / 1000LL);
 }
 
 long long
@@ -1349,7 +1348,7 @@ getnsecs(void)
 
 	(void) clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	return ((long long)ts.tv_sec * 1000000000LL + (long long) ts.tv_nsec);
+	return ((long long)ts.tv_sec * 1000000000LL) + (long long)ts.tv_nsec;
 }
 
 #endif /* USE_GETHRTIME */
@@ -1407,12 +1406,12 @@ sizetoll(const char *arg)
 			mult = GIGABYTE;
 			break;
 		default:
-			return (-1);
+			return -1;
 		}
 
 		for (i = 0; i < len - 1; i++)
 			if (!isdigit(arg[i]))
-				return (-1);
+				return -1;
 	}
 
 	return (mult * strtoll(arg, NULL, 10));
@@ -1441,12 +1440,12 @@ sizetoint(const char *arg)
 			mult = GIGABYTE;
 			break;
 		default:
-			return (-1);
+			return -1;
 		}
 
 		for (i = 0; i < len - 1; i++)
 			if (!isdigit(arg[i]))
-				return (-1);
+				return -1;
 	}
 
 	return (mult * atoi(arg));
