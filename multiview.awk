@@ -161,6 +161,14 @@ END {
 	printf("    <style type=\"text/css\">\n");
 	printf("      body { font-family: sans-serif; background-color:#ffffff; }\n");
 	printf("      table { border-collapse: collapse; }\n");
+	printf("      table.data tr { display: none; }\n");
+	printf("      table tr.heading { display:table-row; }\n");
+	printf("      table.header tr.header { display:table-row; }\n");
+	printf("      table.noise tr.noise { display:table-row; }\n");
+	printf("      table.pos tr.pos { display:table-row; }\n");
+	printf("      table.neg tr.neg { display:table-row; }\n");
+	printf("      table.err tr.err { display:table-row; }\n");
+	printf("      table.mis tr.mis { display:table-row; }\n");
 	printf("      td { padding: 0.1em; border: 1px solid #ccc; text-align: right; }\n");
 	printf("      td.errors { background-color: #ff0000; }\n");
 	printf("      td.missing { background-color: #ffff00; }\n");
@@ -187,11 +195,36 @@ END {
 	printf("    </style>\n");
 	printf("  </head>\n");
 	printf("  <body link=\"#0000ee\" vlink=\"#cc0000\" alink=\"#0000ee\">\n");
-	printf("    <table border=\"1\" cellspacing=\"1\">\n");
+
+	printf("    <table border=\"2\" cellspacing=\"2\">\n");
 	printf("      <tbody>\n");
+
+	printf("        <tr>\n");
+	printf("          <th class=\"header\">Toggle:</th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('header')\">Headers</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('noise')\">Noise</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('pos')\">Positives</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('neg')\">Negatives</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('err')\">Errors</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('mis')\">Missing</button></th>\n");
+	printf("        </tr>\n");
+
+	printf("      </tbody>\n");
+	printf("    </table>\n");
+
+	printf("    <table id=\"maintable\" border=\"1\" cellspacing=\"1\" class=\"data header noise pos neg err mis\">\n");
+	printf("      <tbody>\n");
+
+	printf("        <tr class=\"heading\">\n");
+	printf("          <th>PARAMETER</th>\n");
+	printf("          <th>VALUE</th>\n");
+	for (i = 2; i < ARGC; i++)
+		printf("          <th>VALUE</th>\n");
+	printf("        </tr>\n");
+
 	for(i = 1; i <= header_count; i++) {
 		hname = headers[i];
-		printf("        <tr>\n");
+		printf("        <tr class=\"header\">\n");
 		printf("          <td class=\"header\">%s</td>\n", hname);
 		for (j = 1; j < ARGC; j++) {
 			sub("^[\t ]+", "", header_data[hname, ARGV[j]]);
@@ -200,12 +233,75 @@ END {
 		printf("        </tr>\n");
 	}
 
-	printf("        <tr>\n");
+	printf("        <tr class=\"heading\">\n");
 	printf("          <th>BENCHMARK</th>\n");
 	printf("          <th align=\"right\">%s</th>\n", toupper(base_values));
 	for (i = 2; i < ARGC; i++)
 		printf("          <th align=\"right\">%s [percentage]</th>\n", toupper(base_values));
 	printf("        </tr>\n");
+
+	for (i = 1; i <= benchmark_count; i++) {
+		name = benchmarks[i];
+		a = benchmark_data[name, ARGV[1]];
+
+		errors = 0;
+		missing = 0;
+		if (a < 0) {
+			errors++;
+		}
+		else if (a == 0) {
+			missing++;
+		}
+
+		positives = 0;
+		negatives = 0;
+		noise = 0;
+		for (j = 2; j < ARGC; j++) {
+			b = benchmark_data[name, ARGV[j]];
+			if (b > 0) {
+				if (a > 0) {
+					factor = b/a;
+
+					if (factor > 1)
+						percentage = -((factor * 100) - 100);
+					if (factor <= 1)
+						percentage =   (100 / factor) - 100;
+
+					class = colormap(percentage);
+
+					if (factor > 1) {
+						if (class != "slow1")
+							negatives++;
+						else
+							noise++;
+					}
+					else {
+						# assert (factor <= 1)
+						if (class != "fast1")
+							positives++;
+						else
+							noise++;
+					}
+				}
+			}
+			else if (b == 0) {
+				missing++;
+			}
+			else {
+				# assert (b < 0)
+				errors++;
+			}
+		}
+
+		benchmark_summary_data[name, "pos"] = positives;
+		benchmark_summary_data[name, "neg"] = negatives;
+		benchmark_summary_data[name, "err"] = errors;
+		benchmark_summary_data[name, "mis"] = missing;
+		if (noise && positives == 0 && negatives == 0)
+			benchmark_summary_data[name, "noise"] = 1;
+		else
+			benchmark_summary_data[name, "noise"] = 0;
+	}
 
 	# Bubble sort the names of the benchmarks
 	for (i = 1; i < benchmark_count; i++) {
@@ -222,7 +318,32 @@ END {
 		name = benchmarks[i];
 		a = benchmark_data[name, ARGV[1]];
 
-		printf("        <tr>\n");
+		if (benchmark_summary_data[name, "noise"] > 0)
+			c_noise = "noise";
+		else
+			c_noise = "";
+
+		if (benchmark_summary_data[name, "pos"] > 0)
+			c_pos = " pos";
+		else
+			c_pos = "";
+
+		if (benchmark_summary_data[name, "neg"] > 0)
+			c_neg = " neg";
+		else
+			c_neg = "";
+
+		if (benchmark_summary_data[name, "err"] > 0)
+			c_err = " err";
+		else
+			c_err = "";
+
+		if (benchmark_summary_data[name, "mis"] > 0)
+			c_mis = " mis";
+		else
+			c_mis = "";
+
+		printf("        <tr class=\"%s%s%s%s%s\">\n", c_noise, c_pos, c_neg, c_err, c_mis);
 		printf("          <td>%s</td>\n", name);
 
 		printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
@@ -400,6 +521,9 @@ END {
 	printf("            shID_res_el.style.left = pos.x + 'px';\n");
 	printf("          }\n");
 	printf("        }\n");
+	printf("      }\n");
+	printf("      function toggleRows(c) {\n");
+	printf("        document.getElementById('maintable').classList.toggle(c);\n");
 	printf("      }\n");
 	printf("    </script>\n");
 
