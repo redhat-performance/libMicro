@@ -1538,9 +1538,6 @@ print_histo(barrier_t *b)
 		return;
 	}
 
-	(void) printf("#\n");
-	(void) printf("# DISTRIBUTION\n");
-
 	min = b->ba_data[0];
 	r95 = (v95 - min) + 1;
 
@@ -1575,6 +1572,12 @@ print_histo(barrier_t *b)
 			if (histo[i].count > maxcount)
 				maxcount = histo[i].count;
 		}
+	if (maxcount < 1) {
+		return;
+	}
+
+	(void) printf("#\n");
+	(void) printf("# DISTRIBUTION\n");
 
 	(void) printf("#%*s%*s %*s %*s %*s\n", HISTO_INDENT, "",
 			HISTO_COL1W, "counts", HISTO_COL2W, "nsecs/call",
