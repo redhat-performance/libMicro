@@ -239,33 +239,38 @@ END {
 				printf(" class=\"errors\">%s</td>\n", "ERRORS");
 			else
 				printf(" class=\"missing\">%s</td>\n", "missing");
-
-			for (j = 2; j < ARGC; j++)
-				printf("          <td id=\"%s_%d\" onclick=\"showHide('%s_%d'); return false;\">%s</td>\n", name, j, name, j, "not computed");
-			continue;
 		}
 
 		for (j = 2; j < ARGC; j++) {
 			printf("          <td id=\"%s_%d\" onclick=\"showHide('%s_%d'); return false;\"", name, j, name, j);
 			b = benchmark_data[name, ARGV[j]];
 			if (b > 0) {
-				factor = b/a;
-				if (factor > 1)
-					percentage = -((factor * 100) - 100);
-				if (factor <= 1)
-					percentage =   (100 / factor) - 100;
-				class = colormap(percentage);
+				if (a > 0) {
+					factor = b/a;
+					if (factor > 1)
+						percentage = -((factor * 100) - 100);
+					if (factor <= 1)
+						percentage =   (100 / factor) - 100;
+					class = colormap(percentage);
 
-				if (base_values == "nsecs/call" && base_values == benchmark_values[ARGV[j]]) {
-					printf(" class=\"%s\"><pre>%5d [%#+7.1f%%]</pre></td>\n",
-							class, b, percentage);
+					if (base_values == "nsecs/call" && base_values == benchmark_values[ARGV[j]]) {
+						printf(" class=\"%s\"><pre>%5d [%#+7.1f%%]</pre></td>\n",
+								class, b, percentage);
+					}
+					else {
+						printf(" class=\"%s\"><pre>%11.5f [%#+7.1f%%]</pre></td>\n",
+								class, b, percentage);
+					}
 				}
 				else {
-					printf(" class=\"%s\"><pre>%11.5f [%#+7.1f%%]</pre></td>\n",
-							class, b, percentage);
+					if (base_values == "nsecs/call" && base_values == benchmark_values[ARGV[j]]) {
+						printf("><pre>%5d           </pre></td>\n",	b);
+					}
+					else {
+						printf("<pre>%11.5f           </pre></td>\n", b);
+					}
 				}
 			}
-
 			else if (b < 0)
 				printf(" class=\"errors\">%s</td>\n", "ERRORS");
 			else
