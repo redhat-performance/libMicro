@@ -153,6 +153,7 @@ static unsigned int	nsecs_resolution;
 static void			crunch_stats(long long *, int, stats_t *);
 static void			compute_stats(barrier_t *);
 static void			fit_line(long long *, long long *, int, double *, double *);
+static void		   *gettsd(int, int);
 
 /*
  * main routine; renamed in this file to allow linking with other
@@ -742,7 +743,9 @@ void
 worker_process(void)
 {
 	int			i, ret;
-	void			*tsd;
+	void	   *tsd;
+
+	tids[0] = pthread_self();
 
 	for (i = 1; i < lm_optT; i++) {
 		tsd = gettsd(pindex, i);
@@ -1253,28 +1256,19 @@ barrier_queue(barrier_t *b, result_t *r)
 int
 gettindex(void)
 {
-	int			i;
+	int	i;
 
-	if (tids == NULL) {
-		return -1;
+	assert (NULL == tids);
+
+	for (i = 0; i < lm_optT; i++) {
+		if (pthread_self() == tids[i])
+			break;
 	}
 
-	for (i = 1; i < lm_optT; i++) {
-		if (pthread_self() == tids[i]) {
-			return i;
-		}
-	}
-
-	return 0;
+	return (pindex * lm_optT) + i;
 }
 
-int
-getpindex(void)
-{
-	return pindex;
-}
-
-void *
+static void *
 gettsd(int p, int t)
 {
 	if ((p < 0) || (p >= lm_optP) || (t < 0) || (t >= lm_optT))

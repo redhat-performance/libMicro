@@ -164,7 +164,7 @@ benchmark_initbatch(void *tsd)
 	if (ts->ts_once == 0) {
 		int		us, them;
 
-		us = (getpindex() * lm_optT) + gettindex();
+		us = gettindex();
 		them = (us + 1) % (lm_optP * lm_optT);
 
 		ts->ts_id = us;

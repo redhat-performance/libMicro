@@ -167,7 +167,7 @@ benchmark(void *tsd, result_t *res)
 	int			prot = PROT_NONE;
 	int			j, k;
 
-	us = (getpindex() * lm_optT) + gettindex();
+	us = gettindex();
 	for (i = 0; i < lm_optB; i++) {
 		switch ((us + ts->ts_batch + i) % 2) {
 		case 0:
