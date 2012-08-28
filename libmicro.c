@@ -143,8 +143,8 @@ static long long	lm_hz = 0;
  * Forward references
  */
 
-static void			worker_process();
-static void			usage();
+static void			worker_process(void);
+static void			usage(void);
 static void			print_stats(barrier_t *);
 static void			print_histo(barrier_t *);
 static int			remove_outliers(long long *, int, stats_t *);
@@ -459,7 +459,6 @@ actual_main(int argc, char *argv[])
 		exit(1);
 	}
 	lm_barrier = b;
-	b->ba_flag = 1;
 
 	/* need this here so that parent and children can call exit() */
 	(void) fflush(stdout);
@@ -686,13 +685,13 @@ worker_thread(void *arg)
 	result_t	r;
 	long long	last_sleep = 0;
 	long long	t;
-	int			ret;
+	int			ret, retb;
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initworker()\n");
 	r.re_errors = ret = benchmark_initworker(arg);
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initworker() returned %d\n", ret);
 
-	while (lm_barrier->ba_flag) {
+	do {
 		r.re_count = 0;
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initbatch()\n");
 		r.re_errors += ret = benchmark_initbatch(arg);
@@ -704,38 +703,39 @@ worker_thread(void *arg)
 			(void) poll(0, 0, 10);
 			last_sleep = t;
 		}
+
 		/* wait for it ... */
-		(void) barrier_queue(lm_barrier, NULL);
+		retb = barrier_queue(lm_barrier, NULL);
+		if (retb < 0) {
+			return NULL;
+		}
 
-		/* time the test */
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
-		r.re_t0 = getnsecs();
-		ret = benchmark(arg, &r);
-		r.re_t1 = getnsecs();
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
+		if (0 == retb) {
+			/* time the test */
+			if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
+			r.re_t0 = getnsecs();
+			ret = benchmark(arg, &r);
+			r.re_t1 = getnsecs();
+			if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
 
-		/* record results and sync */
-		(void) barrier_queue(lm_barrier, &r);
-
-		/* time to stop? */
-		if (((lm_barrier->ba_deadline > 0)
-					&& (r.re_t1 > lm_barrier->ba_deadline))
-				|| ((lm_barrier->ba_batches >= (lm_optC * lm_optT * lm_optP))
-						&& (r.re_t1 > lm_barrier->ba_minruntime))) {
-			lm_barrier->ba_flag = 0;
+			/* record results and sync */
+			retb = barrier_queue(lm_barrier, &r);
+			if (retb < 0) {
+				return NULL;
+			}
 		}
 
 		/* Errors from finishing this batch feed into the next batch */
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finibatch()\n");
 		r.re_errors = ret = benchmark_finibatch(arg);
 		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finibatch() returned %d\n", ret);
-	}
+	} while (0 == retb);
 
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finiworker()\n");
 	ret = benchmark_finiworker(arg);
 	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finiworker() returned %d\n", ret);
 
-	return 0;
+	return NULL;
 }
 
 void
@@ -968,14 +968,14 @@ print_stats(barrier_t *b)
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
 			STATS_2COLW, nsecs_overhead);
 
-    if ((lm_optT * lm_optP) > 1) {
+	if ((lm_optT * lm_optP) > 1) {
 		(void) printf("# %*s %*d (%d per thread)\n", STATS_1COLW, "number of samples",
 				STATS_2COLW, b->ba_batches, (b->ba_batches / (lm_optT * lm_optP)));
-    }
-    else {
+	}
+	else {
 		(void) printf("# %*s %*d\n", STATS_1COLW, "number of samples",
 				STATS_2COLW, b->ba_batches);
-    }
+	}
 	if (b->ba_batches > b->ba_datasize)
 		(void) printf("# %*s %*d (%d samples dropped)\n",
 				STATS_1COLW, "number of samples retained",
@@ -1001,14 +1001,14 @@ update_stats(barrier_t *b, result_t *r)
 	b->ba_count  += r->re_count;
 	b->ba_errors += r->re_errors;
 
-    time = r->re_t1 - r->re_t0 - nsecs_overhead;
-    if (time < (100 * nsecs_resolution))
-        b->ba_quant++;
+	time = r->re_t1 - r->re_t0 - nsecs_overhead;
+	if (time < (100 * nsecs_resolution))
+		b->ba_quant++;
 
-    nsecs_per_call = (long long)round((time / (double)r->re_count));
-    b->ba_data[b->ba_batches % b->ba_datasize] = nsecs_per_call;
+	nsecs_per_call = (long long)round((time / (double)r->re_count));
+	b->ba_data[b->ba_batches % b->ba_datasize] = nsecs_per_call;
 
-    b->ba_batches++;
+	b->ba_batches++;
 }
 
 #if defined(__FreeBSD__) && !defined(USE_SEMOP)
@@ -1024,19 +1024,17 @@ barrier_create(int hwm, int datasize)
 			PROT_READ | PROT_WRITE,
 			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if ((barrier_t *)MAP_FAILED == b) {
-        perror("barrier_create(): mmap()");
+		perror("barrier_create(): mmap()");
 		return NULL;
 	}
 
 	b->ba_datasize = datasize * hwm;
 	b->ba_hwm = hwm;
 
-	b->ba_flag	= 0;
-
 #ifdef USE_SEMOP
 	b->ba_semid = semget(IPC_PRIVATE, 3, 0600);
 	if (b->ba_semid == -1) {
-        perror("barrier_create(): semget()");
+		perror("barrier_create(): semget()");
 		(void) munmap((void *)b, sizeof (barrier_t));
 		return NULL;
 	}
@@ -1200,7 +1198,7 @@ barrier_queue(barrier_t *b, result_t *r)
 	int ret = pthread_mutex_lock(&b->ba_lock);
 	if (ret != 0) {
 		fprintf(stderr, "barrier_queue(): pthread_mutex_lock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
-		exit(1);
+		return -1;
 	}
 
 	if (r != NULL) {
@@ -1209,33 +1207,47 @@ barrier_queue(barrier_t *b, result_t *r)
 
 	phase = b->ba_phase;
 
-	b->ba_waiters++;
-	if (b->ba_hwm == b->ba_waiters) {
-		b->ba_waiters = 0;
-		b->ba_phase++;
-		ret = pthread_cond_broadcast(&b->ba_cv);
-		if (ret != 0) {
-			fprintf(stderr, "barrier_queue(): pthread_cond_broadcast(%p) failed: (%d) %s\n", &b->ba_cv, ret, strerror(ret));
-			exit(1);
+	if (phase >= 0) {
+		b->ba_waiters++;
+		if (b->ba_hwm == b->ba_waiters) {
+			b->ba_waiters = 0;
+			/* time to stop? */
+			long long curtim = getnsecs();
+			if (((b->ba_deadline > 0) && (curtim > b->ba_deadline))
+					|| ((b->ba_batches >= (lm_optC * lm_optT * lm_optP))
+							&& (curtim > b->ba_minruntime))) {
+				b->ba_phase = -1;
+			}
+			else {
+				b->ba_phase++;
+			}
+			ret = pthread_cond_broadcast(&b->ba_cv);
+			if (ret != 0) {
+				fprintf(stderr, "barrier_queue(): pthread_cond_broadcast(%p) failed: (%d) %s\n", &b->ba_cv, ret, strerror(ret));
+				return -1;
+			}
+		}
+
+		while (b->ba_phase == phase) {
+			ret = pthread_cond_wait(&b->ba_cv, &b->ba_lock);
+			if (ret != 0) {
+				fprintf(stderr, "barrier_queue(): pthread_cond_wait(%p, %p) failed: (%d) %s\n", &b->ba_cv, &b->ba_lock, ret, strerror(ret));
+				return -1;
+			}
 		}
 	}
 
-	while (b->ba_phase == phase) {
-		ret = pthread_cond_wait(&b->ba_cv, &b->ba_lock);
-		if (ret != 0) {
-			fprintf(stderr, "barrier_queue(): pthread_cond_wait(%p, %p) failed: (%d) %s\n", &b->ba_cv, &b->ba_lock, ret, strerror(ret));
-			exit(1);
-		}
-	}
+	// Check to see if the final batch has been reached.
+	int ret_val = (b->ba_phase < 0) ? 1 : 0;
 
 	ret = pthread_mutex_unlock(&b->ba_lock);
 	if (ret != 0) {
 		fprintf(stderr, "barrier_queue(): pthread_mutex_unlock(%p) failed: (%d) %s\n", &b->ba_lock, ret, strerror(ret));
-		exit(1);
+		return -1;
 	}
 #endif /* USE_SEMOP */
 
-	return 0;
+	return ret_val;
 }
 
 int

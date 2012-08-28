@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.22"
+#define	LIBMICRO_VERSION	"0.4.1-rh.23"
 
 #define	STRSIZE	1024
 
@@ -76,12 +76,7 @@ typedef struct stats {
 
 typedef struct {
 	int				ba_hwm;			/* barrier setpoint	*/
-	int				ba_flag;		/* benchmark while true	*/
-	long long		ba_deadline;	/* when to hard stop */
-	long long		ba_minruntime;	/* when to stop once sample count was
-									 * reached */
-	int				ba_killed;		/* why was run killed */
-	int				ba_phase;		/* number of time used */
+	int				ba_phase;		/* number of time used, benchmark while positive */
 	int				ba_waiters;		/* how many are waiting	*/
 
 #ifdef USE_SEMOP
@@ -91,11 +86,22 @@ typedef struct {
 	pthread_cond_t	ba_cv;
 #endif
 
+	/* ^^^ Barrier data fields ^^^ */
+
+	/* vvv Benchmarking data fields vvv */
+
+	long long		ba_deadline;	/* when to hard stop */
+	long long		ba_minruntime;	/* when to stop once sample count was
+									 * reached */
+	int				ba_killed;		/* why was run killed */
+
 	long long		ba_count;		/* how many ops */
 	long long		ba_errors;		/* how many errors */
 
 	int				ba_quant;		/* how many quant errors */
-	int				ba_batches;		/* how many samples	*/
+	int				ba_batches;		/* how many samples collected, may be
+									 * larger than ba_datasize below, since
+									 * value can wrap. */
 	int				ba_batches_final;	/* how many samples that fit into the
 										 * data set size (see ba_datasize
 										 * below) and after removing outliers. */
@@ -103,25 +109,13 @@ typedef struct {
 	double			ba_starttime;	/* test time start */
 	double			ba_endtime;		/* test time end */
 
-#ifdef NEVER
-	double			ba_tmin;		/* min time taken */
-	double			ba_tmax;		/* max time taken */
-	double			ba_ctmax;		/* max after outliers */
-	double			ba_mean;		/* average value */
-	double			ba_median;		/* median value */
-	double			ba_rawmedian;	/* raw median value */
-	double			ba_stddev;		/* standard deviation */
-	double			ba_stderr;		/* standard error */
-	double			ba_skew;		/* skew */
-	double			ba_kurtosis;	/* kurtosis */
-#endif
 	stats_t			ba_raw;			/* raw stats */
 	stats_t			ba_corrected;	/* corrected stats */
 
-	int				ba_outliers;	/* outlier count */
+	int				ba_outliers;	/* outlier count, # of raw stats tossed */
 
 	int				ba_datasize;	/* possible #items data	*/
-	long long		ba_data[1];		/* start of data ararry	*/
+	long long		ba_data[1];		/* start of data array	*/
 } barrier_t;
 
 
@@ -132,7 +126,6 @@ typedef struct {
 barrier_t *barrier_create(int, int);
 int barrier_destroy(barrier_t *);
 int barrier_queue(barrier_t *, result_t *);
-
 
 /*
  * Functions that can be provided by the user
