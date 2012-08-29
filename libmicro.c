@@ -1258,7 +1258,7 @@ gettindex(void)
 {
 	int	i;
 
-	assert (NULL == tids);
+	assert (NULL != tids);
 
 	for (i = 0; i < lm_optT; i++) {
 		if (pthread_self() == tids[i])
