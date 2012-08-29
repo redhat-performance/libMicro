@@ -63,6 +63,9 @@ BEGIN {
 	if (benchmark_name != "") {
 		line = ++benchmark_results_linecnt[benchmark_name,FILENAME];
 		benchmark_results[benchmark_name,FILENAME,line] = $0;
+		if ($2 == "WARNINGS") {
+			benchmark_warnings[benchmark_name,FILENAME] = 1;
+		}
 	}
 	next;
 }
@@ -168,6 +171,7 @@ END {
 	printf("      table.pos tr.pos { display:table-row; }\n");
 	printf("      table.neg tr.neg { display:table-row; }\n");
 	printf("      table.err tr.err { display:table-row; }\n");
+	printf("      table.war tr.war { display:table-row; }\n");
 	printf("      table.mis tr.mis { display:table-row; }\n");
 	printf("      td { padding: 0.1em; border: 1px solid #ccc; text-align: right; }\n");
 	printf("      td.errors { background-color: #ff0000; }\n");
@@ -206,6 +210,7 @@ END {
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('pos')\">Positives</button></th>\n");
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('neg')\">Negatives</button></th>\n");
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('err')\">Errors</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('war')\">Warnings</button></th>\n");
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('mis')\">Missing</button></th>\n");
 	printf("        </tr>\n");
 
@@ -253,6 +258,11 @@ END {
 			missing++;
 		}
 
+		warnings = 0;
+		if (benchmark_warnings[name, ARGV[1]]) {
+			warnings++;
+		}
+
 		positives = 0;
 		negatives = 0;
 		noise = 0;
@@ -291,11 +301,15 @@ END {
 				# assert (b < 0)
 				errors++;
 			}
+			if (benchmark_warnings[name, ARGV[j]]) {
+				warnings++;
+			}
 		}
 
 		benchmark_summary_data[name, "pos"] = positives;
 		benchmark_summary_data[name, "neg"] = negatives;
 		benchmark_summary_data[name, "err"] = errors;
+		benchmark_summary_data[name, "war"] = warnings;
 		benchmark_summary_data[name, "mis"] = missing;
 		if (noise && positives == 0 && negatives == 0)
 			benchmark_summary_data[name, "noise"] = 1;
@@ -338,12 +352,17 @@ END {
 		else
 			c_err = "";
 
+		if (benchmark_summary_data[name, "war"] > 0)
+			c_err = " war";
+		else
+			c_err = "";
+
 		if (benchmark_summary_data[name, "mis"] > 0)
 			c_mis = " mis";
 		else
 			c_mis = "";
 
-		printf("        <tr class=\"%s%s%s%s%s\">\n", c_noise, c_pos, c_neg, c_err, c_mis);
+		printf("        <tr class=\"%s%s%s%s%s%s\">\n", c_noise, c_pos, c_neg, c_err, c_war, c_mis);
 		printf("          <td>%s</td>\n", name);
 
 		printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
