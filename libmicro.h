@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.24"
+#define	LIBMICRO_VERSION	"0.4.1-rh.25"
 
 #define	STRSIZE	1024
 
@@ -75,6 +75,7 @@ typedef struct stats {
  */
 
 typedef struct {
+	unsigned int	ba_size;		/* Size of allocated structure */
 	int				ba_hwm;			/* barrier setpoint	*/
 	int				ba_phase;		/* number of time used, benchmark while positive */
 	int				ba_waiters;		/* how many are waiting	*/

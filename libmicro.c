@@ -711,19 +711,19 @@ worker_thread(void *arg)
 			return NULL;
 		}
 
-		if (0 == retb) {
-			/* time the test */
-			if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
-			r.re_t0 = getnsecs();
-			ret = benchmark(arg, &r);
-			r.re_t1 = getnsecs();
-			if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
+		assert (0 == retb);
 
-			/* record results and sync */
-			retb = barrier_queue(lm_barrier, &r);
-			if (retb < 0) {
-				return NULL;
-			}
+		/* time the test */
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
+		r.re_t0 = getnsecs();
+		ret = benchmark(arg, &r);
+		r.re_t1 = getnsecs();
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
+
+		/* record results and sync */
+		retb = barrier_queue(lm_barrier, &r);
+		if (retb < 0) {
+			return NULL;
 		}
 
 		/* Errors from finishing this batch feed into the next batch */
@@ -1021,9 +1021,11 @@ update_stats(barrier_t *b, result_t *r)
 barrier_t *
 barrier_create(int hwm, int datasize)
 {
+	unsigned int size = sizeof (barrier_t)
+			+ (((datasize * hwm) - 1)
+					* sizeof (*((barrier_t *)NULL)->ba_data));
 	/*LINTED*/
-	barrier_t	*b = (barrier_t *)mmap(NULL,
-			sizeof (barrier_t) + (((datasize * hwm) - 1) * sizeof (*b->ba_data)),
+	barrier_t	*b = (barrier_t *)mmap(NULL, size,
 			PROT_READ | PROT_WRITE,
 			MAP_SHARED | MAP_ANONYMOUS, -1, 0L);
 	if ((barrier_t *)MAP_FAILED == b) {
@@ -1031,6 +1033,7 @@ barrier_create(int hwm, int datasize)
 		return NULL;
 	}
 
+	b->ba_size = size;
 	b->ba_datasize = datasize * hwm;
 	b->ba_hwm = hwm;
 
@@ -1097,16 +1100,28 @@ barrier_create(int hwm, int datasize)
 	b->ba_count = 0;
 	b->ba_errors = 0;
 
+	b->ba_starttime = 0;
+	b->ba_minruntime = 0;
+	b->ba_deadline = 0;
+
 	return b;
 }
 
 int
 barrier_destroy(barrier_t *b)
 {
+	int 			ret;
+	unsigned int	size = b->ba_size;
 #ifdef USE_SEMOP
-	(void) semctl(b->ba_semid, 0, IPC_RMID);
+	ret = semctl(b->ba_semid, 0, IPC_RMID);
+	if (ret < 0) {
+		perror("barrier_destroy(): semctl(IPC_RMID)");
+	}
 #endif
-	(void) munmap((void *)b, sizeof (barrier_t));
+	ret = munmap((void *)b, b->ba_size);
+	if (ret < 0) {
+		perror("barrier_destroy(): munmap()");
+	}
 
 	return 0;
 }
@@ -1204,7 +1219,7 @@ barrier_queue(barrier_t *b, result_t *r)
 		return -1;
 	}
 
-	if (r != NULL) {
+	if (NULL != r) {
 		update_stats(b, r);
 	}
 
@@ -1215,11 +1230,16 @@ barrier_queue(barrier_t *b, result_t *r)
 		if (b->ba_hwm == b->ba_waiters) {
 			b->ba_waiters = 0;
 			/* time to stop? */
-			long long curtim = getnsecs();
-			if (((b->ba_deadline > 0) && (curtim > b->ba_deadline))
-					|| ((b->ba_batches >= (lm_optC * lm_optT * lm_optP))
-							&& (curtim > b->ba_minruntime))) {
-				b->ba_phase = -1;
+			if ((NULL != r) && ((b->ba_deadline > 0) || (b->ba_minruntime > 0))) {
+				long long curtim = getnsecs();
+				if (((b->ba_deadline > 0) && (curtim > b->ba_deadline))
+						|| ((b->ba_batches >= (lm_optC * lm_optT * lm_optP))
+								&& ((b->ba_minruntime > 0) && (curtim > b->ba_minruntime)))) {
+					b->ba_phase = -1;
+				}
+				else {
+					b->ba_phase++;
+				}
 			}
 			else {
 				b->ba_phase++;
