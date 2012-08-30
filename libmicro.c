@@ -66,12 +66,13 @@
 
 #include "libmicro.h"
 
-#define	HISTOSIZE	32
-#define	DATASIZE	2000
+#define HISTOSIZE	32
+#define DEF_DATASIZE	100000
+#define MIN_DATASIZE	2000
 
-#define DEF_SAMPLES 100
-#define DEF_TIME 10 /* seconds */
-#define MAX_TIME 600 /* seconds, or 10 minutes */
+#define DEF_SAMPLES	100
+#define DEF_TIME	10 /* seconds */
+#define MAX_TIME	600 /* seconds, or 10 minutes */
 
 /*
  * user visible globals
@@ -454,7 +455,7 @@ actual_main(int argc, char *argv[])
 	}
 
 	/* initialise worker synchronisation */
-	b = barrier_create(lm_optT * lm_optP, DATASIZE);
+	b = barrier_create(lm_optT * lm_optP, DEF_DATASIZE);
 	if (b == NULL) {
 		perror("barrier_create()");
 		exit(1);
@@ -1021,9 +1022,10 @@ update_stats(barrier_t *b, result_t *r)
 barrier_t *
 barrier_create(int hwm, int datasize)
 {
+	if (datasize / hwm < MIN_DATASIZE)
+		datasize = MIN_DATASIZE * hwm;
 	unsigned int size = sizeof (barrier_t)
-			+ (((datasize * hwm) - 1)
-					* sizeof (*((barrier_t *)NULL)->ba_data));
+			+ ((datasize - 1) * sizeof (*((barrier_t *)NULL)->ba_data));
 	/*LINTED*/
 	barrier_t	*b = (barrier_t *)mmap(NULL, size,
 			PROT_READ | PROT_WRITE,

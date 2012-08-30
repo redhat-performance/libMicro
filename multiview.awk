@@ -66,6 +66,9 @@ BEGIN {
 		if ($2 == "WARNINGS") {
 			benchmark_warnings[benchmark_name,FILENAME] = 1;
 		}
+		if ($9 == "dropped)") {
+			benchmark_dropped[benchmark_name,FILENAME] = 1;
+		}
 	}
 	next;
 }
@@ -173,6 +176,7 @@ END {
 	printf("      table.err tr.err { display:table-row; }\n");
 	printf("      table.war tr.war { display:table-row; }\n");
 	printf("      table.mis tr.mis { display:table-row; }\n");
+	printf("      table.drop tr.drop { display:table-row; }\n");
 	printf("      td { padding: 0.1em; border: 1px solid #ccc; text-align: right; }\n");
 	printf("      td.errors { background-color: #ff0000; }\n");
 	printf("      td.missing { background-color: #ffff00; }\n");
@@ -212,12 +216,13 @@ END {
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('err')\">Errors</button></th>\n");
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('war')\">Warnings</button></th>\n");
 	printf("          <th class=\"header\"><button onclick=\"toggleRows('mis')\">Missing</button></th>\n");
+	printf("          <th class=\"header\"><button onclick=\"toggleRows('drop')\">Dropped Samples</button></th>\n");
 	printf("        </tr>\n");
 
 	printf("      </tbody>\n");
 	printf("    </table>\n");
 
-	printf("    <table id=\"maintable\" border=\"1\" cellspacing=\"1\" class=\"data header noise pos neg err mis\">\n");
+	printf("    <table id=\"maintable\" border=\"1\" cellspacing=\"1\" class=\"data header noise pos neg err mis drop\">\n");
 	printf("      <tbody>\n");
 
 	printf("        <tr class=\"heading\">\n");
@@ -263,6 +268,11 @@ END {
 			warnings++;
 		}
 
+		dropped = 0;
+		if (benchmark_dropped[name, ARGV[1]]) {
+			dropped++;
+		}
+
 		positives = 0;
 		negatives = 0;
 		noise = 0;
@@ -304,6 +314,9 @@ END {
 			if (benchmark_warnings[name, ARGV[j]]) {
 				warnings++;
 			}
+			if (benchmark_dropped[name, ARGV[j]]) {
+				dropped++;
+			}
 		}
 
 		benchmark_summary_data[name, "pos"] = positives;
@@ -311,6 +324,7 @@ END {
 		benchmark_summary_data[name, "err"] = errors;
 		benchmark_summary_data[name, "war"] = warnings;
 		benchmark_summary_data[name, "mis"] = missing;
+		benchmark_summary_data[name, "drop"] = dropped;
 		if (noise && positives == 0 && negatives == 0)
 			benchmark_summary_data[name, "noise"] = 1;
 		else
@@ -353,16 +367,21 @@ END {
 			c_err = "";
 
 		if (benchmark_summary_data[name, "war"] > 0)
-			c_err = " war";
+			c_war = " war";
 		else
-			c_err = "";
+			c_war = "";
 
 		if (benchmark_summary_data[name, "mis"] > 0)
 			c_mis = " mis";
 		else
 			c_mis = "";
 
-		printf("        <tr class=\"%s%s%s%s%s%s\">\n", c_noise, c_pos, c_neg, c_err, c_war, c_mis);
+		if (benchmark_summary_data[name, "drop"] > 0)
+			c_drop = " drop";
+		else
+			c_drop = "";
+
+		printf("        <tr class=\"%s%s%s%s%s%s%s\">\n", c_noise, c_pos, c_neg, c_err, c_war, c_mis, c_drop);
 		printf("          <td>%s</td>\n", name);
 
 		printf("          <td id=\"%s_1\" onclick=\"showHide('%s_1'); return false;\"", name, name);
