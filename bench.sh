@@ -36,7 +36,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.26
+bench_version=0.4.1-rh.27
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -47,10 +47,25 @@ $bench_version)
 	exit 1
 esac
 
-case $1 in
-	-s) suite=$2; shift 2;;
-	*) suite="full";;
-esac
+suite="full"
+samples=200
+tlimit=20000	#          20s, or  20,000ms
+mlimit=120000	#  2m, or 120s, or 120,000ms
+while getopts "s:C:D:X:" optname; do
+	case "$optname" in
+		"s") suite=$OPTARG;;
+		"C") samples=$OPTARG;;
+		"D") tlimit=$OPTARG;;
+		"X") mlimit=$OPTARG;;
+		":") echo "No argument value for option $OPTARG";;
+		"?") echo "Unknown option $OPTARG";;
+		*) ;;
+	esac
+done
+
+if [ $OPTIND -gt 1 ]; then
+    shift $((OPTIND - 1))
+fi
 
 if [ ! -e "$DIRNAME/suites/$suite.txt" ]; then
 	echo "ERROR: $DIRNAME/suites/$suite.txt does not exist"
@@ -103,7 +118,7 @@ fi
 NSECS_OVERHEAD=$($VARROOT/bin/tattle -O)
 NSECS_RESOLUTION=$($VARROOT/bin/tattle -r)
 
-OPTS="-E -L -W -O $NSECS_OVERHEAD -R $NSECS_RESOLUTION -C 100 -D 10000 -X 600000"
+OPTS="-E -L -W -O $NSECS_OVERHEAD -R $NSECS_RESOLUTION -C $samples -D $tlimit -X $mlimit"
 
 # produce benchmark header for easier comparisons
 

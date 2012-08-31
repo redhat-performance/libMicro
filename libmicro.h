@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.26"
+#define	LIBMICRO_VERSION	"0.4.1-rh.27"
 
 #define	STRSIZE	1024
 
@@ -109,6 +109,9 @@ typedef struct {
 
 	double			ba_starttime;	/* test time start */
 	double			ba_endtime;		/* test time end */
+
+	long long		ba_totaltime;	/* total amount of time spend in benchmark
+									 * routine */
 
 	stats_t			ba_raw;			/* raw stats */
 	stats_t			ba_corrected;	/* corrected stats */

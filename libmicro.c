@@ -146,7 +146,7 @@ static long long	lm_hz = 0;
 
 static void			worker_process(void);
 static void			usage(void);
-static void			print_stats(barrier_t *);
+static void			print_stats(barrier_t *, long long);
 static void			print_histo(barrier_t *);
 static int			remove_outliers(long long *, int, stats_t *);
 static unsigned int	nsecs_overhead;
@@ -376,6 +376,25 @@ actual_main(int argc, char *argv[])
 		(void) fflush(stderr);
 	}
 
+	long long sample_time;
+	if (lm_optC > 0) {
+		/*
+		 * We have a run limit set, so try to set the batch size to give
+		 * us a run of DEF_TIME seconds total.
+		 */
+		int time_range = (lm_optD > 0) ? lm_optD : lm_defD;
+		sample_time = (long long)round((time_range * 1000 * 1000LL) / (double)lm_optC);
+	}
+	else {
+		assert(lm_optD > 0);
+		/*
+		 * We have a time limit (already in ms), so divide it into DEF_SAMPLES
+		 * samples, and set the batch size appropriately to fit in the sample
+		 * time period.
+		 */
+		sample_time = (long long)round((lm_optD * 1000 * 1000LL) / (double)DEF_SAMPLES);
+	}
+
 	if (lm_optB == 0) {
 		/*
 		 * Neither benchmark or user has specified the number of cnts/sample,
@@ -388,23 +407,6 @@ actual_main(int argc, char *argv[])
 		if (lm_optI)
 			lm_nsecs_per_op = lm_optI;
 
-		long long sample_time;
-		if (lm_optC > 0) {
-			/*
-			 * We have a run limit set, so try to set the batch size to give
-			 * us a run of DEF_TIME seconds total.
-			 */
-			sample_time = (long long)round((DEF_TIME * 1000 * 1000 * 1000LL) / (double)lm_optC);
-		}
-		else {
-			assert(lm_optD > 0);
-			/*
-			 * We have a time limit, so divide it into DEF_SAMPLES samples,
-			 * and set the batch size appropriately to fit in the sample time
-			 * period.
-			 */
-			sample_time = (long long)round((lm_optD * 1000 * 1000LL) / (double)DEF_SAMPLES);
-		}
 		lm_optB = (int)(sample_time / lm_nsecs_per_op);
 
 		if (lm_optB == 0) {
@@ -662,7 +664,7 @@ actual_main(int argc, char *argv[])
 	}
 
 	if (lm_optS) {
-		print_stats(b);
+		print_stats(b, sample_time);
 	}
 
 	/* just incase something goes awry */
@@ -871,9 +873,15 @@ print_warnings(barrier_t *b)
 				b->ba_batches, DEF_SAMPLES, DEF_SAMPLES);
 	}
 
-	/*
-	 * XXX should warn on median != mean by a lot
-	 */
+	if ((lm_optM == 0)
+			&& abs(b->ba_corrected.st_mean - b->ba_corrected.st_median)
+					> (b->ba_corrected.st_stddev / 2)) {
+		if (!head++) {
+			(void) printf("#\n# WARNINGS\n");
+		}
+
+		printf("#%*sMean and median differ by more than one-half the standard deviation.\n", WARNING_INDENT, "");
+	}
 
 	if (b->ba_killed) {
 		if (!head++) {
@@ -887,6 +895,17 @@ print_warnings(barrier_t *b)
 			assert(b->ba_killed == KILLED_INT);
 			printf("#%*sInterrupted\n", WARNING_INDENT, "");
 		}
+	}
+
+	long long	elapsed_time = b->ba_endtime - b->ba_starttime;
+	long long	run_time = b->ba_totaltime / (lm_optT * lm_optP);
+	double		percentage = 100.0 - (((elapsed_time - run_time) / elapsed_time) * 100.0);
+	if (percentage < 80.0) {
+		if (!head++) {
+			(void) printf("#\n# WARNINGS\n");
+		}
+		(void) printf("#%*sActual benchmark run time only accounts for %.1f%%"
+				" of elapsed time.\n", WARNING_INDENT, "", percentage);
 	}
 
 	if (b->ba_errors) {
@@ -909,7 +928,7 @@ print_warnings(barrier_t *b)
 #define STATS_SEPW		10
 
 void
-print_stats(barrier_t *b)
+print_stats(barrier_t *b, long long sample_time)
 {
 	if (b->ba_count == 0) {
 		return;
@@ -969,6 +988,9 @@ print_stats(barrier_t *b)
 	(void) printf("#\n# %*s %*.*f\n",
 			STATS_1COLW, "elapsed time",
 			STATS_2COLW, STATS_PREC, (b->ba_endtime - b->ba_starttime) / 1.0e9);
+	(void) printf("# %*s %*.*f\n",
+			STATS_1COLW, "run time",
+			STATS_2COLW, STATS_PREC, (b->ba_totaltime / (lm_optT * lm_optP)) / 1.0e9);
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
 			STATS_2COLW, nsecs_overhead);
 
@@ -989,6 +1011,11 @@ print_stats(barrier_t *b)
 	(void) printf("# %*s %*d\n", STATS_1COLW, "number of final samples",
 			STATS_2COLW, b->ba_batches_final);
 
+	int recB = (int)round(sample_time / b->ba_corrected.st_mean);
+	if ((abs(lm_optB - recB) / (double)lm_optB) > 0.2)
+		(void) printf("# %*s %*d\n", STATS_1COLW, "recommended -B value",
+				STATS_2COLW, recB);
+
 	print_histo(b);
 
 	if (lm_optW) {
@@ -1005,7 +1032,8 @@ update_stats(barrier_t *b, result_t *r)
 	b->ba_count  += r->re_count;
 	b->ba_errors += r->re_errors;
 
-	time = r->re_t1 - r->re_t0 - nsecs_overhead;
+	b->ba_totaltime += time = r->re_t1 - r->re_t0;
+	time -= nsecs_overhead;
 	if (time < (100 * nsecs_resolution))
 		b->ba_quant++;
 
@@ -1691,6 +1719,7 @@ crunch_stats(long long *data, int count, stats_t *stats)
 	double		sk;
 	double		ku;
 	double		mean;
+	long long	sum;
 	int			i;
 	long long  *xdata;
 
@@ -1698,15 +1727,12 @@ crunch_stats(long long *data, int count, stats_t *stats)
 	 * first we need the mean
 	 */
 
-	mean = 0.0;
-
+	sum = 0;
 	for (i = 0; i < count; i++) {
-		mean += data[i];
+		sum += data[i];
 	}
 
-	mean /= count;
-
-	stats->st_mean = mean;
+	stats->st_mean = mean = ((double)sum / count);
 	stats->st_median = data[count/2];
 
 	/*
