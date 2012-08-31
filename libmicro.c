@@ -967,7 +967,7 @@ print_stats(barrier_t *b)
 			STATS_3COLW, STATS_PREC, b->ba_corrected.st_timecorr);
 
 	(void) printf("#\n# %*s %*.*f\n",
-			STATS_1COLW, "elasped time",
+			STATS_1COLW, "elapsed time",
 			STATS_2COLW, STATS_PREC, (b->ba_endtime - b->ba_starttime) / 1.0e9);
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
 			STATS_2COLW, nsecs_overhead);
