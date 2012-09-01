@@ -185,7 +185,7 @@ actual_main(int argc, char *argv[])
 	lm_argc = argc;
 	lm_argv = argv;
 
-	/* before we do anything */
+	/* before we do anything, give benchmark a chance to modify the defaults */
 	(void) benchmark_init();
 
 	/* check that the case defines lm_tsdsize before proceeding */
