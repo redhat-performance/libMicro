@@ -2,37 +2,20 @@
 atoi "atoi" -B 1m
 bind "bind" -B 3k
 cascade_cond "c_cond_1"
-cascade_cond "c_cond_10" -T 10 -B 1k
 cascade_cond "c_cond_o1" -o
-cascade_cond "c_cond_o10" -o -T 10 -B 1k
 cascade_cond "c_cond_os1" -o -s
-cascade_cond "c_cond_os10" -o -s -T 10 -B 1k
 cascade_cond "c_cond_s1" -s
-cascade_cond "c_cond_s10" -s -T 10 -B 1k
 cascade_fcntl "c_fcntl_1" -B 10k
-cascade_fcntl "c_fcntl_10" -P 10 -B 1k
 cascade_flock "c_flock" -B 40k
-cascade_flock "c_flock_10" -P 10 -B 1k
 cascade_lockf "c_lockf_1" -B 60k
-cascade_lockf "c_lockf_10" -P 10 -B 500
 cascade_mutex "c_mutex_1"
-cascade_mutex "c_mutex_10" -T 10 -B 1k
 cascade_mutex "c_mutex_s1" -s
-cascade_mutex "c_mutex_s10" -s -T 10 -B 1k
 chdir "chdir_tmp" -B 10k $TDIR1 $TDIR2
 chdir "chdir_usr" -B 10k $VDIR1 $VDIR2
 chdir "chgetwd_tmp" -B 10k -g $TDIR1 $TDIR2
 chdir "chgetwd_usr" -B 10k -g $VDIR1 $VDIR2
 clock_gettime "clock_gettime" -B 400000
 clock_nanosleep "clock_nanosleep" -B 1500
-clock_nanosleep "clock_nanosleepT4" -B 1500 -T 4
-clock_nanosleep "clock_nanosleepT4_m" -B 1500 -T 4 -m
-clock_nanosleep "clock_nanosleepT4_mr" -B 1500 -T 4 -m -r
-clock_nanosleep "clock_nanosleepT4_ms" -B 1500 -T 4 -m -s
-clock_nanosleep "clock_nanosleepT4_msr" -B 1500 -T 4 -m -s -r
-clock_nanosleep "clock_nanosleepT4_r" -B 1500 -T 4 -r
-clock_nanosleep "clock_nanosleepT4_s" -B 1500 -T 4 -s
-clock_nanosleep "clock_nanosleepT4_sr" -B 1500 -T 4 -s -r
 clock_nanosleep "clock_nanosleep_d10" -B 1500 -d 10
 clock_nanosleep "clock_nanosleep_d100" -B 1500 -d 100
 clock_nanosleep "clock_nanosleep_d1000" -B 1500 -d 1000
@@ -85,15 +68,8 @@ file_lock "file_lock" -B 70k
 fork "fork_100" -B 100
 getcontext "getcontext"
 getenv "getenv" -B 90000 -s 100
-getenv "getenvT2" -B 90000 -T 2 -s 100
 getpeername "getpeername"
 getpid "getpid" -B 2m
-getpid "getpidP4" -B 2m -P 4
-getpid "getpidP4_s" -B 96k -P 4 -s
-getpid "getpidT4" -B 2m -T 4
-getpid "getpidT4P4" -B 2m -T 4 -P 4
-getpid "getpidT4P4_s" -B 96k -T 4 -P 4 -s
-getpid "getpidT4_s" -B 96k -T 4 -s
 getpid "getpid_s" -B 96k -s
 getrusage "getrusage"
 getsockname "getsockname"
@@ -116,11 +92,6 @@ longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
 lseek "lseek_t8k" -s 8k -f $TFILE
 lseek "lseek_u8k" -s 8k -f $VFILE
-malloc "mallocT2_10" -s 10 -g 10 -T 2 -B 16k
-malloc "mallocT2_100" -s 100 -g 10 -T 2 -B 16k
-malloc "mallocT2_100k" -s 100k -g 10 -T 2 -B 1K
-malloc "mallocT2_10k" -s 10k -g 10 -T 2 -B 16k
-malloc "mallocT2_1k" -s 1k -g 10 -T 2 -B 16k
 malloc "malloc_10" -s 10 -g 10 -B 10k
 malloc "malloc_100" -s 100 -g 10 -B 10k
 malloc "malloc_100k" -s 100k -g 10 -B 1000
@@ -154,9 +125,6 @@ memrand "memrand_64k" -s 64k -B 24m
 memrand "memrand_64m" -s 64m -B 16m
 memrand "memrand_8k" -s 8k -B 32m
 memrand "memrand_8m" -s 8m -B 24m
-memset "memsetP2T2_10m" -s 10m -B 50 -P 2 -T 2
-memset "memsetP2_10m" -s 10m -B 50 -P 2
-memset "memsetT2_10m" -s 10m -B 50 -T 2
 memset "memset_10" -s 10 -B 10m
 memset "memset_10k" -s 10k
 memset "memset_10m" -s 10m -B 50
@@ -167,7 +135,6 @@ memset "memset_256_u" -s 256 -a 1 -B 5m
 memset "memset_4k" -s 4k -B 700k
 memset "memset_4k_uc" -s 4k -u -B 100k
 mktime "mktime" -B 10k
-mktime "mktimeT2" -T 2 -B 10k
 mmap "mmap_a128k" -l 128k -f MAP_ANON -B 5k
 mmap "mmap_a8k" -l 8k -f MAP_ANON -B 10k
 mmap "mmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
@@ -247,17 +214,11 @@ msync "msync_wt128k" -l 128k -w -f $TFILE -B 10k
 msync "msync_wt8k" -l 8k -w -f $TFILE -B 30k
 msync "msync_wu128k" -l 128k -w -f $VFILE -B 10k
 msync "msync_wu8k" -l 8k -w -f $VFILE -B 30k
-mutex "mutex_T2" -T 2 -B 500k
-mutex "mutex_T2s" -s -T 2 -B 500k
 mutex "mutex_mt" -t -B 5m
 mutex "mutex_mts" -t -s -B 5m
 mutex "mutex_st" -B 5m
 mutex "mutex_sts" -s -B 5m
 nanosleep "nanosleep" -B 1500
-nanosleep "nanosleepT4" -B 1500 -T 4
-nanosleep "nanosleepT4_r" -B 1500 -T 4 -r
-nanosleep "nanosleepT4_rs" -B 1500 -T 4 -s -r
-nanosleep "nanosleepT4_s" -B 1500 -T 4 -s
 nanosleep "nanosleep_d10" -B 1500 -d 10
 nanosleep "nanosleep_d100" -B 1500 -d 100
 nanosleep "nanosleep_d1000" -B 1500 -d 1000
@@ -352,8 +313,6 @@ recurse "recurse_1k" -d 1k -B 10k
 strcasecmp "scasecmp_10" -s 10 -B 5m
 strcasecmp "scasecmp_1k" -s 1k
 sched_yield "sched_yield" -B 32000
-sched_yield "sched_yieldT4" -B 32000 -T 4
-sched_yield "sched_yieldT4_s" -B 32000 -T 4 -s
 sched_yield "sched_yield_s" -B 32000 -s
 select "select_10" -n 10
 select "select_100" -n 100 -B 10k
@@ -411,7 +370,6 @@ munmap "unmap_wz8k" -l 8k -w -f /dev/zero -B 10k
 munmap "unmap_z128k" -l 128k -f /dev/zero -B 5k
 munmap "unmap_z8k" -l 8k -f /dev/zero -B 10k
 usleep "usleep" -B 1500
-usleep "usleepT4" -B 1500 -T 4
 usleep "usleep_d10" -B 1500 -d 10
 usleep "usleep_d100" -B 500 -d 100
 write "write_n100k" -s 100k -f /dev/null -B 500k

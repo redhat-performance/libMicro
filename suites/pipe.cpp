@@ -1,19 +1,19 @@
 #ifndef _PIPE_
 #define _PIPE_
 
-pipe	"pipe_pst1"	-s 1	-x pipe	-m st
-pipe	"pipe_pmt1"	-s 1	-x pipe	-m mt	-B 10k
-pipe	"pipe_pmp1"	-s 1	-x pipe	-m mp	-B 10k
-pipe	"pipe_pst4k"	-s 4k	-x pipe	-m st
-pipe	"pipe_pmt4k"	-s 4k	-x pipe	-m mt	-B 10k
-pipe	"pipe_pmp4k"	-s 4k	-x pipe	-m mp	-B 10k
+pipe	"pipe_pst1"	-s 1	-x pipe	-m st	-B 50k
+pipe	"pipe_pmt1"	-s 1	-x pipe	-m mt	-B 5k
+pipe	"pipe_pmp1"	-s 1	-x pipe	-m mp	-B 5k
+pipe	"pipe_pst4k"	-s 4k	-x pipe	-m st	-B 50k
+pipe	"pipe_pmt4k"	-s 4k	-x pipe	-m mt	-B 5k
+pipe	"pipe_pmp4k"	-s 4k	-x pipe	-m mp	-B 5k
 
-pipe	"pipe_sst1"	-s 1	-x sock	-m st
-pipe	"pipe_smt1"	-s 1	-x sock	-m mt	-B 10k
-pipe	"pipe_smp1"	-s 1	-x sock	-m mp	-B 10k
-pipe	"pipe_sst4k"	-s 4k	-x sock	-m st
-pipe	"pipe_smt4k"	-s 4k	-x sock	-m mt	-B 10k
-pipe	"pipe_smp4k"	-s 4k	-x sock	-m mp	-B 10k
+pipe	"pipe_sst1"	-s 1	-x sock	-m st	-B 50k
+pipe	"pipe_smt1"	-s 1	-x sock	-m mt	-B 5k
+pipe	"pipe_smp1"	-s 1	-x sock	-m mp	-B 5k
+pipe	"pipe_sst4k"	-s 4k	-x sock	-m st	-B 50k
+pipe	"pipe_smt4k"	-s 4k	-x sock	-m mt	-B 5k
+pipe	"pipe_smp4k"	-s 4k	-x sock	-m mp	-B 5k
 
 #include "localtcp.cpp"
 

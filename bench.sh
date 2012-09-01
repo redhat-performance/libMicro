@@ -47,7 +47,7 @@ $bench_version)
 	exit 1
 esac
 
-suite="full"
+suite="normal"
 samples=200
 tlimit=20000	#          20s, or  20,000ms
 mlimit=120000	#  2m, or 120s, or 120,000ms

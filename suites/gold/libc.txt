@@ -2,11 +2,7 @@
 atoi "atoi" -B 1m
 getcontext "getcontext"
 getenv "getenv" -B 90000 -s 100
-getenv "getenvT2" -B 90000 -T 2 -s 100
 getpid "getpid" -B 2m
-getpid "getpidP4" -B 2m -P 4
-getpid "getpidT4" -B 2m -T 4
-getpid "getpidT4P4" -B 2m -T 4 -P 4
 getrusage "getrusage"
 gettimeofday "gettimeofday" -B 400000
 isatty "isatty_no" -f $IFILE
@@ -15,11 +11,6 @@ isatty "isatty_yes"
 localtime_r "localtime_r"
 longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
-malloc "mallocT2_10" -s 10 -g 10 -T 2 -B 16k
-malloc "mallocT2_100" -s 100 -g 10 -T 2 -B 16k
-malloc "mallocT2_100k" -s 100k -g 10 -T 2 -B 1K
-malloc "mallocT2_10k" -s 10k -g 10 -T 2 -B 16k
-malloc "mallocT2_1k" -s 1k -g 10 -T 2 -B 16k
 malloc "malloc_10" -s 10 -g 10 -B 10k
 malloc "malloc_100" -s 100 -g 10 -B 10k
 malloc "malloc_100k" -s 100k -g 10 -B 1000
@@ -35,10 +26,9 @@ memmove "memmove_10k" -s 10k
 memmove "memmove_10m" -s 10m -B 50
 memmove "memmove_1k" -s 1k -B 200k
 memmove "memmove_1m" -s 1m -B 100
-memset "memsetP2_10m" -s 10m -B 50 -P 2
 memset "memset_10" -s 10 -B 10m
 memset "memset_10k" -s 10k
-memset "memset_10m" -s 10m -B 100
+memset "memset_10m" -s 10m -B 50
 memset "memset_1k" -s 1k -B 2m
 memset "memset_1m" -s 1m -B 200
 memset "memset_256" -s 256 -B 5m
@@ -46,22 +36,17 @@ memset "memset_256_u" -s 256 -a 1 -B 5m
 memset "memset_4k" -s 4k -B 700k
 memset "memset_4k_uc" -s 4k -u -B 100k
 mktime "mktime" -B 10k
-mktime "mktimeT2" -T 2 -B 10k
 nanosleep "nanosleep" -B 1500
-nanosleep "nanosleepT4" -B 1500 -T 4
-nanosleep "nanosleepT4_r" -B 1500 -T 4 -r
 nanosleep "nanosleep_d10" -B 1500 -d 10
 nanosleep "nanosleep_d100" -B 1500 -d 100
 nanosleep "nanosleep_d1000" -B 1500 -d 1000
-nanosleep "nanosleep_d10000" -B 1000 -d 10000
-nanosleep "nanosleep_d100000" -B 1000 -d 100000
 nanosleep "nanosleep_r" -B 1500 -r
 strcasecmp "scasecmp_10" -s 10 -B 5m
 strcasecmp "scasecmp_1k" -s 1k
 setcontext "setcontext"
 sigaction "sigaction"
-siglongjmp "siglongjmp" -B 800k
-signal "signal"
+siglongjmp "siglongjmp" -B 500k
+signal "signal" -B 50k
 sigprocmask "sigprocmask"
 strchr "strchr_10" -s 10 -B 18m
 strchr "strchr_1k" -s 1k -B 1m
@@ -74,8 +59,7 @@ strlen "strlen_10" -s 10 -B 15m
 strlen "strlen_1k" -s 1k -B 1m
 strtol "strtol" -B 1m
 time "time" -B 2m
-times "times" -B 800k
+times "times" -B 400k
 usleep "usleep" -B 1500
-usleep "usleepT4" -B 1500 -T 4
 usleep "usleep_d10" -B 1500 -d 10
-usleep "usleep_d100" -B 1500 -d 100
+usleep "usleep_d100" -B 500 -d 100

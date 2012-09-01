@@ -24,6 +24,7 @@ SUITE_NAMES =	extended \
 				memmove \
 				memory \
 				network \
+				normal \
 				pipe \
 				readwrite \
 				syscalls \
@@ -37,15 +38,17 @@ export LC_ALL=C
 %.txt:	%.cpp
 	$(CPP) -x c -P $< | sort -k 2 | uniq > $@
 
-full.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp memmove.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
+extended.txt: full.cpp normal.cpp hardware.cpp syscalls.cpp libc.cpp memcpy.cpp memmove.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
 
-extended.txt: full.cpp hardware.cpp syscalls.cpp libc.cpp memcpy.cpp memmove.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
+full.txt: normal.cpp hardware.cpp syscalls.cpp libc.cpp memcpy.cpp memmove.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
 
 filesystem.txt: readwrite.cpp fifo.cpp
 
 libc.txt: memcpy.cpp memmove.cpp
 
 network.txt: localtcp.cpp
+
+normal.txt: hardware.cpp syscalls.cpp libc.cpp memcpy.cpp memmove.cpp librt.cpp libm.cpp filesystem.cpp readwrite.cpp network.cpp forkexec.cpp memory.cpp pipe.cpp localtcp.cpp fifo.cpp
 
 pipe.txt: localtcp.cpp fifo.cpp
 

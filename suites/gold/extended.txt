@@ -16,12 +16,12 @@ cascade_cond "c_cond_s200" -s -T 200 -B 100
 cascade_fcntl "c_fcntl_1" -B 10k
 cascade_fcntl "c_fcntl_10" -P 10 -B 1k
 cascade_fcntl "c_fcntl_200" -P 200 -B 20
-cascade_flock "c_flock"
+cascade_flock "c_flock" -B 40k
 cascade_flock "c_flock_10" -P 10 -B 1k
 cascade_flock "c_flock_200" -P 200 -B 100
-cascade_lockf "c_lockf_1" -B 10k
-cascade_lockf "c_lockf_10" -P 10 -B 1k
-cascade_lockf "c_lockf_200" -P 200 -B 100
+cascade_lockf "c_lockf_1" -B 60k
+cascade_lockf "c_lockf_10" -P 10 -B 500
+cascade_lockf "c_lockf_200" -P 200 -B 50
 cascade_mutex "c_mutex_1"
 cascade_mutex "c_mutex_10" -T 10 -B 1k
 cascade_mutex "c_mutex_200" -T 200 -B 100
@@ -54,7 +54,7 @@ clock_nanosleep "clock_nanosleep_msr" -B 1500 -m -s -r
 clock_nanosleep "clock_nanosleep_r" -B 1500 -r
 clock_nanosleep "clock_nanosleep_s" -B 1500 -s
 clock_nanosleep "clock_nanosleep_sr" -B 1500 -s -r
-close "close_bad" -B 1m -b
+close "close_bad" -B 700k -b
 close_tcp "close_tcp" -B 1k
 close "close_tmp" -B 640 -f $TFILE
 close "close_usr" -B 640 -f $VFILE
@@ -62,53 +62,53 @@ close "close_zero" -B 640 -f /dev/zero
 connection "conn_accept" -B 512 -a
 connection "conn_connect" -B 512 -c
 connection "connection" -B 512
-dup "dup" -B 400k
+dup "dup" -B 200k
 exec "exec" -B 100
-execw "execw" -B 250
+execw "execw" -B 175
 execw "execw_1000r" -B 25 -r 1000
-execw "execw_100r" -B 125 -r 100
-execw "execw_1024n" -B 150 -n 1024 -p 256
-execw "execw_1024ntv" -B 500 -n 1024 -p 256 -t -v
-execw "execw_10r" -B 250 -r 10
-execw "execw_128n" -B 250 -n 128 -p 2048
-execw "execw_128nt" -B 25 -n 128 -p 2048 -t
-execw "execw_128ntv" -B 500 -n 128 -p 2048 -t -v
-execw "execw_1r" -B 250 -r 1
-execw "execw_2048n" -B 150 -n 2048 -p 128
-execw "execw_2048ntv" -B 500 -n 2048 -p 128 -t -v
-execw "execw_256n" -B 250 -n 256 -p 1024
-execw "execw_256ntv" -B 500 -n 256 -p 1024 -t -v
-execw "execw_32n" -B 250 -n 32 -p 8192
+execw "execw_100r" -B 50 -r 100
+execw "execw_1024n" -B 70 -n 1024 -p 256
+execw "execw_1024ntv" -B 200 -n 1024 -p 256 -t -v
+execw "execw_10r" -B 100 -r 10
+execw "execw_128n" -B 125 -n 128 -p 2048
+execw "execw_128nt" -B 10 -n 128 -p 2048 -t
+execw "execw_128ntv" -B 200 -n 128 -p 2048 -t -v
+execw "execw_1r" -B 125 -r 1
+execw "execw_2048n" -B 35 -n 2048 -p 128
+execw "execw_2048ntv" -B 200 -n 2048 -p 128 -t -v
+execw "execw_256n" -B 100 -n 256 -p 1024
+execw "execw_256ntv" -B 200 -n 256 -p 1024 -t -v
+execw "execw_32n" -B 125 -n 32 -p 8192
 execw "execw_32nt" -B 25 -n 32 -p 8192 -t
-execw "execw_32ntv" -B 500 -n 32 -p 8192 -t -v
-execw "execw_4096n" -B 150 -n 4096 -p 64
-execw "execw_4096ntv" -B 500 -n 4096 -p 64 -t -v
-execw "execw_512n" -B 150 -n 512 -p 512
-execw "execw_512ntv" -B 500 -n 512 -p 512 -t -v
-execw "execw_64n" -B 250 -n 64 -p 4096
-execw "execw_64nt" -B 25 -n 64 -p 4096 -t
-execw "execw_64ntv" -B 500 -n 64 -p 4096 -t -v
-execw "execw_8192n" -B 150 -n 8192 -p 32
-execw "execw_8192n1000r" -B 25 -n 8192 -p 32 -r 1000
-execw "execw_8192ntv" -B 500 -n 8192 -p 32 -t -v
-execw "execw_8192ntv1000r" -B 500 -n 8192 -p 32 -t -v -r 1000
+execw "execw_32ntv" -B 200 -n 32 -p 8192 -t -v
+execw "execw_4096n" -B 15 -n 4096 -p 64
+execw "execw_4096ntv" -B 200 -n 4096 -p 64 -t -v
+execw "execw_512n" -B 100 -n 512 -p 512
+execw "execw_512ntv" -B 200 -n 512 -p 512 -t -v
+execw "execw_64n" -B 125 -n 64 -p 4096
+execw "execw_64nt" -B 15 -n 64 -p 4096 -t
+execw "execw_64ntv" -B 200 -n 64 -p 4096 -t -v
+execw "execw_8192n" -B 5 -n 8192 -p 32
+execw "execw_8192n1000r" -B 5 -n 8192 -p 32 -r 1000
+execw "execw_8192ntv" -B 200 -n 8192 -p 32 -t -v
+execw "execw_8192ntv1000r" -B 200 -n 8192 -p 32 -t -v -r 1000
 exit "exit_100" -B 100
 exit "exit_1000" -B 1000
 exit "exit_1000_nolibc" -e -B 1000
 exit "exit_100_nolibc" -e -B 100
-exp "exp" -B 2000000 -f exp
-exp "exp10" -B 2000000 -f exp10
-exp "exp10f" -B 2000000 -f exp10f
-exp "exp10l" -B 2000000 -f exp10l
-exp "exp2" -B 2000000 -f exp2
-exp "exp2f" -B 2000000 -f exp2f
-exp "exp2l" -B 2000000 -f exp2l
-exp "expf" -B 2000000 -f expf
-exp "expl" -B 2000000 -f expl
+exp "exp" -B 2m -f exp
+exp "exp10" -B 2m -f exp10
+exp "exp10f" -B 400k -f exp10f
+exp "exp10l" -B 128k -f exp10l
+exp "exp2" -B 400k -f exp2
+exp "exp2f" -B 400k -f exp2f
+exp "exp2l" -B 1m -f exp2l
+exp "expf" -B 400k -f expf
+exp "expl" -B 1m -f expl
 fcntl_ndelay "fcntl_ndelay"
 fcntl "fcntl_tmp" -f $TFILE
 fcntl "fcntl_usr" -f $VFILE
-file_lock "file_lock"
+file_lock "file_lock" -B 70k
 fork "fork_100" -B 100
 fork "fork_1000" -B 1000
 getcontext "getcontext"
@@ -131,15 +131,15 @@ isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
 listen "listen" -B 50k
 localtime_r "localtime_r"
-log "log" -B 2000000 -f log
-log "log10" -B 2000000 -f log10
-log "log10f" -B 2000000 -f log10f
-log "log10l" -B 2000000 -f log10l
-log "log2" -B 2000000 -f log2
-log "log2f" -B 2000000 -f log2f
-log "log2l" -B 2000000 -f log2l
-log "logf" -B 2000000 -f logf
-log "logl" -B 2000000 -f logl
+log "log" -B 2m -f log
+log "log10" -B 2m -f log10
+log "log10f" -B 2m -f log10f
+log "log10l" -B 2m -f log10l
+log "log2" -B 2m -f log2
+log "log2f" -B 2m -f log2f
+log "log2l" -B 2m -f log2l
+log "logf" -B 2m -f logf
+log "logl" -B 2m -f logl
 longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
 lseek "lseek_t8k" -s 8k -f $TFILE
@@ -186,10 +186,12 @@ memrand "memrand_64k" -s 64k -B 24m
 memrand "memrand_64m" -s 64m -B 16m
 memrand "memrand_8k" -s 8k -B 32m
 memrand "memrand_8m" -s 8m -B 24m
+memset "memsetP2T2_10m" -s 10m -B 50 -P 2 -T 2
 memset "memsetP2_10m" -s 10m -B 50 -P 2
+memset "memsetT2_10m" -s 10m -B 50 -T 2
 memset "memset_10" -s 10 -B 10m
 memset "memset_10k" -s 10k
-memset "memset_10m" -s 10m -B 100
+memset "memset_10m" -s 10m -B 50
 memset "memset_1k" -s 1k -B 2m
 memset "memset_1m" -s 1m -B 200
 memset "memset_256" -s 256 -B 5m
@@ -278,8 +280,8 @@ msync "msync_wt128k" -l 128k -w -f $TFILE -B 10k
 msync "msync_wt8k" -l 8k -w -f $TFILE -B 30k
 msync "msync_wu128k" -l 128k -w -f $VFILE -B 10k
 msync "msync_wu8k" -l 8k -w -f $VFILE -B 30k
-mutex "mutex_T2" -T 2 -B 1m
-mutex "mutex_T2s" -s -T 2 -B 1m
+mutex "mutex_T2" -T 2 -B 500k
+mutex "mutex_T2s" -s -T 2 -B 500k
 mutex "mutex_mt" -t -B 5m
 mutex "mutex_mto1" -o 1 -t -B 5m
 mutex "mutex_mto16" -o 16 -t -B 5m
@@ -298,35 +300,35 @@ nanosleep "nanosleep_d10" -B 1500 -d 10
 nanosleep "nanosleep_d100" -B 1500 -d 100
 nanosleep "nanosleep_d1000" -B 1500 -d 1000
 nanosleep "nanosleep_d10000" -B 1000 -d 10000
-nanosleep "nanosleep_d100000" -B 1000 -d 100000
+nanosleep "nanosleep_d100000" -B 500 -d 100000
 nanosleep "nanosleep_r" -B 1500 -r
 nanosleep "nanosleep_rs" -B 1500 -s -r
 nanosleep "nanosleep_s" -B 1500 -s
 open "open_tmp" -B 25000 -f $TFILE
 open "open_usr" -B 25000 -f $VFILE
 open "open_zero" -B 25000 -f /dev/zero
-pipe "pipe_fmp1" -s 1 -x fifo -m mp -B 10k
+pipe "pipe_fmp1" -s 1 -x fifo -m mp -B 5k
 pipe "pipe_fmp4k" -s 4k -x fifo -m mp -B 5k
 pipe "pipe_fmt1" -s 1 -x fifo -m mt -B 5k
 pipe "pipe_fmt4k" -s 4k -x fifo -m mt -B 5k
-pipe "pipe_fst1" -s 1 -x fifo -m st
-pipe "pipe_fst4k" -s 4k -x fifo -m st
-pipe "pipe_pmp1" -s 1 -x pipe -m mp -B 10k
-pipe "pipe_pmp4k" -s 4k -x pipe -m mp -B 10k
-pipe "pipe_pmt1" -s 1 -x pipe -m mt -B 10k
-pipe "pipe_pmt4k" -s 4k -x pipe -m mt -B 10k
-pipe "pipe_pst1" -s 1 -x pipe -m st
-pipe "pipe_pst4k" -s 4k -x pipe -m st
-pipe "pipe_smp1" -s 1 -x sock -m mp -B 10k
-pipe "pipe_smp4k" -s 4k -x sock -m mp -B 10k
-pipe "pipe_smt1" -s 1 -x sock -m mt -B 10k
-pipe "pipe_smt4k" -s 4k -x sock -m mt -B 10k
-pipe "pipe_sst1" -s 1 -x sock -m st
-pipe "pipe_sst4k" -s 4k -x sock -m st
-pipe "pipe_tmp1" -s 1 -x tcp -m mp -B 5k
-pipe "pipe_tmp4k" -s 4k -x tcp -m mp -B 5k
-pipe "pipe_tmt1" -s 1 -x tcp -m mt -B 5k
-pipe "pipe_tmt4k" -s 4k -x tcp -m mt -B 5k
+pipe "pipe_fst1" -s 1 -x fifo -m st -B 50k
+pipe "pipe_fst4k" -s 4k -x fifo -m st -B 50k
+pipe "pipe_pmp1" -s 1 -x pipe -m mp -B 5k
+pipe "pipe_pmp4k" -s 4k -x pipe -m mp -B 5k
+pipe "pipe_pmt1" -s 1 -x pipe -m mt -B 5k
+pipe "pipe_pmt4k" -s 4k -x pipe -m mt -B 5k
+pipe "pipe_pst1" -s 1 -x pipe -m st -B 50k
+pipe "pipe_pst4k" -s 4k -x pipe -m st -B 50k
+pipe "pipe_smp1" -s 1 -x sock -m mp -B 5k
+pipe "pipe_smp4k" -s 4k -x sock -m mp -B 5k
+pipe "pipe_smt1" -s 1 -x sock -m mt -B 5k
+pipe "pipe_smt4k" -s 4k -x sock -m mt -B 5k
+pipe "pipe_sst1" -s 1 -x sock -m st -B 50k
+pipe "pipe_sst4k" -s 4k -x sock -m st -B 50k
+pipe "pipe_tmp1" -s 1 -x tcp -m mp -B 2k
+pipe "pipe_tmp4k" -s 4k -x tcp -m mp -B 2k
+pipe "pipe_tmt1" -s 1 -x tcp -m mt -B 2k
+pipe "pipe_tmt4k" -s 4k -x tcp -m mt -B 2k
 pipe "pipe_tst1" -s 1 -x tcp -m st -B 10k
 pipe "pipe_tst4k" -s 4k -x tcp -m st -B 10k
 poll "poll_10" -n 10
@@ -335,31 +337,31 @@ poll "poll_1000" -n 1000 -B 1k
 poll "poll_w10" -n 10 -w 1
 poll "poll_w100" -n 100 -w 10 -B 10k
 poll "poll_w1000" -n 1000 -w 100 -B 1k
-posix_spawn "posix_spawn" -B 500
-posix_spawn "posix_spawn_1000r" -B 500 -r 1000
-posix_spawn "posix_spawn_100r" -B 500 -r 100
-posix_spawn "posix_spawn_1024n" -B 500 -n 1024 -p 256
-posix_spawn "posix_spawn_1024nt" -B 500 -n 1024 -p 256 -t
-posix_spawn "posix_spawn_10r" -B 500 -r 10
-posix_spawn "posix_spawn_128n" -B 500 -n 128 -p 2048
-posix_spawn "posix_spawn_128nt" -B 500 -n 128 -p 2048 -t
-posix_spawn "posix_spawn_1r" -B 500 -r 1
-posix_spawn "posix_spawn_2048n" -B 500 -n 2048 -p 128
-posix_spawn "posix_spawn_2048nt" -B 500 -n 2048 -p 128 -t
-posix_spawn "posix_spawn_256n" -B 500 -n 256 -p 1024
-posix_spawn "posix_spawn_256nt" -B 500 -n 256 -p 1024 -t
-posix_spawn "posix_spawn_32n" -B 500 -n 32 -p 8192
-posix_spawn "posix_spawn_32nt" -B 500 -n 32 -p 8192 -t
-posix_spawn "posix_spawn_4096n" -B 500 -n 4096 -p 64
-posix_spawn "posix_spawn_4096nt" -B 500 -n 4096 -p 64 -t
-posix_spawn "posix_spawn_512n" -B 500 -n 512 -p 512
-posix_spawn "posix_spawn_512nt" -B 500 -n 512 -p 512 -t
-posix_spawn "posix_spawn_64n" -B 500 -n 64 -p 4096
-posix_spawn "posix_spawn_64nt" -B 500 -n 64 -p 4096 -t
-posix_spawn "posix_spawn_8192n" -B 500 -n 8192 -p 32
-posix_spawn "posix_spawn_8192n1000r" -B 500 -n 8192 -p 32 -r 1000
-posix_spawn "posix_spawn_8192nt" -B 500 -n 8192 -p 32 -t
-posix_spawn "posix_spawn_8192nt1000r" -B 500 -n 8192 -p 32 -t -r 1000
+posix_spawn "posix_spawn" -B 200
+posix_spawn "posix_spawn_1000r" -B 200 -r 1000
+posix_spawn "posix_spawn_100r" -B 200 -r 100
+posix_spawn "posix_spawn_1024n" -B 200 -n 1024 -p 256
+posix_spawn "posix_spawn_1024nt" -B 200 -n 1024 -p 256 -t
+posix_spawn "posix_spawn_10r" -B 200 -r 10
+posix_spawn "posix_spawn_128n" -B 200 -n 128 -p 2048
+posix_spawn "posix_spawn_128nt" -B 200 -n 128 -p 2048 -t
+posix_spawn "posix_spawn_1r" -B 200 -r 1
+posix_spawn "posix_spawn_2048n" -B 200 -n 2048 -p 128
+posix_spawn "posix_spawn_2048nt" -B 200 -n 2048 -p 128 -t
+posix_spawn "posix_spawn_256n" -B 200 -n 256 -p 1024
+posix_spawn "posix_spawn_256nt" -B 200 -n 256 -p 1024 -t
+posix_spawn "posix_spawn_32n" -B 200 -n 32 -p 8192
+posix_spawn "posix_spawn_32nt" -B 200 -n 32 -p 8192 -t
+posix_spawn "posix_spawn_4096n" -B 200 -n 4096 -p 64
+posix_spawn "posix_spawn_4096nt" -B 200 -n 4096 -p 64 -t
+posix_spawn "posix_spawn_512n" -B 200 -n 512 -p 512
+posix_spawn "posix_spawn_512nt" -B 200 -n 512 -p 512 -t
+posix_spawn "posix_spawn_64n" -B 200 -n 64 -p 4096
+posix_spawn "posix_spawn_64nt" -B 200 -n 64 -p 4096 -t
+posix_spawn "posix_spawn_8192n" -B 200 -n 8192 -p 32
+posix_spawn "posix_spawn_8192n1000r" -B 200 -n 8192 -p 32 -r 1000
+posix_spawn "posix_spawn_8192nt" -B 200 -n 8192 -p 32 -t
+posix_spawn "posix_spawn_8192nt1000r" -B 200 -n 8192 -p 32 -t -r 1000
 pread "pread_t100k" -s 100k -f $TFILE -B 10k
 pread "pread_t10k" -s 10k -f $TFILE
 pread "pread_t1k" -s 1k -f $TFILE
@@ -394,8 +396,8 @@ read "read_z100k" -s 100k -f /dev/zero -B 8k
 read "read_z10k" -s 10k -f /dev/zero -B 70k
 read "read_z1k" -s 1k -f /dev/zero -B 300k
 read "read_zw100k" -s 100k -w -f /dev/zero -B 8k
-realpath "realpath_tmp" -f $TDIR1 -B 7000
-realpath "realpath_usr" -f $VDIR1 -B 7000
+realpath "realpath_tmp" -f $TDIR1 -B 4k
+realpath "realpath_usr" -f $VDIR1 -B 4k
 recurse "recurse" -B 200k
 recurse "recurse_10k" -d 10k -B 1k
 recurse "recurse_1k" -d 1k -B 10k
@@ -415,14 +417,14 @@ semop "semop"
 setcontext "setcontext"
 setsockopt "setsockopt"
 sigaction "sigaction"
-siglongjmp "siglongjmp" -B 800k
-signal "signal"
+siglongjmp "siglongjmp" -B 500k
+signal "signal" -B 50k
 sigprocmask "sigprocmask"
 socket "socket_i" -B 10k -f PF_INET
 socket "socket_u" -B 10k
 socketpair "socketpair" -B 25000
-stat "stat_tmp" -f $TFILE
-stat "stat_usr" -f $VFILE
+stat "stat_tmp" -f $TFILE -B 50k
+stat "stat_usr" -f $VFILE -B 50k
 strchr "strchr_10" -s 10 -B 18m
 strchr "strchr_1k" -s 1k -B 1m
 strcmp "strcmp_10" -s 10 -B 14m
@@ -433,9 +435,9 @@ strftime "strftime"
 strlen "strlen_10" -s 10 -B 15m
 strlen "strlen_1k" -s 1k -B 1m
 strtol "strtol" -B 1m
-system "system" -B 100
+system "system" -B 50
 time "time" -B 2m
-times "times" -B 800k
+times "times" -B 400k
 munmap "unmap_a128k" -l 128k -f MAP_ANON -B 5k
 munmap "unmap_a8k" -l 8k -f MAP_ANON -B 10k
 munmap_frag "unmap_frag" -B 2500 -C 1000
@@ -464,7 +466,7 @@ munmap "unmap_z8k" -l 8k -f /dev/zero -B 10k
 usleep "usleep" -B 1500
 usleep "usleepT4" -B 1500 -T 4
 usleep "usleep_d10" -B 1500 -d 10
-usleep "usleep_d100" -B 1500 -d 100
+usleep "usleep_d100" -B 500 -d 100
 write "write_n100k" -s 100k -f /dev/null -B 500k
 write "write_n10k" -s 10k -f /dev/null -B 500k
 write "write_n1k" -s 1k -f /dev/null -B 500k

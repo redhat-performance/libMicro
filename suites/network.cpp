@@ -25,7 +25,9 @@ connection	"conn_connect"	-B 512	-c
 connection	"conn_accept"	-B 512	-a
 # endif
 
+# ifdef EXTENDED
 close_tcp	"close_tcp"	-B 1k
+# endif
 
 poll	"poll_10"	-n 10
 poll	"poll_100"	-n 100	-B 10k
