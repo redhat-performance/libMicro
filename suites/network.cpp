@@ -13,7 +13,7 @@ socketpair	"socketpair"	-B 25000
 
 setsockopt	"setsockopt"	
 
-bind	"bind"	-B 200
+bind	"bind"	-B 3k
 
 listen	"listen"	-B 50k
 

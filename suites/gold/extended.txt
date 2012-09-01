@@ -1,6 +1,6 @@
 
 atoi "atoi" -B 1m
-bind "bind" -B 200
+bind "bind" -B 3k
 cascade_cond "c_cond_1"
 cascade_cond "c_cond_10" -T 10 -B 1k
 cascade_cond "c_cond_200" -T 200 -B 100
