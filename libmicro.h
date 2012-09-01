@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.27"
+#define	LIBMICRO_VERSION	"0.4.1-rh.28"
 
 #define	STRSIZE	1024
 
@@ -107,8 +107,8 @@ typedef struct {
 										 * data set size (see ba_datasize
 										 * below) and after removing outliers. */
 
-	double			ba_starttime;	/* test time start */
-	double			ba_endtime;		/* test time end */
+	long long		ba_starttime;	/* test time start */
+	long long		ba_endtime;		/* test time end */
 
 	long long		ba_totaltime;	/* total amount of time spend in benchmark
 									 * routine */

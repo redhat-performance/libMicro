@@ -471,10 +471,10 @@ actual_main(int argc, char *argv[])
 	/* when we started and when to stop */
 
 	b->ba_starttime = getnsecs();
-	b->ba_minruntime = (long long) (b->ba_starttime + (lm_optD * 1000000LL));
+	b->ba_minruntime = b->ba_starttime + (lm_optD * 1000000LL);
 
 	if (lm_optX > 0)
-		b->ba_deadline = (long long) (b->ba_starttime + (lm_optX * 1000000LL));
+		b->ba_deadline = b->ba_starttime + (lm_optX * 1000000LL);
 	else if (lm_optC <= 0)
 		b->ba_deadline = b->ba_minruntime;
 	else
@@ -897,15 +897,17 @@ print_warnings(barrier_t *b)
 		}
 	}
 
-	long long	elapsed_time = b->ba_endtime - b->ba_starttime;
-	long long	run_time = b->ba_totaltime / (lm_optT * lm_optP);
-	double		percentage = 100.0 - (((elapsed_time - run_time) / elapsed_time) * 100.0);
-	if (percentage < 80.0) {
-		if (!head++) {
-			(void) printf("#\n# WARNINGS\n");
+	if ((lm_optT * lm_optP) == 1) {
+		long long	elapsed_time = b->ba_endtime - b->ba_starttime;
+		long long	run_time = b->ba_totaltime;
+		double		percentage = 100.0 - (((double)(elapsed_time - run_time) / elapsed_time) * 100.0);
+		if (percentage < 80.0) {
+			if (!head++) {
+				(void) printf("#\n# WARNINGS\n");
+			}
+			(void) printf("#%*sActual benchmark run time only accounts for %.1f%%"
+					" of elapsed time.\n", WARNING_INDENT, "", percentage);
 		}
-		(void) printf("#%*sActual benchmark run time only accounts for %.1f%%"
-				" of elapsed time.\n", WARNING_INDENT, "", percentage);
 	}
 
 	if (b->ba_errors) {
@@ -985,12 +987,14 @@ print_stats(barrier_t *b, long long sample_time)
 			STATS_SEPW, "",
 			STATS_3COLW, STATS_PREC, b->ba_corrected.st_timecorr);
 
-	(void) printf("#\n# %*s %*.*f\n",
+	(void) printf("#\n# %*s %*.*lf\n",
 			STATS_1COLW, "elapsed time",
-			STATS_2COLW, STATS_PREC, (b->ba_endtime - b->ba_starttime) / 1.0e9);
-	(void) printf("# %*s %*.*f\n",
-			STATS_1COLW, "run time",
-			STATS_2COLW, STATS_PREC, (b->ba_totaltime / (lm_optT * lm_optP)) / 1.0e9);
+			STATS_2COLW, STATS_PREC, (double)(b->ba_endtime - b->ba_starttime) / 1.0e9);
+	if ((lm_optT * lm_optP) == 1) {
+		(void) printf("# %*s %*.*lf\n",
+				STATS_1COLW, "run time",
+				STATS_2COLW, STATS_PREC, (double)b->ba_totaltime / 1.0e9);
+	}
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
 			STATS_2COLW, nsecs_overhead);
 
@@ -1011,10 +1015,12 @@ print_stats(barrier_t *b, long long sample_time)
 	(void) printf("# %*s %*d\n", STATS_1COLW, "number of final samples",
 			STATS_2COLW, b->ba_batches_final);
 
-	int recB = (int)round(sample_time / b->ba_corrected.st_mean);
-	if ((abs(lm_optB - recB) / (double)lm_optB) > 0.2)
-		(void) printf("# %*s %*d\n", STATS_1COLW, "recommended -B value",
-				STATS_2COLW, recB);
+	if ((lm_optT * lm_optP) == 1) {
+		int recB = (int)round(sample_time / b->ba_corrected.st_mean);
+		if ((abs(lm_optB - recB) / (double)lm_optB) > 0.2)
+			(void) printf("#\n# %*s %*d\n", STATS_1COLW, "recommended -B value",
+					STATS_2COLW, recB);
+	}
 
 	print_histo(b);
 
@@ -1032,7 +1038,7 @@ update_stats(barrier_t *b, result_t *r)
 	b->ba_count  += r->re_count;
 	b->ba_errors += r->re_errors;
 
-	b->ba_totaltime += time = r->re_t1 - r->re_t0;
+	b->ba_totaltime += (time = (r->re_t1 - r->re_t0));
 	time -= nsecs_overhead;
 	if (time < (100 * nsecs_resolution))
 		b->ba_quant++;
@@ -1140,7 +1146,7 @@ barrier_create(int hwm, int datasize)
 int
 barrier_destroy(barrier_t *b)
 {
-	int 			ret;
+	int				ret;
 	unsigned int	size = b->ba_size;
 #ifdef USE_SEMOP
 	ret = semctl(b->ba_semid, 0, IPC_RMID);
