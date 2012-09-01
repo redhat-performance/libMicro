@@ -54,31 +54,31 @@
 #define	FIRSTPORT		12345
 
 typedef struct {
-	int 			*ts_lsns;
-	struct sockaddr_in 	*ts_adds;
+	int				   *ts_lsns;
+	struct sockaddr_in *ts_adds;
 } tsd_t;
 
-static int optz = -0;
+static int optz = 0;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
 	lm_defB = 256;
-	(void) sprintf(lm_optstr, "z");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "z");
 
-	(void) sprintf(lm_usage,
-	    "		[-z bind to port 0 rather than seq. number\n"
-	    "notes: measures bind() on TCP");
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+			"\t[-z bind to port 0 rather than seq. number\n"
+			"notes: measures bind() on TCP");
 
-	return (0);
+	return 0;
 }
 
 int
-benchmark_initrun()
+benchmark_initrun(void)
 {
-	setfdlimit(lm_optB * lm_optT + 10);
+	setfdlimit((lm_optB * lm_optT) + 10);
 
 	return 0;
 }
@@ -92,76 +92,76 @@ benchmark_optswitch(int opt, char *optarg)
 		optz = 1;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t 			*ts = (tsd_t *)tsd;
-	int			i, j;
-	int			opt = 1;
-	struct hostent		*host;
-	int			errors = 0;
+	tsd_t		   *ts = (tsd_t *)tsd;
+	int				i, j;
+	int				opt = 1;
+	struct hostent *host;
+	int				errors = 0;
 
 	ts->ts_lsns = (int *)malloc(lm_optB * sizeof (int));
 	if (ts->ts_lsns == NULL)
 		errors ++;
 
 	ts->ts_adds = (struct sockaddr_in *)malloc(lm_optB *
-	    sizeof (struct sockaddr_in));
+			sizeof (struct sockaddr_in));
 	if (ts->ts_adds == NULL)
-		errors ++;
+		errors++;
 
 	j = FIRSTPORT;
 	for (i = 0; i < lm_optB; i++) {
 		if ((ts->ts_lsns[i] = socket(PF_INET, SOCK_STREAM, 0)) == -1)
-			errors ++;
+			errors++;
 
 		if (setsockopt(ts->ts_lsns[i], SOL_SOCKET, SO_REUSEADDR,
-		    &opt, sizeof (int)) == -1)
-			errors ++;
+				&opt, sizeof (int)) == -1)
+			errors++;
 
 		if ((host = gethostbyname("localhost")) == NULL)
-			errors ++;
+			errors++;
 
 		(void) memset(&ts->ts_adds[i], 0,
-		    sizeof (struct sockaddr_in));
+				sizeof (struct sockaddr_in));
 		ts->ts_adds[i].sin_family = AF_INET;
 		ts->ts_adds[i].sin_port = (optz ? 0 : htons(j++));
 		(void) memcpy(&ts->ts_adds[i].sin_addr.s_addr,
-		    host->h_addr_list[0], sizeof (struct in_addr));
+				host->h_addr_list[0], sizeof (struct in_addr));
 	}
-	return (errors);
+	return errors;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
 	for (i = 0; i < lm_optB; i++) {
 		if ((bind(ts->ts_lsns[i],
-		    (struct sockaddr *)&ts->ts_adds[i],
-		    sizeof (struct sockaddr_in)) != 0) &&
-		    (errno != EADDRINUSE))
-			res->re_errors ++;
+				(struct sockaddr *)&ts->ts_adds[i],
+				sizeof (struct sockaddr_in)) != 0) &&
+				(errno != EADDRINUSE))
+			res->re_errors++;
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark_finibatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
 	for (i = 0; i < lm_optB; i++)
 		(void) close(ts->ts_lsns[i]);
-	return (0);
+	return 0;
 }
