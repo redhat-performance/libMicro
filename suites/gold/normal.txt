@@ -29,7 +29,6 @@ clock_nanosleep "clock_nanosleep_s" -B 1500 -s
 clock_nanosleep "clock_nanosleep_sr" -B 1500 -s -r
 close "close_bad" -B 700k -b
 close "close_tmp" -B 640 -f $TFILE
-close "close_usr" -B 640 -f $VFILE
 close "close_zero" -B 640 -f /dev/zero
 connection "conn_connect" -B 512 -c
 dup "dup" -B 200k
@@ -63,7 +62,6 @@ exp "expf" -B 400k -f expf
 exp "expl" -B 1m -f expl
 fcntl_ndelay "fcntl_ndelay"
 fcntl "fcntl_tmp" -f $TFILE
-fcntl "fcntl_usr" -f $VFILE
 file_lock "file_lock" -B 70k
 fork "fork_100" -B 100
 getcontext "getcontext"
@@ -91,7 +89,6 @@ log "logl" -B 2m -f logl
 longjmp "longjmp" -B 5m
 lrand48 "lrand48" -B 8000000
 lseek "lseek_t8k" -s 8k -f $TFILE
-lseek "lseek_u8k" -s 8k -f $VFILE
 malloc "malloc_10" -s 10 -g 10 -B 10k
 malloc "malloc_100" -s 100 -g 10 -B 10k
 malloc "malloc_100k" -s 100k -g 10 -B 1000
@@ -141,20 +138,14 @@ mmap "mmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 mmap "mmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 mmap "mmap_rt128k" -l 128k -r -f $TFILE -B 5k
 mmap "mmap_rt8k" -l 8k -r -f $TFILE -B 10k
-mmap "mmap_ru128k" -l 128k -r -f $VFILE -B 5k
-mmap "mmap_ru8k" -l 8k -r -f $VFILE -B 10k
 mmap "mmap_rz128k" -l 128k -r -f /dev/zero -B 5k
 mmap "mmap_rz8k" -l 8k -r -f /dev/zero -B 10k
 mmap "mmap_t128k" -l 128k -f $TFILE -B 5k
 mmap "mmap_t8k" -l 8k -f $TFILE -B 10k
-mmap "mmap_u128k" -l 128k -f $VFILE -B 5k
-mmap "mmap_u8k" -l 8k -f $VFILE -B 10k
 mmap "mmap_wa128k" -l 128k -w -f MAP_ANON -B 1k
 mmap "mmap_wa8k" -l 8k -w -f MAP_ANON -B 10k
 mmap "mmap_wt128k" -l 128k -w -f $TFILE -B 1k
 mmap "mmap_wt8k" -l 8k -w -f $TFILE -B 10k
-mmap "mmap_wu128k" -l 128k -w -f $VFILE -B 1k
-mmap "mmap_wu8k" -l 8k -w -f $VFILE -B 10k
 mmap "mmap_wz128k" -l 128k -w -f /dev/zero -B 1k
 mmap "mmap_wz8k" -l 8k -w -f /dev/zero -B 10k
 mmap "mmap_z128k" -l 128k -f /dev/zero -B 5k
@@ -168,20 +159,12 @@ mprotect "mprot_z128k" -l 128k -f /dev/zero -B 5k
 mprotect "mprot_z8k" -l 8k -f /dev/zero -B 10k
 msync "msync_rait128k" -l 128k -r -f $TFILE -a -i -B 15k
 msync "msync_rait8k" -l 8k -r -f $TFILE -a -i -B 15k
-msync "msync_raiu128k" -l 128k -r -f $VFILE -a -i -B 15k
-msync "msync_raiu8k" -l 8k -r -f $VFILE -a -i -B 15k
 msync "msync_rat128k" -l 128k -r -f $TFILE -a -B 15k
 msync "msync_rat8k" -l 8k -r -f $TFILE -a -B 15k
-msync "msync_rau128k" -l 128k -r -f $VFILE -a -B 15k
-msync "msync_rau8k" -l 8k -r -f $VFILE -a -B 15k
 msync "msync_rit128k" -l 128k -r -f $TFILE -i -B 15k
 msync "msync_rit8k" -l 8k -r -f $TFILE -i -B 15k
-msync "msync_riu128k" -l 128k -r -f $VFILE -i -B 15k
-msync "msync_riu8k" -l 8k -r -f $VFILE -i -B 15k
 msync "msync_rt128k" -l 128k -r -f $TFILE -B 15k
 msync "msync_rt8k" -l 8k -r -f $TFILE -B 15k
-msync "msync_ru128k" -l 128k -r -f $VFILE -B 15k
-msync "msync_ru8k" -l 8k -r -f $VFILE -B 15k
 msync "msync_t128k" -l 128k -f $TFILE -B 30k
 msync "msync_t8k" -l 8k -f $TFILE -B 30k
 msync "msync_ta128k" -l 128k -f $TFILE -a -B 30k
@@ -190,30 +173,14 @@ msync "msync_tai128k" -l 128k -f $TFILE -a -i -B 30k
 msync "msync_tai8k" -l 8k -f $TFILE -a -i -B 30k
 msync "msync_ti128k" -l 128k -f $TFILE -i -B 30k
 msync "msync_ti8k" -l 8k -f $TFILE -i -B 30k
-msync "msync_u128k" -l 128k -f $VFILE -B 30k
-msync "msync_u8k" -l 8k -f $VFILE -B 30k
-msync "msync_ua128k" -l 128k -f $VFILE -a -B 30k
-msync "msync_ua8k" -l 8k -f $VFILE -a -B 30k
-msync "msync_uai128k" -l 128k -f $VFILE -a -i -B 30k
-msync "msync_uai8k" -l 8k -f $VFILE -a -i -B 30k
-msync "msync_ui128k" -l 128k -f $VFILE -i -B 30k
-msync "msync_ui8k" -l 8k -f $VFILE -i -B 30k
 msync "msync_wait128k" -l 128k -w -f $TFILE -a -i -B 10k
 msync "msync_wait8k" -l 8k -w -f $TFILE -a -i -B 30k
-msync "msync_waiu128k" -l 128k -w -f $VFILE -a -i -B 10k
-msync "msync_waiu8k" -l 8k -w -f $VFILE -a -i -B 30k
 msync "msync_wat128k" -l 128k -w -f $TFILE -a -B 10k
 msync "msync_wat8k" -l 8k -w -f $TFILE -a -B 30k
-msync "msync_wau128k" -l 128k -w -f $VFILE -a -B 10k
-msync "msync_wau8k" -l 8k -w -f $VFILE -a -B 30k
 msync "msync_wit128k" -l 128k -w -f $TFILE -i -B 10k
 msync "msync_wit8k" -l 8k -w -f $TFILE -i -B 30k
-msync "msync_wiu128k" -l 128k -w -f $VFILE -i -B 10k
-msync "msync_wiu8k" -l 8k -w -f $VFILE -i -B 30k
 msync "msync_wt128k" -l 128k -w -f $TFILE -B 10k
 msync "msync_wt8k" -l 8k -w -f $TFILE -B 30k
-msync "msync_wu128k" -l 128k -w -f $VFILE -B 10k
-msync "msync_wu8k" -l 8k -w -f $VFILE -B 30k
 mutex "mutex_mt" -t -B 5m
 mutex "mutex_mts" -t -s -B 5m
 mutex "mutex_st" -B 5m
@@ -226,7 +193,6 @@ nanosleep "nanosleep_r" -B 1500 -r
 nanosleep "nanosleep_rs" -B 1500 -s -r
 nanosleep "nanosleep_s" -B 1500 -s
 open "open_tmp" -B 25000 -f $TFILE
-open "open_usr" -B 25000 -f $VFILE
 open "open_zero" -B 25000 -f /dev/zero
 pipe "pipe_fmp1" -s 1 -x fifo -m mp -B 5k
 pipe "pipe_fmp4k" -s 4k -x fifo -m mp -B 5k
@@ -274,9 +240,6 @@ posix_spawn "posix_spawn_64nt" -B 200 -n 64 -p 4096 -t
 pread "pread_t100k" -s 100k -f $TFILE -B 10k
 pread "pread_t10k" -s 10k -f $TFILE
 pread "pread_t1k" -s 1k -f $TFILE
-pread "pread_u100k" -s 100k -f $VFILE -B 10k
-pread "pread_u10k" -s 10k -f $VFILE
-pread "pread_u1k" -s 1k -f $VFILE
 pread "pread_z100k" -s 100k -f /dev/zero -B 10k
 pread "pread_z10k" -s 10k -f /dev/zero
 pread "pread_z1k" -s 1k -f /dev/zero
@@ -292,15 +255,9 @@ pwrite "pwrite_n1k" -s 1k -f /dev/null -B 500k
 pwrite "pwrite_t100k" -s 100k -f $TFILE -B 8k
 pwrite "pwrite_t10k" -s 10k -f $TFILE -B 10k
 pwrite "pwrite_t1k" -s 1k -f $TFILE
-pwrite "pwrite_u100k" -s 100k -f $VFILE -B 8k
-pwrite "pwrite_u10k" -s 10k -f $VFILE -B 10k
-pwrite "pwrite_u1k" -s 1k -f $VFILE
 read "read_t100k" -s 100k -f $TFILE -B 5k
 read "read_t10k" -s 10k -f $TFILE -B 40k
 read "read_t1k" -s 1k -f $TFILE -B 80k
-read "read_u100k" -s 100k -f $VFILE -B 5k
-read "read_u10k" -s 10k -f $VFILE -B 40k
-read "read_u1k" -s 1k -f $VFILE -B 150k
 read "read_z100k" -s 100k -f /dev/zero -B 8k
 read "read_z10k" -s 10k -f /dev/zero -B 70k
 read "read_z1k" -s 1k -f /dev/zero -B 300k
@@ -331,7 +288,6 @@ socket "socket_i" -B 10k -f PF_INET
 socket "socket_u" -B 10k
 socketpair "socketpair" -B 25000
 stat "stat_tmp" -f $TFILE -B 50k
-stat "stat_usr" -f $VFILE -B 50k
 strchr "strchr_10" -s 10 -B 18m
 strchr "strchr_1k" -s 1k -B 1m
 strcmp "strcmp_10" -s 10 -B 14m
@@ -351,20 +307,14 @@ munmap "unmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
 munmap "unmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
 munmap "unmap_rt128k" -l 128k -r -f $TFILE -B 5k
 munmap "unmap_rt8k" -l 8k -r -f $TFILE -B 10k
-munmap "unmap_ru128k" -l 128k -r -f $VFILE -B 5k
-munmap "unmap_ru8k" -l 8k -r -f $VFILE -B 10k
 munmap "unmap_rz128k" -l 128k -r -f /dev/zero -B 5k
 munmap "unmap_rz8k" -l 8k -r -f /dev/zero -B 10k
 munmap "unmap_t128k" -l 128k -f $TFILE -B 5k
 munmap "unmap_t8k" -l 8k -f $TFILE -B 10k
-munmap "unmap_u128k" -l 128k -f $VFILE -B 5k
-munmap "unmap_u8k" -l 8k -f $VFILE -B 10k
 munmap "unmap_wa128k" -l 128k -w -f MAP_ANON -B 1k
 munmap "unmap_wa8k" -l 8k -w -f MAP_ANON -B 10k
 munmap "unmap_wt128k" -l 128k -w -f $TFILE -B 1k
 munmap "unmap_wt8k" -l 8k -w -f $TFILE -B 10k
-munmap "unmap_wu128k" -l 128k -w -f $VFILE -B 1k
-munmap "unmap_wu8k" -l 8k -w -f $VFILE -B 10k
 munmap "unmap_wz128k" -l 128k -w -f /dev/zero -B 1k
 munmap "unmap_wz8k" -l 8k -w -f /dev/zero -B 10k
 munmap "unmap_z128k" -l 128k -f /dev/zero -B 5k
@@ -378,15 +328,9 @@ write "write_n1k" -s 1k -f /dev/null -B 500k
 write "write_t100k" -s 100k -f $TFILE -B 1k
 write "write_t10k" -s 10k -f $TFILE -B 20k
 write "write_t1k" -s 1k -f $TFILE -B 80k
-write "write_u100k" -s 100k -f $VFILE -B 1k
-write "write_u10k" -s 10k -f $VFILE -B 20k
-write "write_u1k" -s 1k -f $VFILE -B 80k
 writev "writev_n100k" -s 100k -f /dev/null -B 200k
 writev "writev_n10k" -s 10k -f /dev/null -B 200k
 writev "writev_n1k" -s 1k -f /dev/null -B 200k
 writev "writev_t100k" -s 100k -f $TFILE -B 200
 writev "writev_t10k" -s 10k -f $TFILE -B 1k
 writev "writev_t1k" -s 1k -f $TFILE -B 20k
-writev "writev_u100k" -s 100k -f $VFILE -B 200
-writev "writev_u10k" -s 10k -f $VFILE -B 1k
-writev "writev_u1k" -s 1k -f $VFILE -B 20k

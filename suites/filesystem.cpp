@@ -3,7 +3,9 @@
 
 close	"close_bad"	-B 700k	-b
 close	"close_tmp"	-B 640	-f $TFILE
+# if defined(EXTENDED)
 close	"close_usr"	-B 640	-f $VFILE
+# endif
 close	"close_zero"	-B 640	-f /dev/zero
 
 cascade_lockf	"c_lockf_1"	-B 60k
@@ -34,16 +36,24 @@ realpath	"realpath_tmp"	-f $TDIR1	-B 4k
 realpath	"realpath_usr"	-f $VDIR1	-B 4k
 
 stat	"stat_tmp"	-f $TFILE	-B 50k
+#  if defined(EXTENDED)
 stat	"stat_usr"	-f $VFILE	-B 50k
+# endif
 
 fcntl	"fcntl_tmp"	-f $TFILE
+#  if defined(EXTENDED)
 fcntl	"fcntl_usr"	-f $VFILE
+# endif
 
 lseek	"lseek_t8k"	-s 8k	-f $TFILE
+#  if defined(EXTENDED)
 lseek	"lseek_u8k"	-s 8k	-f $VFILE
+# endif
 
 open	"open_tmp"	-B 25000	-f $TFILE
+#  if defined(EXTENDED)
 open	"open_usr"	-B 25000	-f $VFILE
+# endif
 open	"open_zero"	-B 25000	-f /dev/zero
 
 dup	"dup"	-B 200k
