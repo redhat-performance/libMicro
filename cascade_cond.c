@@ -85,9 +85,9 @@ benchmark_init(void)
 	lm_defN = "cscd_cond";
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-	    "       [-o] (do signal outside mutex)\n"
-	    "       [-s] (force PTHREAD_PROCESS_SHARED)\n"
-	    "notes: thread cascade using pthread_cond_wait()/pthread_cond_signal()\n");
+		"\t[-o] (do signal outside mutex)\n"
+		"\t[-s] (force PTHREAD_PROCESS_SHARED)\n"
+		"notes: thread cascade using pthread_cond_wait()/pthread_cond_signal()\n");
 
 	return 0;
 }
@@ -118,78 +118,78 @@ benchmark_initrun(void)
 	pthread_condattr_t	ca;
 
 	ret = pthread_mutexattr_init(&ma);
-    if (ret != 0) {
-        return 1;
-    }
+	if (ret != 0) {
+		return 1;
+	}
 	ret = pthread_condattr_init(&ca);
-    if (ret != 0) {
-        return 1;
-    }
+	if (ret != 0) {
+		return 1;
+	}
 	if (lm_optP > 1 || opts) {
 		ret = pthread_mutexattr_setpshared(&ma,
-		    PTHREAD_PROCESS_SHARED);
-        if (ret != 0) {
-            return 1;
-        }
+			PTHREAD_PROCESS_SHARED);
+		if (ret != 0) {
+			return 1;
+		}
 		ret = pthread_condattr_setpshared(&ca,
-		    PTHREAD_PROCESS_SHARED);
-        if (ret != 0) {
-            return 1;
-        }
+			PTHREAD_PROCESS_SHARED);
+		if (ret != 0) {
+			return 1;
+		}
 	} else {
 		ret = pthread_mutexattr_setpshared(&ma,
-		    PTHREAD_PROCESS_PRIVATE);
-        if (ret != 0) {
-            return 1;
-        }
+			PTHREAD_PROCESS_PRIVATE);
+		if (ret != 0) {
+			return 1;
+		}
 		ret = pthread_condattr_setpshared(&ca,
-		    PTHREAD_PROCESS_PRIVATE);
-        if (ret != 0) {
-            return 1;
-        }
+			PTHREAD_PROCESS_PRIVATE);
+		if (ret != 0) {
+			return 1;
+		}
 	}
 
 	nthreads = lm_optP * lm_optT;
 	nlocks = nthreads * 2;
 	/*LINTED*/
 	mxs = (pthread_mutex_t *)mmap(NULL,
-	    nlocks * sizeof (pthread_mutex_t),
-	    PROT_READ | PROT_WRITE,
-	    MAP_ANONYMOUS | MAP_SHARED,
-	    -1, 0L);
+		nlocks * sizeof (pthread_mutex_t),
+		PROT_READ | PROT_WRITE,
+		MAP_ANONYMOUS | MAP_SHARED,
+		-1, 0L);
 	if (mxs == MAP_FAILED) {
 		return 1;
 	}
 
 	/*LINTED*/
 	cvs = (pthread_cond_t *)mmap(NULL,
-	    nlocks * sizeof (pthread_cond_t),
-	    PROT_READ | PROT_WRITE,
-	    MAP_ANONYMOUS | MAP_SHARED,
-	    -1, 0L);
+		nlocks * sizeof (pthread_cond_t),
+		PROT_READ | PROT_WRITE,
+		MAP_ANONYMOUS | MAP_SHARED,
+		-1, 0L);
 	if (cvs == MAP_FAILED) {
 		return 1;
 	}
 
 	/*LINTED*/
 	conds = (int *)mmap(NULL,
-	    nlocks * sizeof (int),
-	    PROT_READ | PROT_WRITE,
-	    MAP_ANONYMOUS | MAP_SHARED,
-	    -1, 0L);
+		nlocks * sizeof (int),
+		PROT_READ | PROT_WRITE,
+		MAP_ANONYMOUS | MAP_SHARED,
+		-1, 0L);
 	if (conds == MAP_FAILED) {
 		return 1;
 	}
 
 	for (i = 0; i < nlocks; i++) {
 		ret = pthread_mutex_init(&mxs[i], &ma);
-        if (ret != 0) {
-            e++;
-        }
+		if (ret != 0) {
+			e++;
+		}
 		ret = pthread_cond_init(&cvs[i], &ca);
-        if (ret != 0) {
-            e++;
-        }
+		if (ret != 0) {
+			e++;
+		}
 		conds[i] = 0;
 	}
 
@@ -199,24 +199,24 @@ benchmark_initrun(void)
 static int
 block(int index)
 {
-    int ret;
+	int ret;
 
 	ret = pthread_mutex_lock(&mxs[index]);
-    if (ret != 0) {
-        return 1;
-    }
+	if (ret != 0) {
+		return 1;
+	}
 	while (conds[index] != 0) {
 		ret = pthread_cond_wait(&cvs[index], &mxs[index]);
-        if (ret != 0) {
-            (void) pthread_mutex_unlock(&mxs[index]);
-            return 1;
-        }
+		if (ret != 0) {
+			(void) pthread_mutex_unlock(&mxs[index]);
+			return 1;
+		}
 	}
 	conds[index] = 1;
 	ret = pthread_mutex_unlock(&mxs[index]);
-    if (ret != 0) {
-        return 1;
-    }
+	if (ret != 0) {
+		return 1;
+	}
 
 	return 0;
 }
@@ -224,32 +224,32 @@ block(int index)
 static int
 unblock(int index)
 {
-    int ret;
+	int ret;
 
 	ret = pthread_mutex_lock(&mxs[index]);
-    if (ret != 0) {
-        return 1;
-    }
+	if (ret != 0) {
+		return 1;
+	}
 	conds[index] = 0;
 	if (opto) {
 		ret = pthread_mutex_unlock(&mxs[index]);
-        if (ret != 0) {
-            return 1;
-        }
+		if (ret != 0) {
+			return 1;
+		}
 		ret = pthread_cond_signal(&cvs[index]);
-        if (ret != 0) {
-            return 1;
-        }
+		if (ret != 0) {
+			return 1;
+		}
 	} else {
 		ret = pthread_cond_signal(&cvs[index]);
-        if (ret != 0) {
-            (void) pthread_mutex_unlock(&mxs[index]);
-            return 1;
-        }
+		if (ret != 0) {
+			(void) pthread_mutex_unlock(&mxs[index]);
+			return 1;
+		}
 		ret = pthread_mutex_unlock(&mxs[index]);
-        if (ret != 0) {
-            return 1;
-        }
+		if (ret != 0) {
+			return 1;
+		}
 	}
 	return 0;
 }
