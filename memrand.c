@@ -47,10 +47,9 @@
 
 static long long	opts = 1024*1024;
 static long long	len = 0;
-static long long	loopend = 0;
 
 typedef struct {
-	long long  **ts_data;
+	long long **ts_data;
 	long long	ts_result;
 } tsd_t;
 
@@ -62,7 +61,7 @@ benchmark_init(void)
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s:");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-		"       [-s size] number of bytes to"
+		"\t[-s size] number of bytes to"
 		" access (default %ld)\n"
 		"notes: measures \"random\" memory access times\n",
 		opts);
@@ -111,11 +110,6 @@ benchmark_initworker(void *tsd)
 		ts->ts_data[i] = (long long *)&(ts->ts_data[j]);
 	}
 
-	/* Ensure that we go through the data at least twice */
-	loopend = (lm_optB > (2 * len)) ? lm_optB : 2 * len;
-
-	if (loopend > lm_optB) printf("*** using -B of %lld instead of %d\n", loopend, lm_optB);
-
 	return 0;
 }
 
@@ -124,19 +118,28 @@ benchmark(void *tsd, result_t *res)
 {
 	tsd_t		   *ts = (tsd_t *)tsd;
 	long long	  **ptr = ts->ts_data;
-	int				i;
+	int				i, j;
 
-	for (i = 0; i < loopend; i += 10) {
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
-		ptr = (long long **)*ptr;
+	for (i = 0; i < lm_optB; i += 2) {
+		for (j = 0; j < len; j += 16) {
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+			ptr = (long long **)*ptr;
+		}
 	}
 
 	ts->ts_result = (long long)*ptr;
@@ -147,7 +150,7 @@ benchmark(void *tsd, result_t *res)
 }
 
 char *
-benchmark_result()
+benchmark_result(void)
 {
 	static char	 result[256];
 
