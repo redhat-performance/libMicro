@@ -638,18 +638,20 @@ actual_main(int argc, char *argv[])
 
 	/* print result */
 
+	double usedB = (double)b->ba_count / b->ba_batches;
+
 	if (lm_optM) {
 		(void) printf("%-*s %3d %3d %*.*f %12d %8lld %8d %s\n",
 				strlen(lm_optN), lm_optN, lm_optP, lm_optT,
 				RES_WIDTH, RES_PREC, b->ba_corrected.st_mean,
-				b->ba_batches_final, b->ba_errors, lm_optB,
+				b->ba_batches_final, b->ba_errors, (int)usedB,
 				benchmark_result());
 	}
 	else {
 		(void) printf("%-*s %3d %3d %*lld %12d %8lld %8d %s\n",
 				strlen(lm_optN), lm_optN, lm_optP, lm_optT,
 				RES_WIDTH, b->ba_corrected.st_median,
-				b->ba_batches_final, b->ba_errors, lm_optB,
+				b->ba_batches_final, b->ba_errors, (int)usedB,
 				benchmark_result());
 	}
 
@@ -820,45 +822,9 @@ print_warnings(barrier_t *b)
 			((double)lm_optB * median * 1000.0)) +
 			1.0);
 		(void) printf("#%*sQuantization error likely; "
-				"increase batch size (-B option, "
-				"currently %d) %lldX to avoid.\n",
+				"perhaps increasing batch size (-B option, "
+				"currently %d) %lldX will avoid this.\n",
 				WARNING_INDENT, "", lm_optB, increase);
-	}
-
-	long long per_batch = (long long)round((b->ba_count / (double)b->ba_batches));
-
-	if (lm_optG >= 2)
-		fprintf(stderr, "DEBUG2: print_warnings(): "
-				"lm_optB = %d, per_batch = %lld, "
-				"b->ba_count (%lld) / b->ba_batches (%d) = %.2lf\n",
-				lm_optB, per_batch, b->ba_count, b->ba_batches,
-				b->ba_count / (double)b->ba_batches);
-
-	if ((per_batch / ((double)b->ba_batches / (lm_optT * lm_optP))) < 0.01618) {
-		/*
-		 * The ratio of 0.01618, or The Golden Ratio / 100, is just a way to
-		 * catch a test run with small number of runs in a batch with
-		 * potentially large numbers of batches.
-		 *
-		 * FIXME: There might be a more suitable ratio.
-		 */
-		if (!head++) {
-			(void) printf("#\n# WARNINGS\n");
-		}
-
-		/*
-		 * The number of batches (samples) is either really high, or the
-		 * number of runs per batch is really low. In either case, we should
-		 * probably re-balance the test run so that a sufficient count of
-		 * operations is timed per batch, lowering the number of over batches.
-		 */
-		increase = (long long)round(((double)(b->ba_count / (lm_optT * lm_optP)) / DEF_SAMPLES) / per_batch);
-		(void) printf("#%*sLow runs (%lld) per batch (%d batches) "
-				"consider increasing batch size (-B option, "
-				"currently %d) %lldX (to about %lld) to avoid.\n",
-				WARNING_INDENT, "",
-				per_batch, b->ba_batches, lm_optB, increase,
-				(long long)round((double)b->ba_count / DEF_SAMPLES));
 	}
 
 	if (b->ba_batches < DEF_SAMPLES) {
@@ -996,31 +962,44 @@ print_stats(barrier_t *b, long long sample_time)
 				STATS_2COLW, STATS_PREC, (double)b->ba_totaltime / 1.0e9);
 	}
 	(void) printf("# %*s %*u\n#\n", STATS_1COLW, "getnsecs overhead",
-			STATS_2COLW, nsecs_overhead);
+			STATS_2COLW_L, nsecs_overhead);
 
 	if ((lm_optT * lm_optP) > 1) {
 		(void) printf("# %*s %*d (%d per thread)\n", STATS_1COLW, "number of samples",
-				STATS_2COLW, b->ba_batches, (b->ba_batches / (lm_optT * lm_optP)));
+				STATS_2COLW_L, b->ba_batches, (b->ba_batches / (lm_optT * lm_optP)));
 	}
 	else {
 		(void) printf("# %*s %*d\n", STATS_1COLW, "number of samples",
-				STATS_2COLW, b->ba_batches);
+				STATS_2COLW_L, b->ba_batches);
 	}
 	if (b->ba_batches > b->ba_datasize)
 		(void) printf("# %*s %*d (%d samples dropped)\n",
 				STATS_1COLW, "number of samples retained",
-				STATS_2COLW, b->ba_datasize, (b->ba_batches - b->ba_datasize));
+				STATS_2COLW_L, b->ba_datasize, (b->ba_batches - b->ba_datasize));
 	(void) printf("# %*s %*d\n", STATS_1COLW, "number of outliers",
-			STATS_2COLW, b->ba_outliers);
+			STATS_2COLW_L, b->ba_outliers);
 	(void) printf("# %*s %*d\n", STATS_1COLW, "number of final samples",
-			STATS_2COLW, b->ba_batches_final);
+			STATS_2COLW_L, b->ba_batches_final);
 
-	if ((lm_optT * lm_optP) == 1) {
-		int recB = (int)round(sample_time / b->ba_corrected.st_mean);
-		if ((abs(lm_optB - recB) / (double)lm_optB) > 0.2)
-			(void) printf("#\n# %*s %*d\n", STATS_1COLW, "recommended -B value",
-					STATS_2COLW, recB);
+	double usedB = (double)b->ba_count / b->ba_batches;
+	(void) printf("# %*s %*.*lf (-B %d)\n", STATS_1COLW, "ops per sample",
+			STATS_2COLW, STATS_PREC, usedB, lm_optB);
+	int recB;
+	if (b->ba_corrected.st_mean <= (1000 * 1000)) {
+		/*
+		 * Try to keep the batch size per timed run roughly 1 ms. Basically we
+		 * don't completely trust that the timing measurements are accurate
+		 * under 1 ms, and we don't want to track millions of samples, so we
+		 * recommend keeping the batch size just large enough to fit in 1 ms.
+		 */
+		recB = (int)round((1000 * 1000) / b->ba_corrected.st_mean);
 	}
+	else {
+		recB = 1;
+	}
+	if ((abs(usedB - recB) / (double)usedB) > 0.2)
+		(void) printf("#\n# %*s %*d\n", STATS_1COLW, "recommended -B value",
+				STATS_2COLW_L, recB);
 
 	print_histo(b);
 
