@@ -44,29 +44,29 @@
 #include "libmicro.h"
 
 typedef struct {
-	int			ts_once;
-	int			*ts_fds;
+	int		ts_once;
+	int	   *ts_fds;
 } tsd_t;
 
-#define	DEFF			"/dev/null"
+#define	DEFF	"/dev/null"
 
-static char			*optf = DEFF;
+static char	   *optf = DEFF;
 
 int
-benchmark_init()
+benchmark_init(void)
 {
 	lm_tsdsize = sizeof (tsd_t);
 
 	lm_defB = 256;
 
-	(void) sprintf(lm_usage,
-	    "       [-f file-to-open (default %s)]\n"
-	    "notes: measures open()\n",
-	    DEFF);
+	(void) snprintf(lm_usage, sizeof(lm_usage),
+			"\t[-f file-to-open (default %s)]\n"
+			"notes: measures open()\n",
+			DEFF);
 
-	(void) sprintf(lm_optstr, "f:");
+	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:");
 
-	return (0);
+	return 0;
 }
 
 int
@@ -77,9 +77,9 @@ benchmark_optswitch(int opt, char *optarg)
 		optf = optarg;
 		break;
 	default:
-		return (-1);
+		return -1;
 	}
-	return (0);
+	return 0;
 }
 
 int
@@ -93,30 +93,32 @@ benchmark_initrun(void)
 int
 benchmark_initbatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
-	int			errors = 0;
+	tsd_t   *ts = (tsd_t *)tsd;
+	int		i;
+	int		errors = 0;
 
 	if (ts->ts_once++ == 0) {
 		ts->ts_fds = (int *)malloc(lm_optB * sizeof (int));
 		if (ts->ts_fds == NULL) {
 			errors++;
 		}
-		for (i = 0; i < lm_optB; i++) {
-			ts->ts_fds[i] = -1;
+		else {
+			for (i = 0; i < lm_optB; i++) {
+				ts->ts_fds[i] = -1;
+			}
 		}
 	}
 
-	return (errors);
+	return errors;
 }
 
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
-	for (i = 0; i < lm_optB; i++) {
+	for (i = 0; i < lm_optB && ts->ts_fds; i++) {
 		ts->ts_fds[i] = open(optf, O_RDONLY);
 		if (ts->ts_fds[i] < 0) {
 			res->re_errors++;
@@ -124,18 +126,19 @@ benchmark(void *tsd, result_t *res)
 	}
 	res->re_count = i;
 
-	return (0);
+	return 0;
 }
 
 int
 benchmark_finibatch(void *tsd)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
 
 	for (i = 0; i < lm_optB; i++) {
 		(void) close(ts->ts_fds[i]);
+		ts->ts_fds[i] = -1;
 	}
 
-	return (0);
+	return 0;
 }
