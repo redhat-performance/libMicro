@@ -82,11 +82,13 @@ reserved for framework options):
        [-L] (print argument line)
        [-M] (reports mean rather than median)
        [-N test-name (each benchmark provides default)]
+       [-O getnsecs overhead]
        [-P processes (default 1)]
+       [-R getnsecs resolution]
        [-S] (print detailed stats)
        [-T threads (default 1)]
        [-V] (print the libMicro version and exit)
-       [-W] (flag possible benchmark problems)
+       [-W] (flag possible benchmark problems, implies -S)
        [-X maximum duration in ms (default 600000ms)]
 
 Each benchmark also supports its own set of options (using lowercase
