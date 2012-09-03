@@ -53,11 +53,11 @@ typedef struct {
 	int			ts_res;
 } tsd_t;
 
-#define	DEFF			"/dev/zero"
-#define	DEFL			8192
+#define	DEFF		"/dev/zero"
+#define	DEFL		8192
 
-static char			*optf = DEFF;
-static long long		optl = DEFL;
+static char		   *optf = DEFF;
+static long long	optl = DEFL;
 static int			optr = 0;
 static int			optw = 0;
 static int			opts = 0;
@@ -65,7 +65,7 @@ static int			optt = 0;
 static int			fd = -1;
 static int			anon = 0;
 static int			foo = 0;
-static vchar_t			*seg;
+static vchar_t	   *seg;
 static int			pagesize;
 
 int
@@ -77,12 +77,12 @@ benchmark_init(void)
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "f:l:rstw");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-	    "       [-f file-to-map (default %s)]\n"
-	    "       [-l mapping-length (default %d)]\n"
-	    "       [-r] (read a byte from each page)\n"
-	    "       [-w] (write a byte on each page)\n"
-	    "       [-s] (use MAP_SHARED)\n"
-	    "       [-t] (touch each page after restoring permissions)\n"
+	    "\t[-f file-to-map (default %s)]\n"
+	    "\t[-l mapping-length (default %d)]\n"
+	    "\t[-r] (read a byte from each page)\n"
+	    "\t[-w] (write a byte on each page)\n"
+	    "\t[-s] (use MAP_SHARED)\n"
+	    "\t[-t] (touch each page after restoring permissions)\n"
 	    "notes: measures mprotect()\n",
 	    DEFF, DEFL);
 
@@ -123,8 +123,8 @@ benchmark_optswitch(int opt, char *optarg)
 int
 benchmark_initrun(void)
 {
-	int			flags;
-	int			i;
+	int	flags;
+	int	i;
 
 	if (!anon) {
 		fd = open(optf, O_RDWR);
@@ -137,7 +137,7 @@ benchmark_initrun(void)
 	flags |= anon ? MAP_ANONYMOUS : 0;
 
 	seg = (vchar_t *)mmap(NULL, lm_optB * optl, PROT_READ | PROT_WRITE,
-	    flags, anon ? -1 : fd, 0L);
+            flags, anon ? -1 : fd, 0L);
 
 	if (seg == MAP_FAILED) {
 		return -1;
@@ -161,11 +161,11 @@ benchmark_initrun(void)
 int
 benchmark(void *tsd, result_t *res)
 {
-	tsd_t			*ts = (tsd_t *)tsd;
-	int			i;
-	int			us;
-	int			prot = PROT_NONE;
-	int			j, k;
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		i;
+	int		us;
+	int		prot = PROT_NONE;
+	int		j, k;
 
 	us = gettindex();
 	for (i = 0; i < lm_optB; i++) {
