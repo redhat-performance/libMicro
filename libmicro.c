@@ -124,6 +124,7 @@ char			lm_usage[STRSIZE];
 char			lm_optstr[STRSIZE];
 char			lm_header[STRSIZE];
 size_t			lm_tsdsize = 0;
+pthread_t		lm_default_thread = NULL;
 
 /*
  *	Globals we do not export to the user
@@ -750,7 +751,7 @@ worker_process(void)
 	int			i, ret;
 	void	   *tsd;
 
-	tids[0] = pthread_self();
+	tids[0] = lm_default_thread = pthread_self();
 
 	for (i = 1; i < lm_optT; i++) {
 		tsd = gettsd(pindex, i);

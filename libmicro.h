@@ -34,7 +34,7 @@
 
 #include <pthread.h>
 
-#define	LIBMICRO_VERSION	"0.4.1-rh.28"
+#define	LIBMICRO_VERSION	"0.4.1-rh.29"
 
 #define	STRSIZE	1024
 
@@ -171,7 +171,7 @@ extern char			lm_usage[STRSIZE];
 extern char			lm_optstr[STRSIZE];
 extern char			lm_header[STRSIZE];
 extern size_t		lm_tsdsize;
-
+extern pthread_t	lm_default_thread;
 
 /*
  * Utility functions
