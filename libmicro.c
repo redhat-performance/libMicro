@@ -675,7 +675,7 @@ actual_main(int argc, char *argv[])
 	return exit_val;
 }
 
-void *
+static void *
 worker_thread(void *arg)
 {
 	result_t	r;
@@ -773,7 +773,7 @@ worker_thread(void *arg)
 	return ((r.re_errors + ret) > 0) ? (void *)1 : NULL;
 }
 
-int
+static int
 worker_process(void)
 {
 	int		i, ret, ret_val;
@@ -791,7 +791,7 @@ worker_process(void)
 	}
 
 	tsd = gettsd(pindex, 0);
-	ret_val = (int)worker_thread(tsd);
+	ret_val = (int)(long long)worker_thread(tsd);
 
 	for (i = 1; i < lm_optT; i++) {
 		void *p_val = NULL;
@@ -800,7 +800,7 @@ worker_process(void)
 			fprintf(stderr, "worker_process(%d): pthread_join(%p, NULL) failed: (%d) %s\n", getpid(), tids[i], ret, strerror(ret));
 			exit(1);
 		}
-		if ((0 == ret_val) && p_val) ret_val = (int)p_val;
+		if ((0 == ret_val) && p_val) ret_val = (int)(long long)p_val;
 	}
 
 	return ret_val;
