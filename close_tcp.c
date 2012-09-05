@@ -33,7 +33,7 @@
  */
 
 /*
- * benchmark to measure time to close a local tcp connection
+ * close() - local tcp connection
  */
 
 #include <sys/types.h>
@@ -63,9 +63,8 @@ typedef struct {
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
-
-	lm_defB = 256;
 
 	(void) sprintf(lm_usage,
 	    "notes: measures close() on local TCP connections");

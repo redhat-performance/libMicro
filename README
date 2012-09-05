@@ -53,13 +53,12 @@ all varients (x86/sparc/Solaris/Linux) in one place.
 To collect a complete set of benchmarks, use the bench
 script and redirect its output to a file.
 
-% ./bench > output
+    % ./bench > output
 
 To compare the output of two or more runs, use multiview in the src
 directory:
 
-% ./multiview reference compare1 compare2 compare2 > compare.html
-%
+    % ./multiview reference compare1 compare2 compare2 > compare.html
 
 where the reference and compare files contain the output of different
 libmicro runs.
@@ -70,26 +69,33 @@ allowing a variety of experiments to be quickly analyzed.
 All benchmarks support the following options (uppercase letters
 reserved for framework options):
 
-       [-1] (single process; overrides -P > 1)
-       [-A] (align with clock)
-       [-B batch-size (default 0)]
-       [-C minimum number of samples (default 100)]
-       [-D minimum duration in ms (default 10000ms)]
-       [-E] (echo name to stderr)
-       [-G framework debugging level]
-       [-H] (suppress headers)
-       [-I nsecs per op] (used to compute batch size)
-       [-L] (print argument line)
-       [-M] (reports mean rather than median)
-       [-N test-name (each benchmark provides default)]
-       [-O getnsecs overhead]
-       [-P processes (default 1)]
-       [-R getnsecs resolution]
-       [-S] (print detailed stats)
-       [-T threads (default 1)]
-       [-V] (print the libMicro version and exit)
-       [-W] (flag possible benchmark problems, implies -S)
-       [-X maximum duration in ms (default 600000ms)]
+        [-1] (single process; overrides -P > 1)
+        [-A] (align with clock)
+        [-B batch-size (default is calculated)]
+        [-C minimum number of samples (default 100)]
+        [-D minimum duration in ms (default 10,000ms, or 10 seconds)]
+        [-E] (echo name to stderr)
+        [-G framework debugging level]
+        [-H] (suppress headers)
+        [-I nsecs per op (default is 500,000ns, or 500us)]
+            (used to compute batch size)
+        [-L] (print argument line)
+        [-M] (reports mean rather than median)
+        [-N test-name (each benchmark provides default)]
+        [-O getnsecs overhead]
+        [-P processes (default 1)]
+        [-R getnsecs resolution]
+        [-S] (print detailed stats)
+        [-T threads (default 1)]
+        [-V] (print the libMicro version and exit)
+        [-W] (flag possible benchmark problems, implies -S)
+        [-X maximum duration in ms (default 600,000ms, or 10 minutes)]
 
 Each benchmark also supports its own set of options (using lowercase
 letters).
+
+NOTE: If either -B and -I are not specified, the benchmark frame work will
+dynamically set -B for each sample as they are taken. It will start using a
+value calculated from the default value of -I, and adjust it as more and more
+samples are taken. When -B or -I is specified, only the initial value of -B
+(calculated or from the command line) is used.

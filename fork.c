@@ -54,6 +54,7 @@ typedef struct {
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 	(void) sprintf(lm_usage, "notes: measures fork()\n");
 

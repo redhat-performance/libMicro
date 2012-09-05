@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * test getenv
  */
 
@@ -55,8 +59,6 @@ benchmark_init()
 	    "       [-s search-size (default = %d)]\n"
 	    "notes: measures time to search env for missing string\n",
 	    DEFS);
-
-	lm_nsecs_per_op = 200;
 
 	return (0);
 }

@@ -54,9 +54,8 @@ typedef struct {
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
-
-	lm_defB = 256;
 
 	(void) sprintf(lm_optstr, "f:b");
 

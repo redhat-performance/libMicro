@@ -65,7 +65,6 @@ benchmark_init(void)
 
 	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "func");
 
-	lm_nsecs_per_op = 25;
 	lm_tsdsize = 0;
 
 	return 0;

@@ -68,7 +68,7 @@
 
 #define HISTOSIZE	32
 #define DEF_DATASIZE	100000
-#define MIN_DATASIZE	2000
+#define MIN_DATASIZE	20000
 
 #define DEF_SAMPLES	100
 #define DEF_TIME	10 /* seconds */
@@ -83,13 +83,13 @@ char		  **lm_argv = NULL;
 
 int				lm_opt1;
 int				lm_optA;
-int				lm_optB;
+int				lm_optB = 0;
 int				lm_optC = 0;
 int				lm_optD;
 int				lm_optE;
 int				lm_optG = 0;
 int				lm_optH;
-int				lm_optI;
+int				lm_optI = 0;
 int				lm_optL = 0;
 int				lm_optM = 0;
 char		   *lm_optN;
@@ -102,21 +102,15 @@ int				lm_optW;
 int				lm_optX;
 
 int				lm_def1 = 0;
-int				lm_defB = 0; /* use lm_nsecs_per_op */
 int				lm_defC = DEF_SAMPLES;
 int				lm_defD = DEF_TIME*1000; /* DEF_TIME ms */
 int				lm_defH = 0;
+int				lm_defI = 500*1000; /* 500us per op */
 char		   *lm_defN = NULL;
 int				lm_defP = 1;
 int				lm_defS = 0;
 int				lm_defT = 1;
 int				lm_defX = MAX_TIME*1000; /* MAX_TIME ms */
-
-/*
- * default on fast platform, should be overridden by individual
- * benchmarks if significantly wrong in either direction.
- */
-int				lm_nsecs_per_op = 1000; /* 1,000 ns, or 1us */
 
 char		   *lm_procpath;
 char			lm_procname[STRSIZE];
@@ -124,7 +118,8 @@ char			lm_usage[STRSIZE];
 char			lm_optstr[STRSIZE];
 char			lm_header[STRSIZE];
 size_t			lm_tsdsize = 0;
-pthread_t		lm_default_thread = NULL;
+pthread_t		lm_default_thread = (pthread_t)NULL;
+int				lm_dynamic_optB = 1;
 
 /*
  *	Globals we do not export to the user
@@ -147,7 +142,7 @@ static long long	lm_hz = 0;
 
 static void			worker_process(void);
 static void			usage(void);
-static void			print_stats(barrier_t *, long long);
+static void			print_stats(barrier_t *);
 static void			print_histo(barrier_t *);
 static int			remove_outliers(long long *, int, stats_t *);
 static unsigned int	nsecs_overhead;
@@ -201,9 +196,9 @@ actual_main(int argc, char *argv[])
 	 */
 
 	lm_opt1	= lm_def1;
-	lm_optB	= lm_defB;
 	lm_optD	= lm_defD;
 	lm_optH	= lm_defH;
+	lm_optI = lm_defI;
 	lm_optN	= lm_defN;
 	lm_optP	= lm_defP;
 	lm_optX = lm_defX;
@@ -257,6 +252,7 @@ actual_main(int argc, char *argv[])
 			break;
 		case 'B':
 			lm_optB = sizetoint(optarg);
+			lm_dynamic_optB = 0;
 			break;
 		case 'C':
 			lm_optC = sizetoint(optarg);
@@ -287,6 +283,7 @@ actual_main(int argc, char *argv[])
 			break;
 		case 'I':
 			lm_optI = sizetoint(optarg);
+			lm_dynamic_optB = 0;
 			break;
 		case 'L':
 			lm_optL = 1;
@@ -377,50 +374,24 @@ actual_main(int argc, char *argv[])
 		(void) fflush(stderr);
 	}
 
-	long long sample_time;
-	if (lm_optC > 0) {
-		/*
-		 * We have a run limit set, so try to set the batch size to give
-		 * us a run of DEF_TIME seconds total.
-		 */
-		int time_range = (lm_optD > 0) ? lm_optD : lm_defD;
-		sample_time = (long long)round((time_range * 1000 * 1000LL) / (double)lm_optC);
-	}
-	else {
-		assert(lm_optD > 0);
-		/*
-		 * We have a time limit (already in ms), so divide it into DEF_SAMPLES
-		 * samples, and set the batch size appropriately to fit in the sample
-		 * time period.
-		 */
-		sample_time = (long long)round((lm_optD * 1000 * 1000LL) / (double)DEF_SAMPLES);
-	}
-
 	if (lm_optB == 0) {
 		/*
 		 * Neither benchmark or user has specified the number of cnts/sample,
-		 * so use a computed value.
+		 * so use a computed initial value.
 		 *
 		 * In a DEF_TIME second period (see lm_optD above), we want to have
 		 * DEF_SAMPLES samples executed in that period. So each batch size
 		 * should run for about DEF_TIME/100 seconds.
 		 */
-		if (lm_optI)
-			lm_nsecs_per_op = lm_optI;
-
-		lm_optB = (int)(sample_time / lm_nsecs_per_op);
+		lm_optB = (int)round((double)(1000 * 1000) / lm_optI);
 
 		if (lm_optB == 0) {
-			if (lm_optG >= 1) fprintf(stderr, "DEBUG1 (%s): (sample_time (%lld) / lm_nsecs_per_op (%d)) == 0, defaulting lm_optB to one (1)\n", lm_optN, sample_time, lm_nsecs_per_op);
+			if (lm_optG >= 1) fprintf(stderr, "DEBUG1 (%s): (1000 * 1000) / lm_optI (%d)) == 0, defaulting lm_optB to one (1)\n", lm_optN, lm_optI);
 			lm_optB = 1;
 		}
 		else if (lm_optG >= 2) {
 			fprintf(stderr, "DEBUG2 (%s): defaulting lm_optB to %d\n", lm_optN, lm_optB);
 		}
-	}
-
-	if ((lm_optG >= 2) && (lm_optB < 20)) {
-		fprintf(stderr, "DEBUG2 (%s): lm_optB = %d\n", lm_optN, lm_optB);
 	}
 
 	/*
@@ -667,7 +638,7 @@ actual_main(int argc, char *argv[])
 	}
 
 	if (lm_optS) {
-		print_stats(b, sample_time);
+		print_stats(b);
 	}
 
 	/* just incase something goes awry */
@@ -694,15 +665,15 @@ worker_thread(void *arg)
 	long long	t;
 	int			ret, retb;
 
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initworker()\n");
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): calling benchmark_initworker()\n", getpid(), pthread_self());
 	r.re_errors = ret = benchmark_initworker(arg);
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initworker() returned %d\n", ret);
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): benchmark_initworker() returned %d\n", getpid(), pthread_self(), ret);
 
 	do {
 		r.re_count = 0;
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_initbatch()\n");
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): calling benchmark_initbatch()\n", getpid(), pthread_self());
 		r.re_errors += ret = benchmark_initbatch(arg);
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_initbatch() returned %d\n", ret);
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): benchmark_initbatch() returned %d\n", getpid(), pthread_self(), ret);
 
 		/* sync to clock */
 
@@ -720,11 +691,11 @@ worker_thread(void *arg)
 		assert (0 == retb);
 
 		/* time the test */
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark()\n");
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): calling benchmark()\n", getpid(), pthread_self());
 		r.re_t0 = getnsecs();
 		ret = benchmark(arg, &r);
 		r.re_t1 = getnsecs();
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark() returned %d\n", ret);
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): benchmark() returned %d\n", getpid(), pthread_self(), ret);
 
 		/* record results and sync */
 		retb = barrier_queue(lm_barrier, &r);
@@ -733,14 +704,52 @@ worker_thread(void *arg)
 		}
 
 		/* Errors from finishing this batch feed into the next batch */
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finibatch()\n");
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): calling benchmark_finibatch()\n", getpid(), pthread_self());
 		r.re_errors = ret = benchmark_finibatch(arg);
-		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finibatch() returned %d\n", ret);
+		if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): benchmark_finibatch() returned %d\n", getpid(), pthread_self(), ret);
+
+		if ((0 == retb) && lm_dynamic_optB) {
+			// Ensure all threads have run their finibatch code.
+			retb = barrier_queue(lm_barrier, NULL);
+			if (retb < 0) {
+				return NULL;
+			}
+			if (pthread_self() == lm_default_thread) {
+				/*
+				 * Only the default thread makes the change to lm_optB. Note
+				 * that this is the default thread in each process, so while
+				 * multiple threads, one from each process, are doing this,
+				 * they will all arrive at the same answer (since they all use
+				 * the same data) but only change the lm_optB in their own
+				 * process.
+				 */
+				long long		sum = 0;
+				unsigned int	i;
+				long long		count = (lm_barrier->ba_batches >= lm_barrier->ba_datasize)
+										? lm_barrier->ba_datasize
+										: lm_barrier->ba_batches;
+				for (i = 0; i < count; i++) {
+					sum += lm_barrier->ba_data[i];
+				}
+				int mean = (int)round((double)sum/count);
+				if (mean < (1000 * 1000)) {
+					lm_optB = (int)((1000 * 1000) / mean);
+				}
+				else {
+					lm_optB = 1;
+				}
+			}
+			// Once the default thread joins here they can all continue.
+			retb = barrier_queue(lm_barrier, NULL);
+			if (retb < 0) {
+				return NULL;
+			}
+		}
 	} while (0 == retb);
 
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): calling benchmark_finiworker()\n");
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): calling benchmark_finiworker()\n", getpid(), pthread_self());
 	ret = benchmark_finiworker(arg);
-	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(): benchmark_finiworker() returned %d\n", ret);
+	if (lm_optG >= 9) fprintf(stderr, "DEBUG9: worker_thread(%d, %0#lx): benchmark_finiworker() returned %d\n", getpid(), pthread_self(), ret);
 
 	return NULL;
 }
@@ -757,7 +766,7 @@ worker_process(void)
 		tsd = gettsd(pindex, i);
 		ret = pthread_create(&tids[i], NULL, worker_thread, tsd);
 		if (ret != 0) {
-			fprintf(stderr, "worker_process(): pthread_create(%p, NULL, %p, %p) failed: (%d) %s\n", &tids[i], worker_thread, tsd, ret, strerror(ret));
+			fprintf(stderr, "worker_process(%d): pthread_create(%p, NULL, %p, %p) failed: (%d) %s\n", getpid(), &tids[i], worker_thread, tsd, ret, strerror(ret));
 			exit(1);
 		}
 	}
@@ -768,7 +777,7 @@ worker_process(void)
 	for (i = 1; i < lm_optT; i++) {
 		ret = pthread_join(tids[i], NULL);
 		if (ret != 0) {
-			fprintf(stderr, "worker_process(): pthread_join(%p, NULL) failed: (%d) %s\n", tids[i], ret, strerror(ret));
+			fprintf(stderr, "worker_process(%d): pthread_join(%p, NULL) failed: (%d) %s\n", getpid(), tids[i], ret, strerror(ret));
 			exit(1);
 		}
 	}
@@ -781,7 +790,7 @@ usage(void)
 		"usage: %s\n"
 		"\t[-1] (single process; overrides -P > 1)\n"
 		"\t[-A] (align with clock)\n"
-		"\t[-B batch-size (default %d)]\n"
+		"\t[-B batch-size (default is calculated)]\n"
 		"\t[-C minimum number of samples (default %d)]\n"
 		"\t[-D minimum duration in ms (default %dms)]\n"
 		"\t[-E] (echo name to stderr)\n"
@@ -801,7 +810,7 @@ usage(void)
 		"\t[-X maximum duration in ms (default %dms)]\n"
 		"%s\n",
 		lm_procname,
-		lm_defB, lm_defC, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
+		lm_defC, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
 		lm_usage);
 }
 
@@ -898,8 +907,8 @@ print_warnings(barrier_t *b)
 #define STATS_SEPW_L	16
 #define STATS_SEPW		10
 
-void
-print_stats(barrier_t *b, long long sample_time)
+static void
+print_stats(barrier_t *b)
 {
 	if (b->ba_count == 0) {
 		return;
@@ -984,25 +993,27 @@ print_stats(barrier_t *b, long long sample_time)
 	(void) printf("# %*s %*d\n", STATS_1COLW, "number of final samples",
 			STATS_2COLW_L, b->ba_batches_final);
 
-	double usedB = (double)b->ba_count / b->ba_batches;
-	(void) printf("# %*s %*.*lf (-B %d)\n", STATS_1COLW, "ops per sample",
-			STATS_2COLW, STATS_PREC, usedB, lm_optB);
-	int recB;
-	if (b->ba_corrected.st_mean <= (1000 * 1000)) {
-		/*
-		 * Try to keep the batch size per timed run roughly 1 ms. Basically we
-		 * don't completely trust that the timing measurements are accurate
-		 * under 1 ms, and we don't want to track millions of samples, so we
-		 * recommend keeping the batch size just large enough to fit in 1 ms.
-		 */
-		recB = (int)round((1000 * 1000) / b->ba_corrected.st_mean);
+	if (!lm_dynamic_optB) {
+		double usedB = (double)b->ba_count / b->ba_batches;
+		(void) printf("# %*s %*.*lf (-B %d)\n", STATS_1COLW, "ops per sample",
+				STATS_2COLW, STATS_PREC, usedB, lm_optB);
+		int recB;
+		if (b->ba_corrected.st_mean <= (1000 * 1000)) {
+			/*
+			 * Try to keep the batch size per timed run roughly 1 ms. Basically we
+			 * don't completely trust that the timing measurements are accurate
+			 * under 1 ms, and we don't want to track millions of samples, so we
+			 * recommend keeping the batch size just large enough to fit in 1 ms.
+			 */
+			recB = (int)round((1000 * 1000) / b->ba_corrected.st_mean);
+		}
+		else {
+			recB = 1;
+		}
+		if ((abs(usedB - recB) / (double)usedB) > 0.2)
+			(void) printf("#\n# %*s %*d\n", STATS_1COLW, "recommended -B value",
+					STATS_2COLW_L, recB);
 	}
-	else {
-		recB = 1;
-	}
-	if ((abs(usedB - recB) / (double)usedB) > 0.2)
-		(void) printf("#\n# %*s %*d\n", STATS_1COLW, "recommended -B value",
-				STATS_2COLW_L, recB);
 
 	print_histo(b);
 
@@ -1052,7 +1063,7 @@ barrier_create(int hwm, int datasize)
 	}
 
 	b->ba_size = size;
-	b->ba_datasize = datasize * hwm;
+	b->ba_datasize = datasize;
 	b->ba_hwm = hwm;
 
 #ifdef USE_SEMOP
@@ -1660,8 +1671,8 @@ compute_stats(barrier_t *b)
 	int i, batches;
 
 	batches = (b->ba_batches >= b->ba_datasize)
-		? b->ba_datasize
-		: b->ba_batches;
+			? b->ba_datasize
+			: b->ba_batches;
 
 	/*
 	 * do raw stats
@@ -1685,7 +1696,7 @@ compute_stats(barrier_t *b)
 			b->ba_outliers += removed;
 			batches -= removed;
 			crunch_stats(b->ba_data, batches, &b->ba_corrected);
-			} while (removed != 0 && batches > 40);
+		} while (removed != 0 && batches > 40);
 	}
 	b->ba_batches_final = batches;
 

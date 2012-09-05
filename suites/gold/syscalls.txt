@@ -1,5 +1,5 @@
 
-getpid "getpid_s" -B 96k -s
-nanosleep "nanosleep_rs" -B 1500 -s -r
-nanosleep "nanosleep_s" -B 1500 -s
-sched_yield "sched_yield_s" -B 32000 -s
+getpid "getpid_s" -s
+nanosleep "nanosleep_rs" -s -r
+nanosleep "nanosleep_s" -s
+sched_yield "sched_yield_s" -s

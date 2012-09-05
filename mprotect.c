@@ -71,6 +71,7 @@ static int			pagesize;
 int
 benchmark_init(void)
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 	pagesize = sysconf(_SC_PAGESIZE);
 

@@ -1,29 +1,29 @@
 
-bind "bind" -B 3k
-connection "conn_connect" -B 512 -c
+bind "bind" -B 1k
+connection "conn_connect" -B 125 -c
 fcntl_ndelay "fcntl_ndelay"
 getpeername "getpeername"
 getsockname "getsockname"
-listen "listen" -B 50k
-pipe "pipe_tmp1" -s 1 -x tcp -m mp -B 2k
-pipe "pipe_tmp4k" -s 4k -x tcp -m mp -B 2k
-pipe "pipe_tmt1" -s 1 -x tcp -m mt -B 2k
-pipe "pipe_tmt4k" -s 4k -x tcp -m mt -B 2k
-pipe "pipe_tst1" -s 1 -x tcp -m st -B 10k
-pipe "pipe_tst4k" -s 4k -x tcp -m st -B 10k
+listen "listen"
+pipe "pipe_tmp1" -s 1 -x tcp -m mp
+pipe "pipe_tmp4k" -s 4k -x tcp -m mp
+pipe "pipe_tmt1" -s 1 -x tcp -m mt
+pipe "pipe_tmt4k" -s 4k -x tcp -m mt
+pipe "pipe_tst1" -s 1 -x tcp -m st
+pipe "pipe_tst4k" -s 4k -x tcp -m st
 poll "poll_10" -n 10
-poll "poll_100" -n 100 -B 10k
-poll "poll_1000" -n 1000 -B 1k
+poll "poll_100" -n 100
+poll "poll_1000" -n 1000
 poll "poll_w10" -n 10 -w 1
-poll "poll_w100" -n 100 -w 10 -B 10k
-poll "poll_w1000" -n 1000 -w 100 -B 1k
+poll "poll_w100" -n 100 -w 10
+poll "poll_w1000" -n 1000 -w 100
 select "select_10" -n 10
-select "select_100" -n 100 -B 10k
-select "select_1000" -n 1000 -B 1k
+select "select_100" -n 100
+select "select_1000" -n 1000
 select "select_w10" -n 10 -w 1
-select "select_w100" -n 100 -w 10 -B 10k
-select "select_w1000" -n 1000 -w 100 -B 1k
+select "select_w100" -n 100 -w 10
+select "select_w1000" -n 1000 -w 100
 setsockopt "setsockopt"
-socket "socket_i" -B 10k -f PF_INET
-socket "socket_u" -B 10k
-socketpair "socketpair" -B 25000
+socket "socket_i" -B 400 -f PF_INET
+socket "socket_u" -B 600
+socketpair "socketpair" -B 300

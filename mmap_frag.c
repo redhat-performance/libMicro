@@ -88,6 +88,7 @@ static unsigned int min_map_count = UINT_MAX;
 int
 benchmark_init(void)
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof(tsd_t);
 
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "c:m:t:");

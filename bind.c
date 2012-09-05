@@ -33,7 +33,7 @@
  */
 
 /*
- * benchmark for bind... keep in mind tcp hash chain effects
+ * bind() ... keep in mind tcp hash chain effects
  */
 
 #include <sys/types.h>
@@ -64,9 +64,9 @@ static struct hostent  *host = NULL;
 int
 benchmark_init(void)
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 
-	lm_defB = 256;
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "z");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),

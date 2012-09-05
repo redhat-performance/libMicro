@@ -1,25 +1,25 @@
 
-pipe "pipe_fmp1" -s 1 -x fifo -m mp -B 5k
-pipe "pipe_fmp4k" -s 4k -x fifo -m mp -B 5k
-pipe "pipe_fmt1" -s 1 -x fifo -m mt -B 5k
-pipe "pipe_fmt4k" -s 4k -x fifo -m mt -B 5k
-pipe "pipe_fst1" -s 1 -x fifo -m st -B 50k
-pipe "pipe_fst4k" -s 4k -x fifo -m st -B 50k
-pipe "pipe_pmp1" -s 1 -x pipe -m mp -B 5k
-pipe "pipe_pmp4k" -s 4k -x pipe -m mp -B 5k
-pipe "pipe_pmt1" -s 1 -x pipe -m mt -B 5k
-pipe "pipe_pmt4k" -s 4k -x pipe -m mt -B 5k
-pipe "pipe_pst1" -s 1 -x pipe -m st -B 50k
-pipe "pipe_pst4k" -s 4k -x pipe -m st -B 50k
-pipe "pipe_smp1" -s 1 -x sock -m mp -B 5k
-pipe "pipe_smp4k" -s 4k -x sock -m mp -B 5k
-pipe "pipe_smt1" -s 1 -x sock -m mt -B 5k
-pipe "pipe_smt4k" -s 4k -x sock -m mt -B 5k
-pipe "pipe_sst1" -s 1 -x sock -m st -B 50k
-pipe "pipe_sst4k" -s 4k -x sock -m st -B 50k
-pipe "pipe_tmp1" -s 1 -x tcp -m mp -B 2k
-pipe "pipe_tmp4k" -s 4k -x tcp -m mp -B 2k
-pipe "pipe_tmt1" -s 1 -x tcp -m mt -B 2k
-pipe "pipe_tmt4k" -s 4k -x tcp -m mt -B 2k
-pipe "pipe_tst1" -s 1 -x tcp -m st -B 10k
-pipe "pipe_tst4k" -s 4k -x tcp -m st -B 10k
+pipe "pipe_fmp1" -s 1 -x fifo -m mp
+pipe "pipe_fmp4k" -s 4k -x fifo -m mp
+pipe "pipe_fmt1" -s 1 -x fifo -m mt
+pipe "pipe_fmt4k" -s 4k -x fifo -m mt
+pipe "pipe_fst1" -s 1 -x fifo -m st
+pipe "pipe_fst4k" -s 4k -x fifo -m st
+pipe "pipe_pmp1" -s 1 -x pipe -m mp
+pipe "pipe_pmp4k" -s 4k -x pipe -m mp
+pipe "pipe_pmt1" -s 1 -x pipe -m mt
+pipe "pipe_pmt4k" -s 4k -x pipe -m mt
+pipe "pipe_pst1" -s 1 -x pipe -m st
+pipe "pipe_pst4k" -s 4k -x pipe -m st
+pipe "pipe_smp1" -s 1 -x sock -m mp
+pipe "pipe_smp4k" -s 4k -x sock -m mp
+pipe "pipe_smt1" -s 1 -x sock -m mt
+pipe "pipe_smt4k" -s 4k -x sock -m mt
+pipe "pipe_sst1" -s 1 -x sock -m st
+pipe "pipe_sst4k" -s 4k -x sock -m st
+pipe "pipe_tmp1" -s 1 -x tcp -m mp
+pipe "pipe_tmp4k" -s 4k -x tcp -m mp
+pipe "pipe_tmt1" -s 1 -x tcp -m mt
+pipe "pipe_tmt4k" -s 4k -x tcp -m mt
+pipe "pipe_tst1" -s 1 -x tcp -m st
+pipe "pipe_tst4k" -s 4k -x tcp -m st

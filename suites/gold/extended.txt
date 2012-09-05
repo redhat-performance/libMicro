@@ -1,487 +1,487 @@
 
-atoi "atoi" -B 1m
-bind "bind" -B 3k
+atoi "atoi"
+bind "bind" -B 1k
 cascade_cond "c_cond_1"
-cascade_cond "c_cond_10" -T 10 -B 1k
-cascade_cond "c_cond_200" -T 200 -B 100
+cascade_cond "c_cond_10" -T 10
+cascade_cond "c_cond_200" -T 200
 cascade_cond "c_cond_o1" -o
-cascade_cond "c_cond_o10" -o -T 10 -B 1k
-cascade_cond "c_cond_o200" -o -T 200 -B 100
+cascade_cond "c_cond_o10" -o -T 10
+cascade_cond "c_cond_o200" -o -T 200
 cascade_cond "c_cond_os1" -o -s
-cascade_cond "c_cond_os10" -o -s -T 10 -B 1k
-cascade_cond "c_cond_os200" -o -s -T 200 -B 100
+cascade_cond "c_cond_os10" -o -s -T 10
+cascade_cond "c_cond_os200" -o -s -T 200
 cascade_cond "c_cond_s1" -s
-cascade_cond "c_cond_s10" -s -T 10 -B 1k
-cascade_cond "c_cond_s200" -s -T 200 -B 100
-cascade_fcntl "c_fcntl_1" -B 10k
-cascade_fcntl "c_fcntl_10" -P 10 -B 1k
-cascade_fcntl "c_fcntl_200" -P 200 -B 20
-cascade_flock "c_flock" -B 40k
-cascade_flock "c_flock_10" -P 10 -B 1k
-cascade_flock "c_flock_200" -P 200 -B 100
-cascade_lockf "c_lockf_1" -B 60k
-cascade_lockf "c_lockf_10" -P 10 -B 500
-cascade_lockf "c_lockf_200" -P 200 -B 50
+cascade_cond "c_cond_s10" -s -T 10
+cascade_cond "c_cond_s200" -s -T 200
+cascade_fcntl "c_fcntl_1"
+cascade_fcntl "c_fcntl_10" -P 10
+cascade_fcntl "c_fcntl_200" -P 200
+cascade_flock "c_flock"
+cascade_flock "c_flock_10" -P 10
+cascade_flock "c_flock_200" -P 200
+cascade_lockf "c_lockf_1"
+cascade_lockf "c_lockf_10" -P 10
+cascade_lockf "c_lockf_200" -P 200
 cascade_mutex "c_mutex_1"
-cascade_mutex "c_mutex_10" -T 10 -B 1k
-cascade_mutex "c_mutex_200" -T 200 -B 100
+cascade_mutex "c_mutex_10" -T 10
+cascade_mutex "c_mutex_200" -T 200
 cascade_mutex "c_mutex_s1" -s
-cascade_mutex "c_mutex_s10" -s -T 10 -B 1k
-cascade_mutex "c_mutex_s200" -s -T 200 -B 100
-chdir "chdir_tmp" -B 10k $TDIR1 $TDIR2
-chdir "chdir_usr" -B 10k $VDIR1 $VDIR2
-chdir "chgetwd_tmp" -B 10k -g $TDIR1 $TDIR2
-chdir "chgetwd_usr" -B 10k -g $VDIR1 $VDIR2
-clock_gettime "clock_gettime" -B 400000
-clock_nanosleep "clock_nanosleep" -B 1500
-clock_nanosleep "clock_nanosleepT4" -B 1500 -T 4
-clock_nanosleep "clock_nanosleepT4_m" -B 1500 -T 4 -m
-clock_nanosleep "clock_nanosleepT4_mr" -B 1500 -T 4 -m -r
-clock_nanosleep "clock_nanosleepT4_ms" -B 1500 -T 4 -m -s
-clock_nanosleep "clock_nanosleepT4_msr" -B 1500 -T 4 -m -s -r
-clock_nanosleep "clock_nanosleepT4_r" -B 1500 -T 4 -r
-clock_nanosleep "clock_nanosleepT4_s" -B 1500 -T 4 -s
-clock_nanosleep "clock_nanosleepT4_sr" -B 1500 -T 4 -s -r
-clock_nanosleep "clock_nanosleep_d10" -B 1500 -d 10
-clock_nanosleep "clock_nanosleep_d100" -B 1500 -d 100
-clock_nanosleep "clock_nanosleep_d1000" -B 1500 -d 1000
-clock_nanosleep "clock_nanosleep_d10000" -B 1000 -d 10000
-clock_nanosleep "clock_nanosleep_d100000" -B 1000 -d 100000
-clock_nanosleep "clock_nanosleep_m" -B 1500 -m
-clock_nanosleep "clock_nanosleep_mr" -B 1500 -m -r
-clock_nanosleep "clock_nanosleep_ms" -B 1500 -m -s
-clock_nanosleep "clock_nanosleep_msr" -B 1500 -m -s -r
-clock_nanosleep "clock_nanosleep_r" -B 1500 -r
-clock_nanosleep "clock_nanosleep_s" -B 1500 -s
-clock_nanosleep "clock_nanosleep_sr" -B 1500 -s -r
-close "close_bad" -B 700k -b
-close_tcp "close_tcp" -B 1k
-close "close_tmp" -B 640 -f $TFILE
-close "close_usr" -B 640 -f $VFILE
-close "close_zero" -B 640 -f /dev/zero
-connection "conn_accept" -B 512 -a
-connection "conn_connect" -B 512 -c
-connection "connection" -B 512
-dup "dup" -B 200k
-exec "exec" -B 100
-execw "execw" -B 175
-execw "execw_1000r" -B 25 -r 1000
-execw "execw_100r" -B 50 -r 100
-execw "execw_1024n" -B 70 -n 1024 -p 256
-execw "execw_1024ntv" -B 200 -n 1024 -p 256 -t -v
-execw "execw_10r" -B 100 -r 10
-execw "execw_128n" -B 125 -n 128 -p 2048
-execw "execw_128nt" -B 10 -n 128 -p 2048 -t
-execw "execw_128ntv" -B 200 -n 128 -p 2048 -t -v
-execw "execw_1r" -B 125 -r 1
-execw "execw_2048n" -B 35 -n 2048 -p 128
-execw "execw_2048ntv" -B 200 -n 2048 -p 128 -t -v
-execw "execw_256n" -B 100 -n 256 -p 1024
-execw "execw_256ntv" -B 200 -n 256 -p 1024 -t -v
-execw "execw_32n" -B 125 -n 32 -p 8192
-execw "execw_32nt" -B 25 -n 32 -p 8192 -t
-execw "execw_32ntv" -B 200 -n 32 -p 8192 -t -v
-execw "execw_4096n" -B 15 -n 4096 -p 64
-execw "execw_4096ntv" -B 200 -n 4096 -p 64 -t -v
-execw "execw_512n" -B 100 -n 512 -p 512
-execw "execw_512ntv" -B 200 -n 512 -p 512 -t -v
-execw "execw_64n" -B 125 -n 64 -p 4096
-execw "execw_64nt" -B 15 -n 64 -p 4096 -t
-execw "execw_64ntv" -B 200 -n 64 -p 4096 -t -v
-execw "execw_8192n" -B 5 -n 8192 -p 32
-execw "execw_8192n1000r" -B 5 -n 8192 -p 32 -r 1000
-execw "execw_8192ntv" -B 200 -n 8192 -p 32 -t -v
-execw "execw_8192ntv1000r" -B 200 -n 8192 -p 32 -t -v -r 1000
-exit "exit_100" -B 100
-exit "exit_1000" -B 1000
-exit "exit_1000_nolibc" -e -B 1000
-exit "exit_100_nolibc" -e -B 100
-exp "exp" -B 2m -f exp
-exp "exp10" -B 2m -f exp10
-exp "exp10f" -B 400k -f exp10f
-exp "exp10l" -B 128k -f exp10l
-exp "exp2" -B 400k -f exp2
-exp "exp2f" -B 400k -f exp2f
-exp "exp2l" -B 1m -f exp2l
-exp "expf" -B 400k -f expf
-exp "expl" -B 1m -f expl
+cascade_mutex "c_mutex_s10" -s -T 10
+cascade_mutex "c_mutex_s200" -s -T 200
+chdir "chdir_tmp" $TDIR1 $TDIR2
+chdir "chdir_usr" $VDIR1 $VDIR2
+chdir "chgetwd_tmp" -g $TDIR1 $TDIR2
+chdir "chgetwd_usr" -g $VDIR1 $VDIR2
+clock_gettime "clock_gettime"
+clock_nanosleep "clock_nanosleep"
+clock_nanosleep "clock_nanosleepT4" -T 4
+clock_nanosleep "clock_nanosleepT4_m" -T 4 -m
+clock_nanosleep "clock_nanosleepT4_mr" -T 4 -m -r
+clock_nanosleep "clock_nanosleepT4_ms" -T 4 -m -s
+clock_nanosleep "clock_nanosleepT4_msr" -T 4 -m -s -r
+clock_nanosleep "clock_nanosleepT4_r" -T 4 -r
+clock_nanosleep "clock_nanosleepT4_s" -T 4 -s
+clock_nanosleep "clock_nanosleepT4_sr" -T 4 -s -r
+clock_nanosleep "clock_nanosleep_d10" -d 10
+clock_nanosleep "clock_nanosleep_d100" -d 100
+clock_nanosleep "clock_nanosleep_d1000" -d 1000
+clock_nanosleep "clock_nanosleep_d10000" -d 10000
+clock_nanosleep "clock_nanosleep_d100000" -d 100000
+clock_nanosleep "clock_nanosleep_m" -m
+clock_nanosleep "clock_nanosleep_mr" -m -r
+clock_nanosleep "clock_nanosleep_ms" -m -s
+clock_nanosleep "clock_nanosleep_msr" -m -s -r
+clock_nanosleep "clock_nanosleep_r" -r
+clock_nanosleep "clock_nanosleep_s" -s
+clock_nanosleep "clock_nanosleep_sr" -s -r
+close "close_bad" -B 7500 -b
+close_tcp "close_tcp" -B 100
+close "close_tmp" -B 2600 -f $TFILE
+close "close_usr" -B 2600 -f $VFILE
+close "close_zero" -B 2600 -f /dev/zero
+connection "conn_accept" -B 125 -a
+connection "conn_connect" -B 125 -c
+connection "connection" -B 40
+dup "dup" -B 5500
+exec "exec"
+execw "execw"
+execw "execw_1000r" -r 1000
+execw "execw_100r" -r 100
+execw "execw_1024n" -n 1024 -p 256
+execw "execw_1024ntv" -n 1024 -p 256 -t -v
+execw "execw_10r" -r 10
+execw "execw_128n" -n 128 -p 2048
+execw "execw_128nt" -n 128 -p 2048 -t
+execw "execw_128ntv" -n 128 -p 2048 -t -v
+execw "execw_1r" -r 1
+execw "execw_2048n" -n 2048 -p 128
+execw "execw_2048ntv" -n 2048 -p 128 -t -v
+execw "execw_256n" -n 256 -p 1024
+execw "execw_256ntv" -n 256 -p 1024 -t -v
+execw "execw_32n" -n 32 -p 8192
+execw "execw_32nt" -n 32 -p 8192 -t
+execw "execw_32ntv" -n 32 -p 8192 -t -v
+execw "execw_4096n" -n 4096 -p 64
+execw "execw_4096ntv" -n 4096 -p 64 -t -v
+execw "execw_512n" -n 512 -p 512
+execw "execw_512ntv" -n 512 -p 512 -t -v
+execw "execw_64n" -n 64 -p 4096
+execw "execw_64nt" -n 64 -p 4096 -t
+execw "execw_64ntv" -n 64 -p 4096 -t -v
+execw "execw_8192n" -n 8192 -p 32
+execw "execw_8192n1000r" -n 8192 -p 32 -r 1000
+execw "execw_8192ntv" -n 8192 -p 32 -t -v
+execw "execw_8192ntv1000r" -n 8192 -p 32 -t -v -r 1000
+exit "exit_100" -B 50
+exit "exit_1000" -B 50
+exit "exit_1000_nolibc" -e -B 60
+exit "exit_100_nolibc" -e -B 60
+exp "exp" -f exp
+exp "exp10" -f exp10
+exp "exp10f" -f exp10f
+exp "exp10l" -f exp10l
+exp "exp2" -f exp2
+exp "exp2f" -f exp2f
+exp "exp2l" -f exp2l
+exp "expf" -f expf
+exp "expl" -f expl
 fcntl_ndelay "fcntl_ndelay"
 fcntl "fcntl_tmp" -f $TFILE
 fcntl "fcntl_usr" -f $VFILE
-file_lock "file_lock" -B 70k
-fork "fork_100" -B 100
-fork "fork_1000" -B 1000
+file_lock "file_lock"
+fork "fork_100" -B 15
+fork "fork_1000" -B 10
 getcontext "getcontext"
-getenv "getenv" -B 90000 -s 100
-getenv "getenvT2" -B 90000 -T 2 -s 100
+getenv "getenv" -s 100
+getenv "getenvT2" -T 2 -s 100
 getpeername "getpeername"
-getpid "getpid" -B 2m
-getpid "getpidP4" -B 2m -P 4
-getpid "getpidP4_s" -B 96k -P 4 -s
-getpid "getpidT4" -B 2m -T 4
-getpid "getpidT4P4" -B 2m -T 4 -P 4
-getpid "getpidT4P4_s" -B 96k -T 4 -P 4 -s
-getpid "getpidT4_s" -B 96k -T 4 -s
-getpid "getpid_s" -B 96k -s
+getpid "getpid"
+getpid "getpidP4" -P 4
+getpid "getpidP4_s" -P 4 -s
+getpid "getpidT4" -T 4
+getpid "getpidT4P4" -T 4 -P 4
+getpid "getpidT4P4_s" -T 4 -P 4 -s
+getpid "getpidT4_s" -T 4 -s
+getpid "getpid_s" -s
 getrusage "getrusage"
 getsockname "getsockname"
-gettimeofday "gettimeofday" -B 400000
+gettimeofday "gettimeofday"
 isatty "isatty_no" -f $IFILE
 isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
-listen "listen" -B 50k
+listen "listen"
 localtime_r "localtime_r"
-log "log" -B 2m -f log
-log "log10" -B 2m -f log10
-log "log10f" -B 2m -f log10f
-log "log10l" -B 2m -f log10l
-log "log2" -B 2m -f log2
-log "log2f" -B 2m -f log2f
-log "log2l" -B 2m -f log2l
-log "logf" -B 2m -f logf
-log "logl" -B 2m -f logl
-longjmp "longjmp" -B 5m
-lrand48 "lrand48" -B 8000000
+log "log" -f log
+log "log10" -f log10
+log "log10f" -f log10f
+log "log10l" -f log10l
+log "log2" -f log2
+log "log2f" -f log2f
+log "log2l" -f log2l
+log "logf" -f logf
+log "logl" -f logl
+longjmp "longjmp"
+lrand48 "lrand48"
 lseek "lseek_t8k" -s 8k -f $TFILE
 lseek "lseek_u8k" -s 8k -f $VFILE
-malloc "mallocT2_10" -s 10 -g 10 -T 2 -B 16k
-malloc "mallocT2_100" -s 100 -g 10 -T 2 -B 16k
-malloc "mallocT2_100k" -s 100k -g 10 -T 2 -B 1K
-malloc "mallocT2_10k" -s 10k -g 10 -T 2 -B 16k
-malloc "mallocT2_1k" -s 1k -g 10 -T 2 -B 16k
-malloc "malloc_10" -s 10 -g 10 -B 10k
-malloc "malloc_100" -s 100 -g 10 -B 10k
-malloc "malloc_100k" -s 100k -g 10 -B 1000
-malloc "malloc_10k" -s 10k -g 10 -B 10k
-malloc "malloc_1k" -s 1k -g 10 -B 10k
-memcpy "memcpy_10" -s 10 -B 1m
+malloc "mallocT2_10" -s 10 -g 10 -T 2
+malloc "mallocT2_100" -s 100 -g 10 -T 2
+malloc "mallocT2_100k" -s 100k -g 10 -T 2
+malloc "mallocT2_10k" -s 10k -g 10 -T 2
+malloc "mallocT2_1k" -s 1k -g 10 -T 2
+malloc "malloc_10" -s 10 -g 10
+malloc "malloc_100" -s 100 -g 10
+malloc "malloc_100k" -s 100k -g 10
+malloc "malloc_10k" -s 10k -g 10
+malloc "malloc_1k" -s 1k -g 10
+memcpy "memcpy_10" -s 10
 memcpy "memcpy_10k" -s 10k
-memcpy "memcpy_10m" -s 10m -B 50
-memcpy "memcpy_1k" -s 1k -B 200k
-memcpy "memcpy_1m" -s 1m -B 100
-memmove "memmove_10" -s 10 -B 1m
+memcpy "memcpy_10m" -s 10m
+memcpy "memcpy_1k" -s 1k
+memcpy "memcpy_1m" -s 1m
+memmove "memmove_10" -s 10
 memmove "memmove_10k" -s 10k
-memmove "memmove_10m" -s 10m -B 50
-memmove "memmove_1k" -s 1k -B 200k
-memmove "memmove_1m" -s 1m -B 100
-memrand "memrand" -s 128m -B 32m
-memrand "memrand_128k" -s 128k -B 24m
-memrand "memrand_16k" -s 16k -B 32m
-memrand "memrand_16m" -s 16m -B 24m
-memrand "memrand_1g" -s 1g -B 256m
-memrand "memrand_1k" -s 1k -B 32m
-memrand "memrand_1m" -s 1m -B 24m
-memrand "memrand_256k" -s 256k -B 24m
-memrand "memrand_256m" -s 256m -B 64m
-memrand "memrand_2g" -s 2g -B 512m
-memrand "memrand_2k" -s 2k -B 32m
-memrand "memrand_2m" -s 2m -B 24m
-memrand "memrand_32k" -s 32k -B 32m
-memrand "memrand_32m" -s 32m -B 24m
-memrand "memrand_4k" -s 4k -B 32m
-memrand "memrand_4m" -s 4m -B 24m
-memrand "memrand_512k" -s 512k -B 24m
-memrand "memrand_512m" -s 512m -B 128m
-memrand "memrand_64k" -s 64k -B 24m
-memrand "memrand_64m" -s 64m -B 16m
-memrand "memrand_8k" -s 8k -B 32m
-memrand "memrand_8m" -s 8m -B 24m
-memset "memsetP2T2_10m" -s 10m -B 50 -P 2 -T 2
-memset "memsetP2_10m" -s 10m -B 50 -P 2
-memset "memsetT2_10m" -s 10m -B 50 -T 2
-memset "memset_10" -s 10 -B 10m
+memmove "memmove_10m" -s 10m
+memmove "memmove_1k" -s 1k
+memmove "memmove_1m" -s 1m
+memrand "memrand" -s 128m
+memrand "memrand_128k" -s 128k
+memrand "memrand_16k" -s 16k
+memrand "memrand_16m" -s 16m
+memrand "memrand_1g" -s 1g
+memrand "memrand_1k" -s 1k
+memrand "memrand_1m" -s 1m
+memrand "memrand_256k" -s 256k
+memrand "memrand_256m" -s 256m
+memrand "memrand_2g" -s 2g
+memrand "memrand_2k" -s 2k
+memrand "memrand_2m" -s 2m
+memrand "memrand_32k" -s 32k
+memrand "memrand_32m" -s 32m
+memrand "memrand_4k" -s 4k
+memrand "memrand_4m" -s 4m
+memrand "memrand_512k" -s 512k
+memrand "memrand_512m" -s 512m
+memrand "memrand_64k" -s 64k
+memrand "memrand_64m" -s 64m
+memrand "memrand_8k" -s 8k
+memrand "memrand_8m" -s 8m
+memset "memsetP2T2_10m" -s 10m -P 2 -T 2
+memset "memsetP2_10m" -s 10m -P 2
+memset "memsetT2_10m" -s 10m -T 2
+memset "memset_10" -s 10
 memset "memset_10k" -s 10k
-memset "memset_10m" -s 10m -B 50
-memset "memset_1k" -s 1k -B 2m
-memset "memset_1m" -s 1m -B 200
-memset "memset_256" -s 256 -B 5m
-memset "memset_256_u" -s 256 -a 1 -B 5m
-memset "memset_4k" -s 4k -B 700k
-memset "memset_4k_uc" -s 4k -u -B 100k
-mktime "mktime" -B 10k
-mktime "mktimeT2" -T 2 -B 10k
-mmap "mmap_a128k" -l 128k -f MAP_ANON -B 5k
-mmap "mmap_a8k" -l 8k -f MAP_ANON -B 10k
+memset "memset_10m" -s 10m
+memset "memset_1k" -s 1k
+memset "memset_1m" -s 1m
+memset "memset_256" -s 256
+memset "memset_256_u" -s 256 -a 1
+memset "memset_4k" -s 4k
+memset "memset_4k_uc" -s 4k -u
+mktime "mktime"
+mktime "mktimeT2" -T 2
+mmap "mmap_a128k" -l 128k -f MAP_ANON
+mmap "mmap_a8k" -l 8k -f MAP_ANON
 mmap_frag "mmap_frag" -B 10000 -C 1000
-mmap "mmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
-mmap "mmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
-mmap "mmap_rt128k" -l 128k -r -f $TFILE -B 5k
-mmap "mmap_rt8k" -l 8k -r -f $TFILE -B 10k
-mmap "mmap_ru128k" -l 128k -r -f $VFILE -B 5k
-mmap "mmap_ru8k" -l 8k -r -f $VFILE -B 10k
-mmap "mmap_rz128k" -l 128k -r -f /dev/zero -B 5k
-mmap "mmap_rz8k" -l 8k -r -f /dev/zero -B 10k
-mmap "mmap_t128k" -l 128k -f $TFILE -B 5k
-mmap "mmap_t8k" -l 8k -f $TFILE -B 10k
-mmap "mmap_u128k" -l 128k -f $VFILE -B 5k
-mmap "mmap_u8k" -l 8k -f $VFILE -B 10k
-mmap "mmap_wa128k" -l 128k -w -f MAP_ANON -B 1k
-mmap "mmap_wa8k" -l 8k -w -f MAP_ANON -B 10k
-mmap "mmap_wt128k" -l 128k -w -f $TFILE -B 1k
-mmap "mmap_wt8k" -l 8k -w -f $TFILE -B 10k
-mmap "mmap_wu128k" -l 128k -w -f $VFILE -B 1k
-mmap "mmap_wu8k" -l 8k -w -f $VFILE -B 10k
-mmap "mmap_wz128k" -l 128k -w -f /dev/zero -B 1k
-mmap "mmap_wz8k" -l 8k -w -f /dev/zero -B 10k
-mmap "mmap_z128k" -l 128k -f /dev/zero -B 5k
-mmap "mmap_z8k" -l 8k -f /dev/zero -B 10k
-mprotect "mprot_tw128k" -l 128k -w -t -f /dev/zero -B 5k
-mprotect "mprot_tw4m" -l 4m -w -t -f /dev/zero -B 500
-mprotect "mprot_twz8k" -l 8k -w -t -f /dev/zero -B 10k
-mprotect "mprot_wz128k" -l 128k -w -f /dev/zero -B 5k
-mprotect "mprot_wz8k" -l 8k -w -f /dev/zero -B 10k
-mprotect "mprot_z128k" -l 128k -f /dev/zero -B 5k
-mprotect "mprot_z8k" -l 8k -f /dev/zero -B 10k
-msync "msync_rait128k" -l 128k -r -f $TFILE -a -i -B 15k
-msync "msync_rait8k" -l 8k -r -f $TFILE -a -i -B 15k
-msync "msync_raiu128k" -l 128k -r -f $VFILE -a -i -B 15k
-msync "msync_raiu8k" -l 8k -r -f $VFILE -a -i -B 15k
-msync "msync_rat128k" -l 128k -r -f $TFILE -a -B 15k
-msync "msync_rat8k" -l 8k -r -f $TFILE -a -B 15k
-msync "msync_rau128k" -l 128k -r -f $VFILE -a -B 15k
-msync "msync_rau8k" -l 8k -r -f $VFILE -a -B 15k
-msync "msync_rit128k" -l 128k -r -f $TFILE -i -B 15k
-msync "msync_rit8k" -l 8k -r -f $TFILE -i -B 15k
-msync "msync_riu128k" -l 128k -r -f $VFILE -i -B 15k
-msync "msync_riu8k" -l 8k -r -f $VFILE -i -B 15k
-msync "msync_rt128k" -l 128k -r -f $TFILE -B 15k
-msync "msync_rt8k" -l 8k -r -f $TFILE -B 15k
-msync "msync_ru128k" -l 128k -r -f $VFILE -B 15k
-msync "msync_ru8k" -l 8k -r -f $VFILE -B 15k
-msync "msync_t128k" -l 128k -f $TFILE -B 30k
-msync "msync_t8k" -l 8k -f $TFILE -B 30k
-msync "msync_ta128k" -l 128k -f $TFILE -a -B 30k
-msync "msync_ta8k" -l 8k -f $TFILE -a -B 30k
-msync "msync_tai128k" -l 128k -f $TFILE -a -i -B 30k
-msync "msync_tai8k" -l 8k -f $TFILE -a -i -B 30k
-msync "msync_ti128k" -l 128k -f $TFILE -i -B 30k
-msync "msync_ti8k" -l 8k -f $TFILE -i -B 30k
-msync "msync_u128k" -l 128k -f $VFILE -B 30k
-msync "msync_u8k" -l 8k -f $VFILE -B 30k
-msync "msync_ua128k" -l 128k -f $VFILE -a -B 30k
-msync "msync_ua8k" -l 8k -f $VFILE -a -B 30k
-msync "msync_uai128k" -l 128k -f $VFILE -a -i -B 30k
-msync "msync_uai8k" -l 8k -f $VFILE -a -i -B 30k
-msync "msync_ui128k" -l 128k -f $VFILE -i -B 30k
-msync "msync_ui8k" -l 8k -f $VFILE -i -B 30k
-msync "msync_wait128k" -l 128k -w -f $TFILE -a -i -B 10k
-msync "msync_wait8k" -l 8k -w -f $TFILE -a -i -B 30k
-msync "msync_waiu128k" -l 128k -w -f $VFILE -a -i -B 10k
-msync "msync_waiu8k" -l 8k -w -f $VFILE -a -i -B 30k
-msync "msync_wat128k" -l 128k -w -f $TFILE -a -B 10k
-msync "msync_wat8k" -l 8k -w -f $TFILE -a -B 30k
-msync "msync_wau128k" -l 128k -w -f $VFILE -a -B 10k
-msync "msync_wau8k" -l 8k -w -f $VFILE -a -B 30k
-msync "msync_wit128k" -l 128k -w -f $TFILE -i -B 10k
-msync "msync_wit8k" -l 8k -w -f $TFILE -i -B 30k
-msync "msync_wiu128k" -l 128k -w -f $VFILE -i -B 10k
-msync "msync_wiu8k" -l 8k -w -f $VFILE -i -B 30k
-msync "msync_wt128k" -l 128k -w -f $TFILE -B 10k
-msync "msync_wt8k" -l 8k -w -f $TFILE -B 30k
-msync "msync_wu128k" -l 128k -w -f $VFILE -B 10k
-msync "msync_wu8k" -l 8k -w -f $VFILE -B 30k
-mutex "mutex_T2" -T 2 -B 500k
-mutex "mutex_T2s" -s -T 2 -B 500k
-mutex "mutex_mt" -t -B 5m
-mutex "mutex_mto1" -o 1 -t -B 5m
-mutex "mutex_mto16" -o 16 -t -B 5m
-mutex "mutex_mto32" -o 32 -t -B 5m
-mutex "mutex_mto4" -o 4 -t -B 5m
-mutex "mutex_mto8" -o 8 -t -B 5m
-mutex "mutex_mts" -t -s -B 5m
-mutex "mutex_st" -B 5m
-mutex "mutex_sts" -s -B 5m
-nanosleep "nanosleep" -B 1500
-nanosleep "nanosleepT4" -B 1500 -T 4
-nanosleep "nanosleepT4_r" -B 1500 -T 4 -r
-nanosleep "nanosleepT4_rs" -B 1500 -T 4 -s -r
-nanosleep "nanosleepT4_s" -B 1500 -T 4 -s
-nanosleep "nanosleep_d10" -B 1500 -d 10
-nanosleep "nanosleep_d100" -B 1500 -d 100
-nanosleep "nanosleep_d1000" -B 1500 -d 1000
-nanosleep "nanosleep_d10000" -B 1000 -d 10000
-nanosleep "nanosleep_d100000" -B 500 -d 100000
-nanosleep "nanosleep_r" -B 1500 -r
-nanosleep "nanosleep_rs" -B 1500 -s -r
-nanosleep "nanosleep_s" -B 1500 -s
-open "open_tmp" -B 25000 -f $TFILE
-open "open_usr" -B 25000 -f $VFILE
-open "open_zero" -B 25000 -f /dev/zero
-pipe "pipe_fmp1" -s 1 -x fifo -m mp -B 5k
-pipe "pipe_fmp4k" -s 4k -x fifo -m mp -B 5k
-pipe "pipe_fmt1" -s 1 -x fifo -m mt -B 5k
-pipe "pipe_fmt4k" -s 4k -x fifo -m mt -B 5k
-pipe "pipe_fst1" -s 1 -x fifo -m st -B 50k
-pipe "pipe_fst4k" -s 4k -x fifo -m st -B 50k
-pipe "pipe_pmp1" -s 1 -x pipe -m mp -B 5k
-pipe "pipe_pmp4k" -s 4k -x pipe -m mp -B 5k
-pipe "pipe_pmt1" -s 1 -x pipe -m mt -B 5k
-pipe "pipe_pmt4k" -s 4k -x pipe -m mt -B 5k
-pipe "pipe_pst1" -s 1 -x pipe -m st -B 50k
-pipe "pipe_pst4k" -s 4k -x pipe -m st -B 50k
-pipe "pipe_smp1" -s 1 -x sock -m mp -B 5k
-pipe "pipe_smp4k" -s 4k -x sock -m mp -B 5k
-pipe "pipe_smt1" -s 1 -x sock -m mt -B 5k
-pipe "pipe_smt4k" -s 4k -x sock -m mt -B 5k
-pipe "pipe_sst1" -s 1 -x sock -m st -B 50k
-pipe "pipe_sst4k" -s 4k -x sock -m st -B 50k
-pipe "pipe_tmp1" -s 1 -x tcp -m mp -B 2k
-pipe "pipe_tmp4k" -s 4k -x tcp -m mp -B 2k
-pipe "pipe_tmt1" -s 1 -x tcp -m mt -B 2k
-pipe "pipe_tmt4k" -s 4k -x tcp -m mt -B 2k
-pipe "pipe_tst1" -s 1 -x tcp -m st -B 10k
-pipe "pipe_tst4k" -s 4k -x tcp -m st -B 10k
+mmap "mmap_ra128k" -l 128k -r -f MAP_ANON
+mmap "mmap_ra8k" -l 8k -r -f MAP_ANON
+mmap "mmap_rt128k" -l 128k -r -f $TFILE
+mmap "mmap_rt8k" -l 8k -r -f $TFILE
+mmap "mmap_ru128k" -l 128k -r -f $VFILE
+mmap "mmap_ru8k" -l 8k -r -f $VFILE
+mmap "mmap_rz128k" -l 128k -r -f /dev/zero
+mmap "mmap_rz8k" -l 8k -r -f /dev/zero
+mmap "mmap_t128k" -l 128k -f $TFILE
+mmap "mmap_t8k" -l 8k -f $TFILE
+mmap "mmap_u128k" -l 128k -f $VFILE
+mmap "mmap_u8k" -l 8k -f $VFILE
+mmap "mmap_wa128k" -l 128k -w -f MAP_ANON
+mmap "mmap_wa8k" -l 8k -w -f MAP_ANON
+mmap "mmap_wt128k" -l 128k -w -f $TFILE
+mmap "mmap_wt8k" -l 8k -w -f $TFILE
+mmap "mmap_wu128k" -l 128k -w -f $VFILE
+mmap "mmap_wu8k" -l 8k -w -f $VFILE
+mmap "mmap_wz128k" -l 128k -w -f /dev/zero
+mmap "mmap_wz8k" -l 8k -w -f /dev/zero
+mmap "mmap_z128k" -l 128k -f /dev/zero
+mmap "mmap_z8k" -l 8k -f /dev/zero
+mprotect "mprot_tw128k" -l 128k -w -t -f /dev/zero -B 500
+mprotect "mprot_tw4m" -l 4m -w -t -f /dev/zero -B 40
+mprotect "mprot_twz8k" -l 8k -w -t -f /dev/zero -B 900
+mprotect "mprot_wz128k" -l 128k -w -f /dev/zero -B 800
+mprotect "mprot_wz8k" -l 8k -w -f /dev/zero -B 1k
+mprotect "mprot_z128k" -l 128k -f /dev/zero -B 1k
+mprotect "mprot_z8k" -l 8k -f /dev/zero -B 1k
+msync "msync_rait128k" -l 128k -r -f $TFILE -a -i
+msync "msync_rait8k" -l 8k -r -f $TFILE -a -i
+msync "msync_raiu128k" -l 128k -r -f $VFILE -a -i
+msync "msync_raiu8k" -l 8k -r -f $VFILE -a -i
+msync "msync_rat128k" -l 128k -r -f $TFILE -a
+msync "msync_rat8k" -l 8k -r -f $TFILE -a
+msync "msync_rau128k" -l 128k -r -f $VFILE -a
+msync "msync_rau8k" -l 8k -r -f $VFILE -a
+msync "msync_rit128k" -l 128k -r -f $TFILE -i
+msync "msync_rit8k" -l 8k -r -f $TFILE -i
+msync "msync_riu128k" -l 128k -r -f $VFILE -i
+msync "msync_riu8k" -l 8k -r -f $VFILE -i
+msync "msync_rt128k" -l 128k -r -f $TFILE
+msync "msync_rt8k" -l 8k -r -f $TFILE
+msync "msync_ru128k" -l 128k -r -f $VFILE
+msync "msync_ru8k" -l 8k -r -f $VFILE
+msync "msync_t128k" -l 128k -f $TFILE
+msync "msync_t8k" -l 8k -f $TFILE
+msync "msync_ta128k" -l 128k -f $TFILE -a
+msync "msync_ta8k" -l 8k -f $TFILE -a
+msync "msync_tai128k" -l 128k -f $TFILE -a -i
+msync "msync_tai8k" -l 8k -f $TFILE -a -i
+msync "msync_ti128k" -l 128k -f $TFILE -i
+msync "msync_ti8k" -l 8k -f $TFILE -i
+msync "msync_u128k" -l 128k -f $VFILE
+msync "msync_u8k" -l 8k -f $VFILE
+msync "msync_ua128k" -l 128k -f $VFILE -a
+msync "msync_ua8k" -l 8k -f $VFILE -a
+msync "msync_uai128k" -l 128k -f $VFILE -a -i
+msync "msync_uai8k" -l 8k -f $VFILE -a -i
+msync "msync_ui128k" -l 128k -f $VFILE -i
+msync "msync_ui8k" -l 8k -f $VFILE -i
+msync "msync_wait128k" -l 128k -w -f $TFILE -a -i
+msync "msync_wait8k" -l 8k -w -f $TFILE -a -i
+msync "msync_waiu128k" -l 128k -w -f $VFILE -a -i
+msync "msync_waiu8k" -l 8k -w -f $VFILE -a -i
+msync "msync_wat128k" -l 128k -w -f $TFILE -a
+msync "msync_wat8k" -l 8k -w -f $TFILE -a
+msync "msync_wau128k" -l 128k -w -f $VFILE -a
+msync "msync_wau8k" -l 8k -w -f $VFILE -a
+msync "msync_wit128k" -l 128k -w -f $TFILE -i
+msync "msync_wit8k" -l 8k -w -f $TFILE -i
+msync "msync_wiu128k" -l 128k -w -f $VFILE -i
+msync "msync_wiu8k" -l 8k -w -f $VFILE -i
+msync "msync_wt128k" -l 128k -w -f $TFILE
+msync "msync_wt8k" -l 8k -w -f $TFILE
+msync "msync_wu128k" -l 128k -w -f $VFILE
+msync "msync_wu8k" -l 8k -w -f $VFILE
+mutex "mutex_T2" -T 2
+mutex "mutex_T2s" -s -T 2
+mutex "mutex_mt" -t
+mutex "mutex_mto1" -o 1 -t
+mutex "mutex_mto16" -o 16 -t
+mutex "mutex_mto32" -o 32 -t
+mutex "mutex_mto4" -o 4 -t
+mutex "mutex_mto8" -o 8 -t
+mutex "mutex_mts" -t -s
+mutex "mutex_st"
+mutex "mutex_sts" -s
+nanosleep "nanosleep"
+nanosleep "nanosleepT4" -T 4
+nanosleep "nanosleepT4_r" -T 4 -r
+nanosleep "nanosleepT4_rs" -T 4 -s -r
+nanosleep "nanosleepT4_s" -T 4 -s
+nanosleep "nanosleep_d10" -d 10
+nanosleep "nanosleep_d100" -d 100
+nanosleep "nanosleep_d1000" -d 1000
+nanosleep "nanosleep_d10000" -d 10000
+nanosleep "nanosleep_d100000" -d 100000
+nanosleep "nanosleep_r" -r
+nanosleep "nanosleep_rs" -s -r
+nanosleep "nanosleep_s" -s
+open "open_tmp" -f $TFILE
+open "open_usr" -f $VFILE
+open "open_zero" -f /dev/zero
+pipe "pipe_fmp1" -s 1 -x fifo -m mp
+pipe "pipe_fmp4k" -s 4k -x fifo -m mp
+pipe "pipe_fmt1" -s 1 -x fifo -m mt
+pipe "pipe_fmt4k" -s 4k -x fifo -m mt
+pipe "pipe_fst1" -s 1 -x fifo -m st
+pipe "pipe_fst4k" -s 4k -x fifo -m st
+pipe "pipe_pmp1" -s 1 -x pipe -m mp
+pipe "pipe_pmp4k" -s 4k -x pipe -m mp
+pipe "pipe_pmt1" -s 1 -x pipe -m mt
+pipe "pipe_pmt4k" -s 4k -x pipe -m mt
+pipe "pipe_pst1" -s 1 -x pipe -m st
+pipe "pipe_pst4k" -s 4k -x pipe -m st
+pipe "pipe_smp1" -s 1 -x sock -m mp
+pipe "pipe_smp4k" -s 4k -x sock -m mp
+pipe "pipe_smt1" -s 1 -x sock -m mt
+pipe "pipe_smt4k" -s 4k -x sock -m mt
+pipe "pipe_sst1" -s 1 -x sock -m st
+pipe "pipe_sst4k" -s 4k -x sock -m st
+pipe "pipe_tmp1" -s 1 -x tcp -m mp
+pipe "pipe_tmp4k" -s 4k -x tcp -m mp
+pipe "pipe_tmt1" -s 1 -x tcp -m mt
+pipe "pipe_tmt4k" -s 4k -x tcp -m mt
+pipe "pipe_tst1" -s 1 -x tcp -m st
+pipe "pipe_tst4k" -s 4k -x tcp -m st
 poll "poll_10" -n 10
-poll "poll_100" -n 100 -B 10k
-poll "poll_1000" -n 1000 -B 1k
+poll "poll_100" -n 100
+poll "poll_1000" -n 1000
 poll "poll_w10" -n 10 -w 1
-poll "poll_w100" -n 100 -w 10 -B 10k
-poll "poll_w1000" -n 1000 -w 100 -B 1k
-posix_spawn "posix_spawn" -B 200
-posix_spawn "posix_spawn_1000r" -B 200 -r 1000
-posix_spawn "posix_spawn_100r" -B 200 -r 100
-posix_spawn "posix_spawn_1024n" -B 200 -n 1024 -p 256
-posix_spawn "posix_spawn_1024nt" -B 200 -n 1024 -p 256 -t
-posix_spawn "posix_spawn_10r" -B 200 -r 10
-posix_spawn "posix_spawn_128n" -B 200 -n 128 -p 2048
-posix_spawn "posix_spawn_128nt" -B 200 -n 128 -p 2048 -t
-posix_spawn "posix_spawn_1r" -B 200 -r 1
-posix_spawn "posix_spawn_2048n" -B 200 -n 2048 -p 128
-posix_spawn "posix_spawn_2048nt" -B 200 -n 2048 -p 128 -t
-posix_spawn "posix_spawn_256n" -B 200 -n 256 -p 1024
-posix_spawn "posix_spawn_256nt" -B 200 -n 256 -p 1024 -t
-posix_spawn "posix_spawn_32n" -B 200 -n 32 -p 8192
-posix_spawn "posix_spawn_32nt" -B 200 -n 32 -p 8192 -t
-posix_spawn "posix_spawn_4096n" -B 200 -n 4096 -p 64
-posix_spawn "posix_spawn_4096nt" -B 200 -n 4096 -p 64 -t
-posix_spawn "posix_spawn_512n" -B 200 -n 512 -p 512
-posix_spawn "posix_spawn_512nt" -B 200 -n 512 -p 512 -t
-posix_spawn "posix_spawn_64n" -B 200 -n 64 -p 4096
-posix_spawn "posix_spawn_64nt" -B 200 -n 64 -p 4096 -t
-posix_spawn "posix_spawn_8192n" -B 200 -n 8192 -p 32
-posix_spawn "posix_spawn_8192n1000r" -B 200 -n 8192 -p 32 -r 1000
-posix_spawn "posix_spawn_8192nt" -B 200 -n 8192 -p 32 -t
-posix_spawn "posix_spawn_8192nt1000r" -B 200 -n 8192 -p 32 -t -r 1000
-pread "pread_t100k" -s 100k -f $TFILE -B 10k
+poll "poll_w100" -n 100 -w 10
+poll "poll_w1000" -n 1000 -w 100
+posix_spawn "posix_spawn"
+posix_spawn "posix_spawn_1000r" -r 1000
+posix_spawn "posix_spawn_100r" -r 100
+posix_spawn "posix_spawn_1024n" -n 1024 -p 256
+posix_spawn "posix_spawn_1024nt" -n 1024 -p 256 -t
+posix_spawn "posix_spawn_10r" -r 10
+posix_spawn "posix_spawn_128n" -n 128 -p 2048
+posix_spawn "posix_spawn_128nt" -n 128 -p 2048 -t
+posix_spawn "posix_spawn_1r" -r 1
+posix_spawn "posix_spawn_2048n" -n 2048 -p 128
+posix_spawn "posix_spawn_2048nt" -n 2048 -p 128 -t
+posix_spawn "posix_spawn_256n" -n 256 -p 1024
+posix_spawn "posix_spawn_256nt" -n 256 -p 1024 -t
+posix_spawn "posix_spawn_32n" -n 32 -p 8192
+posix_spawn "posix_spawn_32nt" -n 32 -p 8192 -t
+posix_spawn "posix_spawn_4096n" -n 4096 -p 64
+posix_spawn "posix_spawn_4096nt" -n 4096 -p 64 -t
+posix_spawn "posix_spawn_512n" -n 512 -p 512
+posix_spawn "posix_spawn_512nt" -n 512 -p 512 -t
+posix_spawn "posix_spawn_64n" -n 64 -p 4096
+posix_spawn "posix_spawn_64nt" -n 64 -p 4096 -t
+posix_spawn "posix_spawn_8192n" -n 8192 -p 32
+posix_spawn "posix_spawn_8192n1000r" -n 8192 -p 32 -r 1000
+posix_spawn "posix_spawn_8192nt" -n 8192 -p 32 -t
+posix_spawn "posix_spawn_8192nt1000r" -n 8192 -p 32 -t -r 1000
+pread "pread_t100k" -s 100k -f $TFILE
 pread "pread_t10k" -s 10k -f $TFILE
 pread "pread_t1k" -s 1k -f $TFILE
-pread "pread_u100k" -s 100k -f $VFILE -B 10k
+pread "pread_u100k" -s 100k -f $VFILE
 pread "pread_u10k" -s 10k -f $VFILE
 pread "pread_u1k" -s 1k -f $VFILE
-pread "pread_z100k" -s 100k -f /dev/zero -B 10k
+pread "pread_z100k" -s 100k -f /dev/zero
 pread "pread_z10k" -s 10k -f /dev/zero
 pread "pread_z1k" -s 1k -f /dev/zero
-pread "pread_zw100k" -s 100k -w -f /dev/zero -B 10k
+pread "pread_zw100k" -s 100k -w -f /dev/zero
 pthread_create "pthread_128" -B 128
 pthread_create "pthread_256" -B 256
 pthread_create "pthread_32" -B 32
 pthread_create "pthread_512" -B 512
 pthread_create "pthread_64" -B 64
-pwrite "pwrite_n100k" -s 100k -f /dev/null -B 500k
-pwrite "pwrite_n10k" -s 10k -f /dev/null -B 500k
-pwrite "pwrite_n1k" -s 1k -f /dev/null -B 500k
-pwrite "pwrite_t100k" -s 100k -f $TFILE -B 8k
-pwrite "pwrite_t10k" -s 10k -f $TFILE -B 10k
+pwrite "pwrite_n100k" -s 100k -f /dev/null
+pwrite "pwrite_n10k" -s 10k -f /dev/null
+pwrite "pwrite_n1k" -s 1k -f /dev/null
+pwrite "pwrite_t100k" -s 100k -f $TFILE
+pwrite "pwrite_t10k" -s 10k -f $TFILE
 pwrite "pwrite_t1k" -s 1k -f $TFILE
-pwrite "pwrite_u100k" -s 100k -f $VFILE -B 8k
-pwrite "pwrite_u10k" -s 10k -f $VFILE -B 10k
+pwrite "pwrite_u100k" -s 100k -f $VFILE
+pwrite "pwrite_u10k" -s 10k -f $VFILE
 pwrite "pwrite_u1k" -s 1k -f $VFILE
-read "read_t100k" -s 100k -f $TFILE -B 5k
-read "read_t10k" -s 10k -f $TFILE -B 40k
-read "read_t1k" -s 1k -f $TFILE -B 80k
-read "read_u100k" -s 100k -f $VFILE -B 5k
-read "read_u10k" -s 10k -f $VFILE -B 40k
-read "read_u1k" -s 1k -f $VFILE -B 150k
-read "read_z100k" -s 100k -f /dev/zero -B 8k
-read "read_z10k" -s 10k -f /dev/zero -B 70k
-read "read_z1k" -s 1k -f /dev/zero -B 300k
-read "read_zw100k" -s 100k -w -f /dev/zero -B 8k
-realpath "realpath_tmp" -f $TDIR1 -B 4k
-realpath "realpath_usr" -f $VDIR1 -B 4k
-recurse "recurse" -B 200k
-recurse "recurse_10k" -d 10k -B 1k
-recurse "recurse_1k" -d 1k -B 10k
-strcasecmp "scasecmp_10" -s 10 -B 5m
+read "read_t100k" -s 100k -f $TFILE
+read "read_t10k" -s 10k -f $TFILE
+read "read_t1k" -s 1k -f $TFILE
+read "read_u100k" -s 100k -f $VFILE
+read "read_u10k" -s 10k -f $VFILE
+read "read_u1k" -s 1k -f $VFILE
+read "read_z100k" -s 100k -f /dev/zero
+read "read_z10k" -s 10k -f /dev/zero
+read "read_z1k" -s 1k -f /dev/zero
+read "read_zw100k" -s 100k -w -f /dev/zero
+realpath "realpath_tmp" -f $TDIR1
+realpath "realpath_usr" -f $VDIR1
+recurse "recurse"
+recurse "recurse_10k" -d 10k
+recurse "recurse_1k" -d 1k
+strcasecmp "scasecmp_10" -s 10
 strcasecmp "scasecmp_1k" -s 1k
-sched_yield "sched_yield" -B 32000
-sched_yield "sched_yieldT4" -B 32000 -T 4
-sched_yield "sched_yieldT4_s" -B 32000 -T 4 -s
-sched_yield "sched_yield_s" -B 32000 -s
+sched_yield "sched_yield"
+sched_yield "sched_yieldT4" -T 4
+sched_yield "sched_yieldT4_s" -T 4 -s
+sched_yield "sched_yield_s" -s
 select "select_10" -n 10
-select "select_100" -n 100 -B 10k
-select "select_1000" -n 1000 -B 1k
+select "select_100" -n 100
+select "select_1000" -n 1000
 select "select_w10" -n 10 -w 1
-select "select_w100" -n 100 -w 10 -B 10k
-select "select_w1000" -n 1000 -w 100 -B 1k
+select "select_w100" -n 100 -w 10
+select "select_w1000" -n 1000 -w 100
 semop "semop"
 setcontext "setcontext"
 setsockopt "setsockopt"
 sigaction "sigaction"
-siglongjmp "siglongjmp" -B 500k
-signal "signal" -B 50k
+siglongjmp "siglongjmp"
+signal "signal"
 sigprocmask "sigprocmask"
-socket "socket_i" -B 10k -f PF_INET
-socket "socket_u" -B 10k
-socketpair "socketpair" -B 25000
-stat "stat_tmp" -f $TFILE -B 50k
-stat "stat_usr" -f $VFILE -B 50k
-strchr "strchr_10" -s 10 -B 18m
-strchr "strchr_1k" -s 1k -B 1m
-strcmp "strcmp_10" -s 10 -B 14m
-strcmp "strcmp_1k" -s 1k -B 1m
-strcpy "strcpy_10" -s 10 -B 10m
-strcpy "strcpy_1k" -s 1k -B 1m
+socket "socket_i" -B 400 -f PF_INET
+socket "socket_u" -B 600
+socketpair "socketpair" -B 300
+stat "stat_tmp" -f $TFILE
+stat "stat_usr" -f $VFILE
+strchr "strchr_10" -s 10
+strchr "strchr_1k" -s 1k
+strcmp "strcmp_10" -s 10
+strcmp "strcmp_1k" -s 1k
+strcpy "strcpy_10" -s 10
+strcpy "strcpy_1k" -s 1k
 strftime "strftime"
-strlen "strlen_10" -s 10 -B 15m
-strlen "strlen_1k" -s 1k -B 1m
-strtol "strtol" -B 1m
-system "system" -B 50
-time "time" -B 2m
-times "times" -B 400k
-munmap "unmap_a128k" -l 128k -f MAP_ANON -B 5k
-munmap "unmap_a8k" -l 8k -f MAP_ANON -B 10k
+strlen "strlen_10" -s 10
+strlen "strlen_1k" -s 1k
+strtol "strtol"
+system "system"
+time "time"
+times "times"
+munmap "unmap_a128k" -l 128k -f MAP_ANON
+munmap "unmap_a8k" -l 8k -f MAP_ANON
 munmap_frag "unmap_frag" -B 2500 -C 1000
-munmap "unmap_ra128k" -l 128k -r -f MAP_ANON -B 5k
-munmap "unmap_ra8k" -l 8k -r -f MAP_ANON -B 10k
-munmap "unmap_rt128k" -l 128k -r -f $TFILE -B 5k
-munmap "unmap_rt8k" -l 8k -r -f $TFILE -B 10k
-munmap "unmap_ru128k" -l 128k -r -f $VFILE -B 5k
-munmap "unmap_ru8k" -l 8k -r -f $VFILE -B 10k
-munmap "unmap_rz128k" -l 128k -r -f /dev/zero -B 5k
-munmap "unmap_rz8k" -l 8k -r -f /dev/zero -B 10k
-munmap "unmap_t128k" -l 128k -f $TFILE -B 5k
-munmap "unmap_t8k" -l 8k -f $TFILE -B 10k
-munmap "unmap_u128k" -l 128k -f $VFILE -B 5k
-munmap "unmap_u8k" -l 8k -f $VFILE -B 10k
-munmap "unmap_wa128k" -l 128k -w -f MAP_ANON -B 1k
-munmap "unmap_wa8k" -l 8k -w -f MAP_ANON -B 10k
-munmap "unmap_wt128k" -l 128k -w -f $TFILE -B 1k
-munmap "unmap_wt8k" -l 8k -w -f $TFILE -B 10k
-munmap "unmap_wu128k" -l 128k -w -f $VFILE -B 1k
-munmap "unmap_wu8k" -l 8k -w -f $VFILE -B 10k
-munmap "unmap_wz128k" -l 128k -w -f /dev/zero -B 1k
-munmap "unmap_wz8k" -l 8k -w -f /dev/zero -B 10k
-munmap "unmap_z128k" -l 128k -f /dev/zero -B 5k
-munmap "unmap_z8k" -l 8k -f /dev/zero -B 10k
-usleep "usleep" -B 1500
-usleep "usleepT4" -B 1500 -T 4
-usleep "usleep_d10" -B 1500 -d 10
-usleep "usleep_d100" -B 500 -d 100
-write "write_n100k" -s 100k -f /dev/null -B 500k
-write "write_n10k" -s 10k -f /dev/null -B 500k
-write "write_n1k" -s 1k -f /dev/null -B 500k
-write "write_t100k" -s 100k -f $TFILE -B 1k
-write "write_t10k" -s 10k -f $TFILE -B 20k
-write "write_t1k" -s 1k -f $TFILE -B 80k
-write "write_u100k" -s 100k -f $VFILE -B 1k
-write "write_u10k" -s 10k -f $VFILE -B 20k
-write "write_u1k" -s 1k -f $VFILE -B 80k
-writev "writev_n100k" -s 100k -f /dev/null -B 200k
-writev "writev_n10k" -s 10k -f /dev/null -B 200k
-writev "writev_n1k" -s 1k -f /dev/null -B 200k
-writev "writev_t100k" -s 100k -f $TFILE -B 200
-writev "writev_t10k" -s 10k -f $TFILE -B 1k
-writev "writev_t1k" -s 1k -f $TFILE -B 20k
-writev "writev_u100k" -s 100k -f $VFILE -B 200
-writev "writev_u10k" -s 10k -f $VFILE -B 1k
-writev "writev_u1k" -s 1k -f $VFILE -B 20k
+munmap "unmap_ra128k" -l 128k -r -f MAP_ANON
+munmap "unmap_ra8k" -l 8k -r -f MAP_ANON
+munmap "unmap_rt128k" -l 128k -r -f $TFILE
+munmap "unmap_rt8k" -l 8k -r -f $TFILE
+munmap "unmap_ru128k" -l 128k -r -f $VFILE
+munmap "unmap_ru8k" -l 8k -r -f $VFILE
+munmap "unmap_rz128k" -l 128k -r -f /dev/zero
+munmap "unmap_rz8k" -l 8k -r -f /dev/zero
+munmap "unmap_t128k" -l 128k -f $TFILE
+munmap "unmap_t8k" -l 8k -f $TFILE
+munmap "unmap_u128k" -l 128k -f $VFILE
+munmap "unmap_u8k" -l 8k -f $VFILE
+munmap "unmap_wa128k" -l 128k -w -f MAP_ANON
+munmap "unmap_wa8k" -l 8k -w -f MAP_ANON
+munmap "unmap_wt128k" -l 128k -w -f $TFILE
+munmap "unmap_wt8k" -l 8k -w -f $TFILE
+munmap "unmap_wu128k" -l 128k -w -f $VFILE
+munmap "unmap_wu8k" -l 8k -w -f $VFILE
+munmap "unmap_wz128k" -l 128k -w -f /dev/zero
+munmap "unmap_wz8k" -l 8k -w -f /dev/zero
+munmap "unmap_z128k" -l 128k -f /dev/zero
+munmap "unmap_z8k" -l 8k -f /dev/zero
+usleep "usleep"
+usleep "usleepT4" -T 4
+usleep "usleep_d10" -d 10
+usleep "usleep_d100" -d 100
+write "write_n100k" -s 100k -f /dev/null
+write "write_n10k" -s 10k -f /dev/null
+write "write_n1k" -s 1k -f /dev/null
+write "write_t100k" -s 100k -f $TFILE
+write "write_t10k" -s 10k -f $TFILE
+write "write_t1k" -s 1k -f $TFILE
+write "write_u100k" -s 100k -f $VFILE
+write "write_u10k" -s 10k -f $VFILE
+write "write_u1k" -s 1k -f $VFILE
+writev "writev_n100k" -s 100k -f /dev/null
+writev "writev_n10k" -s 10k -f /dev/null
+writev "writev_n1k" -s 1k -f /dev/null
+writev "writev_t100k" -s 100k -f $TFILE
+writev "writev_t10k" -s 10k -f $TFILE
+writev "writev_t1k" -s 1k -f $TFILE
+writev "writev_u100k" -s 100k -f $VFILE
+writev "writev_u10k" -s 10k -f $VFILE
+writev "writev_u1k" -s 1k -f $VFILE

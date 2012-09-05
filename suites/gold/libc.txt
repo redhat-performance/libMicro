@@ -1,65 +1,65 @@
 
-atoi "atoi" -B 1m
+atoi "atoi"
 getcontext "getcontext"
-getenv "getenv" -B 90000 -s 100
-getpid "getpid" -B 2m
+getenv "getenv" -s 100
+getpid "getpid"
 getrusage "getrusage"
-gettimeofday "gettimeofday" -B 400000
+gettimeofday "gettimeofday"
 isatty "isatty_no" -f $IFILE
 isatty "isatty_no_badfd" -b
 isatty "isatty_yes"
 localtime_r "localtime_r"
-longjmp "longjmp" -B 5m
-lrand48 "lrand48" -B 8000000
-malloc "malloc_10" -s 10 -g 10 -B 10k
-malloc "malloc_100" -s 100 -g 10 -B 10k
-malloc "malloc_100k" -s 100k -g 10 -B 1000
-malloc "malloc_10k" -s 10k -g 10 -B 10k
-malloc "malloc_1k" -s 1k -g 10 -B 10k
-memcpy "memcpy_10" -s 10 -B 1m
+longjmp "longjmp"
+lrand48 "lrand48"
+malloc "malloc_10" -s 10 -g 10
+malloc "malloc_100" -s 100 -g 10
+malloc "malloc_100k" -s 100k -g 10
+malloc "malloc_10k" -s 10k -g 10
+malloc "malloc_1k" -s 1k -g 10
+memcpy "memcpy_10" -s 10
 memcpy "memcpy_10k" -s 10k
-memcpy "memcpy_10m" -s 10m -B 50
-memcpy "memcpy_1k" -s 1k -B 200k
-memcpy "memcpy_1m" -s 1m -B 100
-memmove "memmove_10" -s 10 -B 1m
+memcpy "memcpy_10m" -s 10m
+memcpy "memcpy_1k" -s 1k
+memcpy "memcpy_1m" -s 1m
+memmove "memmove_10" -s 10
 memmove "memmove_10k" -s 10k
-memmove "memmove_10m" -s 10m -B 50
-memmove "memmove_1k" -s 1k -B 200k
-memmove "memmove_1m" -s 1m -B 100
-memset "memset_10" -s 10 -B 10m
+memmove "memmove_10m" -s 10m
+memmove "memmove_1k" -s 1k
+memmove "memmove_1m" -s 1m
+memset "memset_10" -s 10
 memset "memset_10k" -s 10k
-memset "memset_10m" -s 10m -B 50
-memset "memset_1k" -s 1k -B 2m
-memset "memset_1m" -s 1m -B 200
-memset "memset_256" -s 256 -B 5m
-memset "memset_256_u" -s 256 -a 1 -B 5m
-memset "memset_4k" -s 4k -B 700k
-memset "memset_4k_uc" -s 4k -u -B 100k
-mktime "mktime" -B 10k
-nanosleep "nanosleep" -B 1500
-nanosleep "nanosleep_d10" -B 1500 -d 10
-nanosleep "nanosleep_d100" -B 1500 -d 100
-nanosleep "nanosleep_d1000" -B 1500 -d 1000
-nanosleep "nanosleep_r" -B 1500 -r
-strcasecmp "scasecmp_10" -s 10 -B 5m
+memset "memset_10m" -s 10m
+memset "memset_1k" -s 1k
+memset "memset_1m" -s 1m
+memset "memset_256" -s 256
+memset "memset_256_u" -s 256 -a 1
+memset "memset_4k" -s 4k
+memset "memset_4k_uc" -s 4k -u
+mktime "mktime"
+nanosleep "nanosleep"
+nanosleep "nanosleep_d10" -d 10
+nanosleep "nanosleep_d100" -d 100
+nanosleep "nanosleep_d1000" -d 1000
+nanosleep "nanosleep_r" -r
+strcasecmp "scasecmp_10" -s 10
 strcasecmp "scasecmp_1k" -s 1k
 setcontext "setcontext"
 sigaction "sigaction"
-siglongjmp "siglongjmp" -B 500k
-signal "signal" -B 50k
+siglongjmp "siglongjmp"
+signal "signal"
 sigprocmask "sigprocmask"
-strchr "strchr_10" -s 10 -B 18m
-strchr "strchr_1k" -s 1k -B 1m
-strcmp "strcmp_10" -s 10 -B 14m
-strcmp "strcmp_1k" -s 1k -B 1m
-strcpy "strcpy_10" -s 10 -B 10m
-strcpy "strcpy_1k" -s 1k -B 1m
+strchr "strchr_10" -s 10
+strchr "strchr_1k" -s 1k
+strcmp "strcmp_10" -s 10
+strcmp "strcmp_1k" -s 1k
+strcpy "strcpy_10" -s 10
+strcpy "strcpy_1k" -s 1k
 strftime "strftime"
-strlen "strlen_10" -s 10 -B 15m
-strlen "strlen_1k" -s 1k -B 1m
-strtol "strtol" -B 1m
-time "time" -B 2m
-times "times" -B 400k
-usleep "usleep" -B 1500
-usleep "usleep_d10" -B 1500 -d 10
-usleep "usleep_d100" -B 500 -d 100
+strlen "strlen_10" -s 10
+strlen "strlen_1k" -s 1k
+strtol "strtol"
+time "time"
+times "times"
+usleep "usleep"
+usleep "usleep_d10" -d 10
+usleep "usleep_d100" -d 100

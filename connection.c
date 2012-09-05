@@ -32,6 +32,10 @@
  * Modifications by Red Hat, Inc.
  */
 
+/*
+ * connect()/accept()
+ */
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -68,7 +72,7 @@ static int				reuseaddr = 1;
 int
 benchmark_init(void)
 {
-	lm_defB = 256;
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "ac");

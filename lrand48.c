@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * lrand48
  */
 
@@ -42,7 +46,6 @@ int
 benchmark_init()
 {
 	(void) sprintf(lm_usage, "note: measures lrand48()");
-	lm_nsecs_per_op = 10;
 	lm_tsdsize = 0;
 	return (0);
 }

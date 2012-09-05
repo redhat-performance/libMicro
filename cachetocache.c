@@ -29,6 +29,10 @@
  */
 
 /*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
  * routine to benchmark cache-to-cache transfer times... uses
  * solaris features to find and bind to cpus in the current
  * processor set, so not likely to work elsewhere.
@@ -66,6 +70,7 @@ int traverse_ptrchain(long **, int, int);
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 
 	(void) sprintf(lm_optstr, "s:");

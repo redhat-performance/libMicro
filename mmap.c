@@ -50,7 +50,8 @@
 typedef volatile char		vchar_t;
 
 typedef struct {
-	int			ts_once;
+	int			ts_count;
+	int			ts_size;
 	vchar_t	  **ts_map;
 	vchar_t		ts_foo;
 } tsd_t;
@@ -124,8 +125,26 @@ benchmark_initrun(void)
 	if (!anon) {
 		fd = open(optf, O_RDWR);
 		if (fd < 0) {
+			perror("benchmark_initrun(): open");
 			errors++;
 		}
+	}
+
+	return errors;
+}
+
+int
+benchmark_initworker(void *tsd)
+{
+	tsd_t  *ts = (tsd_t *)tsd;
+	int		errors = 0;
+
+	ts->ts_count = lm_optB;
+	ts->ts_size = lm_optB * sizeof(void *);
+	ts->ts_map = (vchar_t **)malloc(ts->ts_size);
+	if (NULL == ts->ts_map) {
+		perror("benchmark_initworker(): malloc");
+		errors++;
 	}
 
 	return errors;
@@ -137,12 +156,31 @@ benchmark_initbatch(void *tsd)
 	tsd_t  *ts = (tsd_t *)tsd;
 	int		errors = 0;
 
-	if (ts->ts_once++ == 0) {
-		ts->ts_map = (vchar_t **)malloc(lm_optB * sizeof (void *));
-		if (ts->ts_map == NULL) {
-			errors++;
+	if (lm_optB > ts->ts_count) {
+		/*
+		 * It got bigger, expand the array of pointers, but only allocate a
+		 * new array if the size of the currently allocated array is
+		 * insufficient.
+		 */
+		int newsize = (lm_optB * sizeof(void *));
+		if (ts->ts_size < newsize) {
+			ts->ts_size = 0;
+			ts->ts_count = 0;
+			free(ts->ts_map);
+			ts->ts_map = (vchar_t **)malloc(newsize);
+			if (NULL == ts->ts_map) {
+				perror("benchmark_initbatch(): malloc");
+				return 1;
+			}
+			ts->ts_size = newsize;
 		}
+		ts->ts_count = lm_optB;
 	}
+	else if (lm_optB < ts->ts_count) {
+		// It got smaller, just reduce the count we are working with.
+		ts->ts_count = lm_optB;
+	}
+	// Else, it has not changed, so just go with it.
 
 	return errors;
 }
@@ -153,7 +191,7 @@ benchmark(void *tsd, result_t *res)
 	tsd_t  *ts = (tsd_t *)tsd;
 	int		i, j;
 
-	for (i = 0; i < lm_optB; i++) {
+	for (i = 0; ts->ts_map && (i < ts->ts_count); i++) {
 		if (anon) {
 			ts->ts_map[i] = (vchar_t *)mmap(NULL, optl,
 				PROT_READ | PROT_WRITE,
@@ -167,6 +205,7 @@ benchmark(void *tsd, result_t *res)
 		}
 
 		if (ts->ts_map[i] == MAP_FAILED) {
+			perror("benchmark(): mmap");
 			res->re_errors++;
 			continue;
 		}
@@ -193,9 +232,10 @@ benchmark_finibatch(void *tsd)
 	tsd_t  *ts = (tsd_t *)tsd;
 	int		i, errors = 0, ret;
 
-	for (i = 0; i < lm_optB; i++) {
+	for (i = 0; ts->ts_map && (i < ts->ts_count); i++) {
 		ret = munmap((void *)ts->ts_map[i], optl);
 		if (ret != 0) {
+			perror("benchmark(): munmap");
 			errors++;
 		}
 	}

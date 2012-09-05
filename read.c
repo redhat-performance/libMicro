@@ -28,6 +28,13 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * read()
+ */
 
 #ifdef linux
 #define	_XOPEN_SOURCE 500
@@ -67,8 +74,6 @@ benchmark_init()
 	    DEFF, DEFS);
 
 	(void) sprintf(lm_header, "%8s", "size");
-
-	lm_defB = 1;
 
 	return (0);
 }

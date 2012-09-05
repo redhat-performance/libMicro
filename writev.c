@@ -86,8 +86,6 @@ benchmark_init()
 
 	(void) sprintf(lm_header, "%8s %4s", "size", "vec");
 
-	lm_defB = 1;
-
 	return (0);
 }
 

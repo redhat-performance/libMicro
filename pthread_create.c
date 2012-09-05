@@ -56,6 +56,7 @@ static int				opts = 0;
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_defN = "pthread";
 
 	lm_tsdsize = sizeof (tsd_t);

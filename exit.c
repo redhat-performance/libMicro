@@ -51,6 +51,7 @@ static barrier_t		*b;
 int
 benchmark_init()
 {
+	lm_dynamic_optB = 0;
 	lm_tsdsize = sizeof (tsd_t);
 	(void) sprintf(lm_optstr, "e");
 

@@ -16,7 +16,7 @@
             pipe_fmt4k  pipe_pmt4k  pipe_smt4k  pipe_tmt4k
             pipe_fst1   pipe_pst1   pipe_sst1   pipe_tst1 
             pipe_fst4k  pipe_pst4k  pipe_sst4k  pipe_tst4k
-    	There are others ...
+        There are others ...
 
     Consider testing alternative malloc implementations?
 
@@ -31,3 +31,21 @@
 
     Separate out the barrier implementation from the statistics gathering code
     (and data).
+
+    Emit usage information for the given test as part of the test report for
+    inclusion in the multiview output.
+
+    Convert the following tests to allow dynamic operation:
+        bind
+        close
+        close_tcp
+        connection
+        dup
+        exit
+        fork
+        mmap_frag
+        mprotect
+        munmap_frag
+        pthread_create
+        socket
+        socketpair

@@ -29,7 +29,11 @@
  */
 
 /*
- * exec benchmark
+ * Modifications by Red Hat, Inc.
+ */
+
+/*
+ * exec()
  */
 
 #include <unistd.h>
@@ -46,7 +50,6 @@ static char *argv[3];
 int
 benchmark_init()
 {
-	lm_defB = 128;
 	lm_tsdsize = 0;
 
 	(void) sprintf(lm_usage,
