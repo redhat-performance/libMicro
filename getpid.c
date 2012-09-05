@@ -53,7 +53,7 @@ benchmark_init(void)
 	(void) snprintf(lm_optstr, sizeof(lm_optstr), "s");
 
 	(void) snprintf(lm_usage, sizeof(lm_usage),
-			"\t-s skip libc making system call directly\n"
+			"\t[-s] (skip libc making system call directly)\n"
 			"note: measures getpid()\n");
 
 	(void) snprintf(lm_header, sizeof(lm_header), "%8s", "method");
