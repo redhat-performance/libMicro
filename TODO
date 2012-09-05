@@ -32,9 +32,6 @@
     Separate out the barrier implementation from the statistics gathering code
     (and data).
 
-    Emit usage information for the given test as part of the test report for
-    inclusion in the multiview output.
-
     Convert the following tests to allow dynamic operation:
         bind
         close

@@ -223,6 +223,8 @@ do
 	fi
 
 	(cd $VARROOT && eval "bin/$A -N $B $OPTS $C")
+	echo "#"
+	$VARROOT/bin/$A -? | awk '{$1=$1;print}' | awk '/^[\[-]/ {sub(/^/, "    ")}{sub(/^/, "# ");print}'
 done < $VARROOT/suites/$suite.txt
 
 # Clean up background processes

@@ -809,7 +809,9 @@ worker_process(void)
 void
 usage(void)
 {
-	(void) printf("usage: %s\n"
+	unsigned int len = strlen(lm_usage);
+	(void) printf("Usage: %s\n"
+			"\t---- All Benchmarks ----\n"
 			"\t[-?] (print usage and exit)\n"
 			"\t[-1] (single process; overrides -P > 1)\n"
 			"\t[-A] (align with clock)\n"
@@ -828,14 +830,21 @@ usage(void)
 			"\t[-R getnsecs resolution]\n"
 			"\t[-S] (print detailed stats)\n"
 			"\t[-T threads (default %d)]\n"
-			"\t[-U] emit usage information (implies -L)\n"
 			"\t[-V] (print the libMicro version and exit)\n"
 			"\t[-W] (flag possible benchmark problems, implies -S)\n"
 			"\t[-X maximum duration in ms (default %dms)]\n"
-			"%s\n",
+			"%s%s%s",
 			lm_procname,
 			lm_defC, lm_defD, lm_procname, lm_defP, lm_defT, lm_defX,
-			lm_usage);
+			(len > 0
+					? "\t---- Benchmark Specific ----\n"
+					: ""),
+			lm_usage,
+			(len > 0
+					? ((lm_usage[len-1] == '\n')
+							? ""
+							: "\n")
+					: "\n"));
 }
 
 #define WARNING_INDENT	5
@@ -939,7 +948,7 @@ print_stats(barrier_t *b)
 	}
 
 	(void) printf("#\n");
-	(void) printf("# %*s %*s %-*s %*s %s\n",
+	(void) printf("# %-*s %*s %-*s %*s %s\n",
 			STATS_1COLW, "STATISTICS",
 			STATS_2COLW, "nsecs/call",
 			STATS_SEPW, "(raw)",
