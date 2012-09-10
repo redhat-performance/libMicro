@@ -178,7 +178,7 @@ benchmark_result(void)
 	static char		result[256];
 	char			flags[6];
 
-	flags[0] = opta ? 'a' : '-';
+	flags[0] = (opta == MS_ASYNC) ? 'a' : '-';
 	flags[1] = opti ? 'i' : '-';
 	flags[2] = optr ? 'r' : '-';
 	flags[3] = optw ? 'w' : '-';
