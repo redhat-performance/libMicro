@@ -1793,7 +1793,7 @@ crunch_stats(long long *data, int count, stats_t *stats)
 	double cm1		   = (double)(count - 1);
 	stats->st_stddev   = std = sqrt(std/cm1);
 	stats->st_stderr   = std / sqrt(count);
-	stats->st_99confidence = stats->st_stderr * 2.326;
+	stats->st_99confidence = stats->st_stderr * 2.576;
 	double std3		   = (std * std * std);
 	stats->st_skew	   = (sk / (cm1 * std3));
 	stats->st_kurtosis = (ku / (cm1 * (std3 * std))) - 3;
