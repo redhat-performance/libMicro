@@ -1767,24 +1767,7 @@ crunch_stats(long long *data, int count, stats_t *stats)
 	stats->st_mean = mean = ((double)sum / count);
 	stats->st_median = data[count/2];
 
-	/*
-	 * reuse dupdata to compute time correlation of data to
-	 * detect interesting time-based trends
-	 */
-
-	xdata = malloc(sizeof (*xdata) * count);
-	if (NULL == xdata) {
-		perror("crunch_stats: malloc()");
-		stats->st_timecorr = NAN;
-	}
-	else {
-		for (i = 0; i < count; i++) {
-			xdata[i] = i;
-		}
-		fit_line(xdata, data, count, &a, &stats->st_timecorr);
-
-		free(xdata);
-	}
+	fit_line(NULL, data, count, &a, &stats->st_timecorr);
 
 	std = 0.0;
 	sk	= 0.0;
@@ -1831,20 +1814,22 @@ fit_line(long long *x, long long *y, int count, double *a, double *b)
 	sumx = sumy = sumxy = sumx2 = 0.0;
 
 	for (i = 0; i < count; i++) {
-		sumx	+= x[i];
-		sumx2	+= x[i] * x[i];
-		sumy	+= y[i];
-		sumxy	+= x[i] * y[i];
+		long long x_sub_i = (NULL == x) ? i : x[i];
+		sumx	+= x_sub_i;
+		sumx2	+= x_sub_i * x_sub_i;
+		long long y_sub_i = y[i];
+		sumy	+= y_sub_i;
+		sumxy	+= x_sub_i * y_sub_i;
 	}
 
-	denom = count * sumx2 - sumx * sumx;
+	denom = (count * sumx2) - (sumx * sumx);
 
 	if (denom == 0.0) {
 		*a = *b = NAN;
 	}
 	else {
-		*a = (sumy * sumx2 - sumx * sumxy) / denom;
-		*b = (count * sumxy - sumx * sumy) / denom;
+		*a = ((sumy * sumx2) - (sumx * sumxy)) / denom;
+		*b = ((count * sumxy) - (sumx * sumy)) / denom;
 	}
 }
 
