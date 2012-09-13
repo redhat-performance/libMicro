@@ -32,6 +32,8 @@
     Separate out the barrier implementation from the statistics gathering code
     (and data).
 
+    Calculate the mode.
+
     Convert the following tests to allow dynamic operation:
         bind
         close
