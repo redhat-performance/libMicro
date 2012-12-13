@@ -36,7 +36,7 @@
 
 DIRNAME=$(dirname $0)
 
-bench_version=0.4.1-rh.30
+bench_version=0.4.1-rh.31
 libmicro_version=`$DIRNAME/bin/tattle -V`
 
 case $libmicro_version in
@@ -49,8 +49,8 @@ esac
 
 suite="normal"
 samples=200
-tlimit=20000	#          20s, or  20,000ms
-mlimit=120000	#  2m, or 120s, or 120,000ms
+tlimit=20000	# 20s
+mlimit=25000	# 25s - Don't wait longer than 25 seconds
 while getopts "s:C:D:X:" optname; do
 	case "$optname" in
 		"s") suite=$OPTARG;;
@@ -235,7 +235,7 @@ else
 	else
 		p_count='Unknown'
 		p_mhz='Unknown'
-	fi  
+	fi
 	printf "!#CPUs:        %30s\n" $p_count
 	printf "!CPU_MHz:      %30s\n" $p_mhz
 fi
